@@ -197,6 +197,152 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    IncludeInactive?: boolean;
+                    Sort?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CategoryDtoPagedResult"];
+                        "application/json": components["schemas"]["CategoryDtoPagedResult"];
+                        "text/json": components["schemas"]["CategoryDtoPagedResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CategoryRequest"];
+                    "text/json": components["schemas"]["CategoryRequest"];
+                    "application/*+json": components["schemas"]["CategoryRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CreatedResponse"];
+                        "application/json": components["schemas"]["CreatedResponse"];
+                        "text/json": components["schemas"]["CreatedResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CategoryRequest"];
+                    "text/json": components["schemas"]["CategoryRequest"];
+                    "application/*+json": components["schemas"]["CategoryRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/categories/{id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ping": {
         parameters: {
             query?: never;
@@ -227,6 +373,258 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    CategoryId?: string;
+                    TrackingType?: components["schemas"]["TrackingType"];
+                    IncludeInactive?: boolean;
+                    Sort?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProductListItemDtoPagedResult"];
+                        "application/json": components["schemas"]["ProductListItemDtoPagedResult"];
+                        "text/json": components["schemas"]["ProductListItemDtoPagedResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateProductCommand"];
+                    "text/json": components["schemas"]["CreateProductCommand"];
+                    "application/*+json": components["schemas"]["CreateProductCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CreatedResponse"];
+                        "application/json": components["schemas"]["CreatedResponse"];
+                        "text/json": components["schemas"]["CreatedResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProductDto"];
+                        "application/json": components["schemas"]["ProductDto"];
+                        "text/json": components["schemas"]["ProductDto"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateProductRequest"];
+                    "text/json": components["schemas"]["UpdateProductRequest"];
+                    "application/*+json": components["schemas"]["UpdateProductRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{id}/barcodes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["AddBarcodeRequest"];
+                    "text/json": components["schemas"]["AddBarcodeRequest"];
+                    "application/*+json": components["schemas"]["AddBarcodeRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CreatedResponse"];
+                        "application/json": components["schemas"]["CreatedResponse"];
+                        "text/json": components["schemas"]["CreatedResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{id}/barcodes/{barcodeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    barcodeId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -427,9 +825,51 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
         };
+        AddBarcodeRequest: {
+            value: string;
+            format: components["schemas"]["BarcodeFormat"];
+        };
+        /** @enum {string} */
+        BarcodeFormat: "Ean13" | "Ean8" | "UpcA" | "Code128" | "Other";
+        BarcodeInput: {
+            value: string;
+            format: components["schemas"]["BarcodeFormat"];
+        };
+        CategoryDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            isActive: boolean;
+            /** Format: int32 */
+            activeProductCount: number;
+        };
+        CategoryDtoPagedResult: {
+            items: components["schemas"]["CategoryDto"][];
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+        };
+        CategoryRequest: {
+            name: string;
+        };
         ChangePasswordCommand: {
             currentPassword: string;
             newPassword: string;
+        };
+        CreateProductCommand: {
+            name: string;
+            description?: string | null;
+            /** Format: uuid */
+            categoryId: string;
+            unit: components["schemas"]["Unit"];
+            trackingType: components["schemas"]["TrackingType"];
+            isAssignable: boolean;
+            /** Format: double */
+            minStockLevel?: number | null;
+            barcodes?: components["schemas"]["BarcodeInput"][] | null;
         };
         CreateUserCommand: {
             fullName: string;
@@ -456,8 +896,77 @@ export interface components {
             email: string;
             password: string;
         };
+        ProductBarcodeDto: {
+            /** Format: uuid */
+            id: string;
+            value: string;
+            format: components["schemas"]["BarcodeFormat"];
+        };
+        ProductDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            description?: string | null;
+            /** Format: uuid */
+            categoryId: string;
+            categoryName: string;
+            categoryIsActive: boolean;
+            unit: components["schemas"]["Unit"];
+            trackingType: components["schemas"]["TrackingType"];
+            isAssignable: boolean;
+            /** Format: double */
+            minStockLevel?: number | null;
+            isActive: boolean;
+            trackingTypeLocked: boolean;
+            barcodes: components["schemas"]["ProductBarcodeDto"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt?: string | null;
+        };
+        ProductListItemDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            /** Format: uuid */
+            categoryId: string;
+            categoryName: string;
+            unit: components["schemas"]["Unit"];
+            trackingType: components["schemas"]["TrackingType"];
+            isAssignable: boolean;
+            /** Format: double */
+            minStockLevel?: number | null;
+            isActive: boolean;
+            barcodes: string[];
+        };
+        ProductListItemDtoPagedResult: {
+            items: components["schemas"]["ProductListItemDto"][];
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+        };
         ResetPasswordRequest: {
             newPassword: string;
+        };
+        /** @enum {string} */
+        TrackingType: "Serialized" | "Quantity";
+        /** @enum {string} */
+        Unit: "Piece" | "Kg" | "Meter" | "Liter" | "Package" | "Box";
+        UpdateProductRequest: {
+            name: string;
+            description?: string | null;
+            /** Format: uuid */
+            categoryId: string;
+            unit: components["schemas"]["Unit"];
+            trackingType: components["schemas"]["TrackingType"];
+            isAssignable: boolean;
+            /** Format: double */
+            minStockLevel?: number | null;
         };
         UpdateUserRequest: {
             fullName: string;

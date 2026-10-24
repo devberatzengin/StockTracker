@@ -32,6 +32,30 @@ export const router = createBrowserRouter([
                 ],
               },
               {
+                path: 'products',
+                lazy: async () => ({
+                  Component: (await import('@/features/catalog/ProductsPage')).ProductsPage,
+                }),
+              },
+              {
+                path: 'products/:id',
+                lazy: async () => ({
+                  Component: (await import('@/features/catalog/ProductDetailPage'))
+                    .ProductDetailPage,
+                }),
+              },
+              {
+                element: <RequirePermission permission={Permissions.CanManageCatalog} />,
+                children: [
+                  {
+                    path: 'categories',
+                    lazy: async () => ({
+                      Component: (await import('@/features/catalog/CategoriesPage')).CategoriesPage,
+                    }),
+                  },
+                ],
+              },
+              {
                 path: 'dev/scan',
                 // Lazy: the barcode reader is large and only needed on this page.
                 lazy: async () => ({

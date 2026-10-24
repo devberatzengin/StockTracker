@@ -22,7 +22,8 @@ export function Providers({
   queryClient?: QueryClient
 }) {
   return (
-    <MantineProvider>
+    // env="test" disables transitions so dropdown options are immediately accessible.
+    <MantineProvider env="test">
       <QueryClientProvider client={queryClient ?? createTestQueryClient()}>
         <ModalsProvider>{children}</ModalsProvider>
       </QueryClientProvider>

@@ -11,10 +11,12 @@ import {
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import {
+  IconCategory,
   IconChevronDown,
   IconHome,
   IconKey,
   IconLogout,
+  IconPackage,
   IconScan,
   IconUsers,
 } from '@tabler/icons-react'
@@ -34,6 +36,13 @@ interface NavItem {
 
 const mainItems: NavItem[] = [
   { label: 'Ana sayfa', to: '/', icon: <IconHome size={18} /> },
+  { label: 'Ürünler', to: '/products', icon: <IconPackage size={18} /> },
+  {
+    label: 'Kategoriler',
+    to: '/categories',
+    icon: <IconCategory size={18} />,
+    permission: Permissions.CanManageCatalog,
+  },
   {
     label: 'Kullanıcılar',
     to: '/users',

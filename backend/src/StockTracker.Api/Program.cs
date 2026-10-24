@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.OpenApi;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -31,7 +32,9 @@ builder.Services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
 builder.Services.AddApiAuthentication();
 
 builder.Services.AddApiProblemDetails();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    // Enums travel as their names ("Serialized", "Piece"), matching the generated frontend types.
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

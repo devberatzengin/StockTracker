@@ -8,6 +8,7 @@
     <LangVersion>latest</LangVersion>
     <!-- Required for IDE0005 (unused usings) to run during build. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- CS1591: not every public member needs docs. CS1573: allow documenting only the non-obvious parameters. -->
+    <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
   </PropertyGroup>
 </Project>

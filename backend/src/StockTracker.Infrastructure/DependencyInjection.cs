@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Application.Common.Interfaces;
+using StockTracker.Infrastructure.Catalog;
 using StockTracker.Infrastructure.Identity;
 using StockTracker.Infrastructure.Persistence;
 using StockTracker.Infrastructure.Persistence.Interceptors;
+using StockTracker.Infrastructure.Persistence.Repositories;
 using StockTracker.Infrastructure.Services;
 
 namespace StockTracker.Infrastructure;
@@ -32,6 +34,11 @@ public static class DependencyInjection
 
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IProductStockChecker, NoStockProductStockChecker>();
+        services.AddScoped<IProductCodeGenerator, TemporaryProductCodeGenerator>();
 
         services.AddHealthChecks().AddDbContextCheck<AppDbContext>("database");
 
