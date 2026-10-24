@@ -92,6 +92,21 @@ public class AuthEndpointsTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Refresh_WithLoggedOutToken_IsRejected_WithoutRevokingOtherSessions()
+    {
+        var admin = await LoginAsync(_client);
+        var email = UniqueEmail();
+        await CreateUserAsync(_client, admin.AccessToken, Roles.Staff, email: email);
+        var laptop = await LoginAsync(_client, email, "Passw0rd!");
+        var phone = await LoginAsync(_client, email, "Passw0rd!");
+
+        (await LogoutRawAsync(_client, laptop.RefreshToken)).StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        (await RefreshRawAsync(_client, laptop.RefreshToken)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await RefreshRawAsync(_client, phone.RefreshToken)).StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
     public async Task Login_WithWrongPassword_ReturnsGenericMessage()
     {
         var response = await LoginRawAsync(_client, TestSettings.AdminEmail, "Wrong12345");
@@ -181,11 +196,12 @@ public class AuthEndpointsTests(ApiFactory factory)
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var renewed = await ReadSessionAsync(response);
+
+        // The other device's token was revoked by the password change: rejected, but it is not
+        // treated as reuse, so the new session keeps working.
+        (await RefreshRawAsync(_client, otherDevice.RefreshToken)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         (await RefreshRawAsync(_client, renewed.RefreshToken)).StatusCode.Should().Be(HttpStatusCode.OK);
         (await LoginRawAsync(_client, email, "Changed123")).StatusCode.Should().Be(HttpStatusCode.OK);
-
-        // Last: presenting a revoked token counts as reuse and revokes every session of the user.
-        (await RefreshRawAsync(_client, otherDevice.RefreshToken)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     private static async Task ShouldBeInvalidCredentialsAsync(HttpResponseMessage response)

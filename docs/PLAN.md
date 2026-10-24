@@ -38,6 +38,7 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | API stili | Controller + MediatR |
 | UI | Mantine, grafikler için Mantine Charts |
 | Token saklama | Access token bellekte; refresh token httpOnly + Secure + SameSite=Strict cookie |
+| Refresh token tekrar kullanımı (24 Ekim) | Toplu iptal yalnızca rotation ile değiştirilmiş bir token tekrar gelince; logout, şifre değişikliği veya pasifleştirme ile iptal edilen token sadece 401 alır |
 | Telefondan HTTPS test | cloudflared tüneli + Vite proxy (tek tünel) |
 | Fotoğraf depolama | Geliştirmede yerel disk, deploy'da Cloudflare R2 |
 | Fotoğraf sınırları | En fazla 5 MB; JPEG, PNG, WebP; ürün başına en fazla 10; 400 px thumbnail |
@@ -227,7 +228,7 @@ Amaç: bir ürünü tanımlayıp rafa koymak, taşımak, çıkarmak ve QR okutar
 **Kurallar**
 
 - Access token 15 dakika; içinde `sub`, `name`, `role` claim'leri
-- Refresh token her kullanımda yenilenir (rotation). İptal edilmiş bir token tekrar gelirse çalıntı sayılır ve kullanıcının tüm token'ları iptal edilir
+- Refresh token her kullanımda yenilenir (rotation). Rotation ile yenisiyle değiştirilmiş bir token tekrar gelirse çalıntı sayılır ve kullanıcının tüm token'ları iptal edilir. Logout, şifre değişikliği veya pasifleştirme ile iptal edilmiş bir token gelirse sadece 401 döner; diğer oturumlar etkilenmez
 - Cookie: `refresh_token`, `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/api/auth`
 - Şifre: en az 8 karakter, büyük harf, küçük harf ve rakam içerir; 5 hatalı denemede 15 dakika kilit (Identity lockout)
 - `IsActive = false` ya da `CanLogin = false` olan kullanıcı giriş yapamaz; hata mesajı her durumda aynıdır ("E-posta veya şifre hatalı")

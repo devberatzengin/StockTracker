@@ -58,7 +58,7 @@ public sealed class AuthService(
 
         if (stored.RevokedAt is not null)
         {
-            await HandleReuseAsync(stored.UserId, now, cancellationToken);
+            await RejectRevokedAsync(stored.UserId, stored.ReplacedByHash, now, cancellationToken);
         }
 
         if (stored.ExpiresAt <= now)
@@ -88,8 +88,13 @@ public sealed class AuthService(
 
         if (rotated == 0)
         {
+            // Revoked by a concurrent request: rotation (reuse) or logout/password change (plain 401).
             await transaction.RollbackAsync(cancellationToken);
-            await HandleReuseAsync(stored.UserId, now, cancellationToken);
+            var replacedByHash = await db.RefreshTokens
+                .Where(t => t.Id == stored.Id)
+                .Select(t => t.ReplacedByHash)
+                .SingleAsync(cancellationToken);
+            await RejectRevokedAsync(stored.UserId, replacedByHash, now, cancellationToken);
         }
 
         var tokens = await IssueTokensAsync(user, newToken, newHash, now, cancellationToken);
@@ -134,8 +139,21 @@ public sealed class AuthService(
         return await IssueTokensAsync(user, cancellationToken);
     }
 
-    private async Task HandleReuseAsync(Guid userId, DateTime now, CancellationToken cancellationToken)
+    /// <summary>
+    /// A rotated token (ReplacedByHash set) presented again means it was copied: revoke every session.
+    /// Tokens revoked by logout, password change or deactivation are simply rejected.
+    /// </summary>
+    private async Task RejectRevokedAsync(
+        Guid userId,
+        string? replacedByHash,
+        DateTime now,
+        CancellationToken cancellationToken)
     {
+        if (replacedByHash is null)
+        {
+            throw new UnauthorizedException(SessionExpiredMessage);
+        }
+
         var revoked = await db.RevokeAllRefreshTokensAsync(userId, now, cancellationToken);
         logger.LogWarning(
             "Refresh token reuse detected for user {UserId}; revoked {RevokedCount} active tokens",
