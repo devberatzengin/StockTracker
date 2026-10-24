@@ -38,20 +38,20 @@ public sealed class AuditableEntityInterceptor(ICurrentUser currentUser, IDateTi
         var now = dateTime.UtcNow;
         var userId = currentUser.UserId;
 
-        foreach (var entry in context.ChangeTracker.Entries<BaseEntity>())
+        foreach (var entry in context.ChangeTracker.Entries<IAuditable>())
         {
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Property(e => e.CreatedAt).CurrentValue = now;
-                    entry.Property(e => e.CreatedBy).CurrentValue = userId;
+                    entry.Property(nameof(IAuditable.CreatedAt)).CurrentValue = now;
+                    entry.Property(nameof(IAuditable.CreatedBy)).CurrentValue = userId;
                     break;
 
                 case EntityState.Modified:
-                    entry.Property(e => e.CreatedAt).IsModified = false;
-                    entry.Property(e => e.CreatedBy).IsModified = false;
-                    entry.Property(e => e.UpdatedAt).CurrentValue = now;
-                    entry.Property(e => e.UpdatedBy).CurrentValue = userId;
+                    entry.Property(nameof(IAuditable.CreatedAt)).IsModified = false;
+                    entry.Property(nameof(IAuditable.CreatedBy)).IsModified = false;
+                    entry.Property(nameof(IAuditable.UpdatedAt)).CurrentValue = now;
+                    entry.Property(nameof(IAuditable.UpdatedBy)).CurrentValue = userId;
                     break;
             }
         }

@@ -12,6 +12,15 @@ public static class ProblemDetailsServiceCollectionExtensions
             options.CustomizeProblemDetails = context =>
             {
                 context.ProblemDetails.Instance ??= context.HttpContext.Request.Path;
+
+                // Also replaces the English defaults on framework-generated problems
+                // (unknown route, missing token, model binding errors).
+                var status = context.ProblemDetails.Status ?? context.HttpContext.Response.StatusCode;
+                if (ProblemTitles.For(status) is { } title)
+                {
+                    context.ProblemDetails.Title = title;
+                }
+
                 context.ProblemDetails.Extensions[TraceIdKey] =
                     Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
             });

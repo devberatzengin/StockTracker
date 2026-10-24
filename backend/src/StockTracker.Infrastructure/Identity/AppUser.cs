@@ -3,7 +3,7 @@ using StockTracker.Domain.Common;
 
 namespace StockTracker.Infrastructure.Identity;
 
-public class AppUser : IdentityUser<Guid>, ISoftDeletable
+public class AppUser : IdentityUser<Guid>, ISoftDeletable, IAuditable
 {
     public const int FullNameMaxLength = 100;
     public const int DepartmentMaxLength = 100;
@@ -23,4 +23,12 @@ public class AppUser : IdentityUser<Guid>, ISoftDeletable
     /// Users without login permission can still receive assignments.
     /// </summary>
     public bool CanLogin { get; set; }
+
+    public DateTime CreatedAt { get; private set; }
+
+    public Guid? CreatedBy { get; private set; }
+
+    public DateTime? UpdatedAt { get; private set; }
+
+    public Guid? UpdatedBy { get; private set; }
 }

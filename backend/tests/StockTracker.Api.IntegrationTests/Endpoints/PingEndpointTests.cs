@@ -29,7 +29,9 @@ public class PingEndpointTests(ApiFactory factory)
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
-        (await response.Content.ReadAsStringAsync()).Should().Contain("traceId");
+        var body = await AuthApi.ReadJsonAsync(response);
+        body.TryGetProperty("traceId", out _).Should().BeTrue();
+        body.GetProperty("title").GetString().Should().Be("Kayıt bulunamadı.");
     }
 
     [Fact]
@@ -40,6 +42,7 @@ public class PingEndpointTests(ApiFactory factory)
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
+        (await AuthApi.ReadJsonAsync(response)).GetProperty("title").GetString().Should().Be("Oturum açmanız gerekiyor.");
     }
 
     [Fact]

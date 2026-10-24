@@ -1,6 +1,6 @@
 namespace StockTracker.Domain.Common;
 
-public abstract class BaseEntity
+public abstract class BaseEntity : IAuditable
 {
     public Guid Id { get; protected init; } = Guid.CreateVersion7();
 

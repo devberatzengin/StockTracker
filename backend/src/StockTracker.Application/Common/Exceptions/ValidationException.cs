@@ -5,7 +5,7 @@ namespace StockTracker.Application.Common.Exceptions;
 public class ValidationException : Exception
 {
     public ValidationException(IEnumerable<ValidationFailure> failures)
-        : base("One or more validation errors occurred.")
+        : base("Bazı alanlar hatalı. Lütfen kontrol edin.")
     {
         Errors = failures
             .GroupBy(f => f.PropertyName, f => f.ErrorMessage)

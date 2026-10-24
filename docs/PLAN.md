@@ -46,6 +46,25 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Seri no | Opsiyonel; girilirse aynı ürün içinde benzersiz |
 | Çalışma ortamı | Docker Compose: api, web, migrator, cloudflared konteynerleri; PostgreSQL harici. Deploy sonraya bırakıldı. |
 
+**Uygulama sırasında alınan kararlar** (Faz 0–1.2, 24 Ekim):
+
+| Konu | Karar |
+| --- | --- |
+| Paket lisansları | MediatR 12.5 ve FluentAssertions 7.2 kullanılır (Apache 2.0). MediatR 13+ ve FluentAssertions 8+ ticari lisans ister. |
+| Tünel hedefi | cloudflared `web:80`'e (nginx) bağlanır; nginx `/api`'yi `api:8080`'e proxy'ler. Vite dev sunucusu tünellenmez. |
+| CI testleri | Backend workflow'u integration testleri dahil hepsini çalıştırır (Testcontainers, GitHub runner'da Docker var). Üç Dockerfile (api, migrator, web) push edilmeden build edilir. |
+| AppUser'ın yeri | Infrastructure'da (Identity'ye bağlı; Domain paketsiz kalır). Diğer aggregate'ler kullanıcıya sadece `Guid` ile referans verir. |
+| Kullanıcı veri erişimi | Kural 2 ve 3'ün tek istisnası: kullanıcı okuma ve yazmaları `IUserAccountService` / `IAuthService` üzerinden ASP.NET Core Identity (`UserManager`) ile yapılır. |
+| Kullanıcı rolü | Her kullanıcının tek rolü vardır; `CanLogin = false` kullanıcıya da rol verilir (varsayılan Personel). |
+| E-posta benzersizliği | Identity'nin `RequireUniqueEmail` ayarı kapalı; `normalized_email` üzerinde partial unique index (boş e-posta serbest). |
+| Kilitli hesap | Kilitli hesap da "E-posta veya şifre hatalı" mesajını alır (hesabın varlığı açığa çıkmaz). |
+| Audit alanları | `IAuditable` (`CreatedAt/By`, `UpdatedAt/By`); `BaseEntity` ve `AppUser` uygular, interceptor doldurur. RefreshToken sadece kendi `CreatedAt`'ını tutar. |
+| Hata modeli | `UnauthorizedException` → 401 eklendi. ProblemDetails `title` ve `detail` Türkçe; framework'ün ürettiği yanıtlar da (404 route, 401/403) Türkçe başlık alır. Token'sız istekte eşleşmeyen route 401 döner (fallback policy). |
+| Unique index ihlali | Eşzamanlı isteklerde unique index ihlali (barkod, aktif kategori adı) 422 domain hatasına çevrilir. |
+| Enum saklama | API'de ve veritabanında string (`"Serialized"`, `"Piece"`). |
+| Barkod düzenleme | Yeni üründe barkodlar oluşturma isteğiyle birlikte kaydedilir; var olan üründe ekleme/silme ayrı uçlarla anında kaydedilir. |
+| Geçici implementasyonlar | `IProductStockChecker` stok tabloları gelene kadar (1.5) her zaman "stok yok" döner. `PRD-` kodu ortak `ICodeGenerator` gelene kadar geçici üreticiyle üretilir. |
+
 ## Mimari
 
 Bağımlılıklar her zaman içe doğru akar: API → Application → Domain. Infrastructure, Application'daki arayüzleri uygular. Domain hiçbir pakete bağımlı değildir.

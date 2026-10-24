@@ -1,6 +1,9 @@
 using System.Net;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Api.IntegrationTests.Infrastructure;
+using StockTracker.Infrastructure.Persistence;
 using StockTracker.Domain.Users;
 using static StockTracker.Api.IntegrationTests.Infrastructure.AuthApi;
 
@@ -127,6 +130,40 @@ public class UsersEndpointsTests(ApiFactory factory)
         var me = await ReadJsonAsync(await _client.SendAsync(Authorized(HttpMethod.Get, "/api/auth/me", session.AccessToken)));
         me.GetProperty("role").GetString().Should().Be(Roles.WarehouseManager);
         me.GetProperty("fullName").GetString().Should().Be("Terfi Eden");
+    }
+
+    [Fact]
+    public async Task UserChanges_FillAuditFieldsWithTheActingAdmin()
+    {
+        var admin = await LoginAsync(_client);
+        var adminId = (await ReadJsonAsync(await _client.SendAsync(Authorized(HttpMethod.Get, "/api/auth/me", admin.AccessToken))))
+            .GetProperty("id").GetGuid();
+        var userId = await CreateUserAsync(_client, admin.AccessToken, Roles.Staff, canLogin: false);
+
+        var created = await LoadUserAsync(userId);
+        created.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMinutes(1));
+        created.CreatedBy.Should().Be(adminId);
+
+        var update = await _client.SendAsync(Authorized(HttpMethod.Put, $"/api/users/{userId}", admin.AccessToken, new
+        {
+            fullName = "Güncellenen",
+            role = Roles.Staff,
+            canLogin = false,
+        }));
+        update.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var updated = await LoadUserAsync(userId);
+        updated.CreatedAt.Should().Be(created.CreatedAt);
+        // Identity's role assignment already touches the user during creation, so compare against that.
+        updated.UpdatedAt.Should().BeAfter(created.UpdatedAt ?? created.CreatedAt);
+        updated.UpdatedBy.Should().Be(adminId);
+    }
+
+    private async Task<StockTracker.Infrastructure.Identity.AppUser> LoadUserAsync(Guid id)
+    {
+        using var scope = factory.Services.CreateScope();
+        return await scope.ServiceProvider.GetRequiredService<AppDbContext>()
+            .Users.IgnoreQueryFilters().AsNoTracking().SingleAsync(u => u.Id == id);
     }
 
     [Fact]

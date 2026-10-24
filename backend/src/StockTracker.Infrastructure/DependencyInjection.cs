@@ -68,7 +68,8 @@ public static class DependencyInjection
                 options.User.RequireUniqueEmail = false;
             })
             .AddRoles<IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<AppDbContext>();
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddErrorDescriber<TurkishIdentityErrorDescriber>();
 
         services.AddOptions<JwtOptions>()
             .BindConfiguration(JwtOptions.SectionName)

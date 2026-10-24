@@ -35,6 +35,24 @@ public class GlobalExceptionHandlerTests
         body.GetProperty("traceId").GetString().Should().NotBeNullOrWhiteSpace();
     }
 
+    [Theory]
+    [MemberData(nameof(StatusCases))]
+    public async Task TryHandleAsync_UsesTurkishTitles(Exception exception, int expectedStatus)
+    {
+        var (_, _, body) = await HandleAsync(exception);
+
+        body.GetProperty("title").GetString().Should().Be(ProblemTitles.For(expectedStatus)).And.NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task TryHandleAsync_NotFound_HasTurkishDetail()
+    {
+        var (_, _, body) = await HandleAsync(new NotFoundException("Ürün", Guid.NewGuid()));
+
+        body.GetProperty("title").GetString().Should().Be("Kayıt bulunamadı.");
+        body.GetProperty("detail").GetString().Should().Be("Ürün bulunamadı.");
+    }
+
     [Fact]
     public async Task TryHandleAsync_ValidationException_IncludesFieldErrors()
     {

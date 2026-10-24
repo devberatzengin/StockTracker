@@ -13,22 +13,20 @@ public static class ProblemDetailsMapper
         ValidationException e => new ValidationProblemDetails(e.Errors.ToDictionary(kv => kv.Key, kv => kv.Value))
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Validation failed.",
+            Title = ProblemTitles.For(StatusCodes.Status400BadRequest),
             Detail = e.Message,
         },
-        UnauthorizedException e => Create(StatusCodes.Status401Unauthorized, "Unauthorized.", e.Message),
-        NotFoundException e => Create(StatusCodes.Status404NotFound, "Resource not found.", e.Message),
-        DomainException e => WithCode(
-            Create(StatusCodes.Status422UnprocessableEntity, "Business rule violated.", e.Message),
-            e.Code),
-        ConcurrencyException e => Create(StatusCodes.Status409Conflict, "Concurrency conflict.", e.Message),
-        ForbiddenException e => Create(StatusCodes.Status403Forbidden, "Forbidden.", e.Message),
+        UnauthorizedException e => Create(StatusCodes.Status401Unauthorized, e.Message),
+        NotFoundException e => Create(StatusCodes.Status404NotFound, e.Message),
+        DomainException e => WithCode(Create(StatusCodes.Status422UnprocessableEntity, e.Message), e.Code),
+        ConcurrencyException e => Create(StatusCodes.Status409Conflict, e.Message),
+        ForbiddenException e => Create(StatusCodes.Status403Forbidden, e.Message),
         // Never leak internal exception details to the client.
-        _ => Create(StatusCodes.Status500InternalServerError, "An unexpected error occurred.", null),
+        _ => Create(StatusCodes.Status500InternalServerError, detail: null),
     };
 
-    private static ProblemDetails Create(int status, string title, string? detail) =>
-        new() { Status = status, Title = title, Detail = detail };
+    private static ProblemDetails Create(int status, string? detail) =>
+        new() { Status = status, Title = ProblemTitles.For(status), Detail = detail };
 
     private static ProblemDetails WithCode(ProblemDetails problem, string code)
     {
