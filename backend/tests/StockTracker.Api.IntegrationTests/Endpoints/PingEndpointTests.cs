@@ -1,11 +1,11 @@
 using System.Net;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
+using StockTracker.Api.IntegrationTests.Infrastructure;
 
 namespace StockTracker.Api.IntegrationTests.Endpoints;
 
-public class PingEndpointTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+[Collection(ApiCollection.Name)]
+public class PingEndpointTests(ApiFactory factory)
 {
     [Fact]
     public async Task GetPing_ReturnsPong()

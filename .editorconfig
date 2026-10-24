@@ -50,3 +50,7 @@ dotnet_diagnostic.IDE0005.severity = warning
 
 [*.{csproj,props,targets}]
 indent_size = 2
+
+# EF Core migrations are tool-generated; skip style analyzers.
+[backend/src/StockTracker.Infrastructure/Persistence/Migrations/*.cs]
+generated_code = true

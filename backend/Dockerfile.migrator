@@ -1,0 +1,31 @@
+# syntax=docker/dockerfile:1
+
+# Builds an EF Core migration bundle and applies it to ConnectionStrings__Default.
+# Usage: docker compose run --rm migrator
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+COPY dotnet-tools.json ./
+RUN dotnet tool restore
+
+COPY Directory.Build.props Directory.Packages.props ./
+COPY src/StockTracker.Domain/StockTracker.Domain.csproj src/StockTracker.Domain/
+COPY src/StockTracker.Application/StockTracker.Application.csproj src/StockTracker.Application/
+COPY src/StockTracker.Infrastructure/StockTracker.Infrastructure.csproj src/StockTracker.Infrastructure/
+COPY src/StockTracker.Api/StockTracker.Api.csproj src/StockTracker.Api/
+RUN dotnet restore src/StockTracker.Api/StockTracker.Api.csproj
+
+COPY src/ src/
+RUN dotnet ef migrations bundle \
+        --project src/StockTracker.Infrastructure \
+        --startup-project src/StockTracker.Api \
+        --configuration Release \
+        --output /out/efbundle
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /migrator
+COPY --from=build /out/efbundle .
+USER $APP_UID
+
+ENTRYPOINT ["/bin/sh", "-c", "exec ./efbundle --connection \"$ConnectionStrings__Default\""]

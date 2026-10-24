@@ -1,0 +1,57 @@
+name: stocktracker
+
+# PostgreSQL is external: the connection string comes from .env (ConnectionStrings__Default).
+# Migrations never run on startup; apply them with: docker compose run --rm migrator
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - path: .env
+        required: true
+    # Not published to the host; only reachable inside the compose network.
+    expose:
+      - "8080"
+    volumes:
+      - uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  migrator:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.migrator
+    env_file:
+      - path: .env
+        required: true
+    # Profile keeps it out of `docker compose up`; `docker compose run` still starts it.
+    profiles: ["tools"]
+
+  # Added in Phase 0.5 (frontend).
+  # web:
+  #   build:
+  #     context: ./frontend
+  #   ports:
+  #     - "8080:80"
+  #   depends_on:
+  #     api:
+  #       condition: service_healthy
+
+  # Exposes web:80 through an HTTPS quick tunnel. Start with: docker compose --profile tunnel up
+  # Enable together with the web service.
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   command: tunnel --no-autoupdate --url http://web:80
+  #   profiles: ["tunnel"]
+  #   depends_on:
+  #     - web
+
+volumes:
+  uploads:
