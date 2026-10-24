@@ -13,8 +13,23 @@ export default defineConfig({
     },
   },
   build: {
-    // The lazily loaded barcode reader chunk (@zxing) is ~510 kB on its own.
+    // The lazily loaded barcode reader chunk (@zxing) is ~480 kB on its own.
     chunkSizeWarningLimit: 600,
+    rolldownOptions: {
+      output: {
+        // Split large, rarely changing vendors into their own cacheable chunks.
+        codeSplitting: {
+          groups: [
+            { name: 'mantine', test: /node_modules[\\/]@mantine/ },
+            {
+              name: 'react',
+              test: /node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/,
+            },
+            { name: 'forms', test: /node_modules[\\/](zod|react-hook-form|@hookform)[\\/]/ },
+          ],
+        },
+      },
+    },
   },
   server: {
     port: 5273,

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, apiClient, getErrorMessage, setRefreshHandler } from '@/api/client'
+import { ApiError, apiClient, getErrorMessage, setSessionHandlers, tokenStore } from '@/api/client'
 
 function jsonResponse(status: number, body: unknown, contentType = 'application/json') {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': contentType } })
@@ -15,8 +15,15 @@ describe('apiClient', () => {
   afterEach(() => {
     fetchMock.mockReset()
     vi.unstubAllGlobals()
-    setRefreshHandler(async () => false)
+    tokenStore.set(null)
+    setSessionHandlers({ refresh: async () => false, onExpired: () => {} })
   })
+
+  function useSession(refresh: () => Promise<boolean>) {
+    const onExpired = vi.fn()
+    setSessionHandlers({ refresh, onExpired })
+    return { onExpired }
+  }
 
   it('prefixes requests with /api and parses JSON', async () => {
     fetchMock.mockResolvedValue(jsonResponse(200, { id: 1 }))
@@ -113,7 +120,7 @@ describe('apiClient', () => {
 
   it('retries once after a successful refresh on 401', async () => {
     const refresh = vi.fn(async () => true)
-    setRefreshHandler(refresh)
+    useSession(refresh)
     fetchMock
       .mockResolvedValueOnce(new Response(null, { status: 401 }))
       .mockResolvedValueOnce(jsonResponse(200, { ok: true }))
@@ -123,17 +130,70 @@ describe('apiClient', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
-  it('does not retry when refresh fails', async () => {
+  it('does not retry and reports an expired session when refresh fails', async () => {
+    const { onExpired } = useSession(async () => false)
     fetchMock.mockResolvedValue(new Response(null, { status: 401, statusText: 'Unauthorized' }))
 
     const error = (await apiClient.get('/me').catch((e: unknown) => e)) as ApiError
 
     expect(error.status).toBe(401)
     expect(fetchMock).toHaveBeenCalledOnce()
+    expect(onExpired).toHaveBeenCalledOnce()
+  })
+
+  it('sends the in-memory access token as a bearer token', async () => {
+    tokenStore.set('abc')
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }))
+
+    await apiClient.get('/items')
+
+    expect(new Headers(fetchMock.mock.calls[0][1]!.headers).get('Authorization')).toBe('Bearer abc')
+  })
+
+  it('resolves concurrent 401s with a single refresh request', async () => {
+    let releaseRefresh!: (value: boolean) => void
+    const refresh = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          releaseRefresh = resolve
+        }),
+    )
+    useSession(refresh)
+    const attempts = new Map<string, number>()
+    fetchMock.mockImplementation(async (input) => {
+      const url = String(input)
+      const attempt = (attempts.get(url) ?? 0) + 1
+      attempts.set(url, attempt)
+      return attempt === 1 ? new Response(null, { status: 401 }) : jsonResponse(200, { url })
+    })
+
+    const requests = Promise.all([apiClient.get('/a'), apiClient.get('/b'), apiClient.get('/c')])
+    await vi.waitFor(() => expect(refresh).toHaveBeenCalled())
+    releaseRefresh(true)
+
+    await expect(requests).resolves.toEqual([
+      { url: '/api/a' },
+      { url: '/api/b' },
+      { url: '/api/c' },
+    ])
+    expect(refresh).toHaveBeenCalledOnce()
+    expect(fetchMock).toHaveBeenCalledTimes(6)
+  })
+
+  it('never refreshes for auth endpoints', async () => {
+    const refresh = vi.fn(async () => true)
+    const { onExpired } = useSession(refresh)
+    fetchMock.mockResolvedValue(jsonResponse(401, { detail: 'E-posta veya şifre hatalı.' }))
+
+    const error = (await apiClient.post('/auth/login', {}).catch((e: unknown) => e)) as ApiError
+
+    expect(error.message).toBe('E-posta veya şifre hatalı.')
+    expect(refresh).not.toHaveBeenCalled()
+    expect(onExpired).not.toHaveBeenCalled()
   })
 
   it('does not loop when the retried request is also 401', async () => {
-    setRefreshHandler(async () => true)
+    useSession(async () => true)
     fetchMock.mockImplementation(async () => new Response(null, { status: 401 }))
 
     const error = (await apiClient.get('/me').catch((e: unknown) => e)) as ApiError

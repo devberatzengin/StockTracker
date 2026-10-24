@@ -1,25 +1,69 @@
-import { AppShell, Burger, Group, NavLink, Text, Title } from '@mantine/core'
+import {
+  AppShell,
+  Avatar,
+  Burger,
+  Group,
+  Menu,
+  NavLink,
+  Text,
+  Title,
+  UnstyledButton,
+} from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { IconHome, IconScan } from '@tabler/icons-react'
+import {
+  IconChevronDown,
+  IconHome,
+  IconKey,
+  IconLogout,
+  IconScan,
+  IconUsers,
+} from '@tabler/icons-react'
 import type { ReactNode } from 'react'
 import { NavLink as RouterNavLink, Outlet, useLocation } from 'react-router'
+import { ChangePasswordModal } from '@/features/auth/ChangePasswordModal'
+import { useAuth } from '@/features/auth/authContext'
+import { Permissions, type Permission } from '@/features/auth/permissions'
+import { roleLabel } from '@/features/users/roles'
 
 interface NavItem {
   label: string
   to: string
   icon: ReactNode
+  permission?: Permission
 }
 
-const mainItems: NavItem[] = [{ label: 'Ana sayfa', to: '/', icon: <IconHome size={18} /> }]
+const mainItems: NavItem[] = [
+  { label: 'Ana sayfa', to: '/', icon: <IconHome size={18} /> },
+  {
+    label: 'Kullanıcılar',
+    to: '/users',
+    icon: <IconUsers size={18} />,
+    permission: Permissions.CanManageUsers,
+  },
+]
 
 // Temporary developer tools from Phase 0.
 const devItems: NavItem[] = [
   { label: 'Tarama denemesi', to: '/dev/scan', icon: <IconScan size={18} /> },
 ]
 
+function initials(fullName: string) {
+  return fullName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]!.toLocaleUpperCase('tr-TR'))
+    .join('')
+}
+
 export function AppLayout() {
   const [opened, { toggle, close }] = useDisclosure()
+  const [passwordOpened, passwordModal] = useDisclosure()
   const { pathname } = useLocation()
+  const { user, logout, hasPermission } = useAuth()
+
+  const visible = (items: NavItem[]) =>
+    items.filter((item) => !item.permission || hasPermission(item.permission))
 
   const renderItem = (item: NavItem) => (
     <NavLink
@@ -40,23 +84,63 @@ export function AppLayout() {
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" aria-label="Menü" />
-          <Title order={4}>StockTracker</Title>
+        <Group h="100%" px="md" justify="space-between" wrap="nowrap">
+          <Group wrap="nowrap">
+            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" aria-label="Menü" />
+            <Title order={4}>StockTracker</Title>
+          </Group>
+
+          {user && (
+            <Menu position="bottom-end" width={220}>
+              <Menu.Target>
+                <UnstyledButton aria-label="Profil menüsü">
+                  <Group gap="xs" wrap="nowrap">
+                    <Avatar radius="xl" size="sm" color="blue">
+                      {initials(user.fullName)}
+                    </Avatar>
+                    <div style={{ lineHeight: 1.1 }}>
+                      <Text size="sm" fw={500} visibleFrom="xs">
+                        {user.fullName}
+                      </Text>
+                      <Text size="xs" c="dimmed" visibleFrom="xs">
+                        {roleLabel(user.role)}
+                      </Text>
+                    </div>
+                    <IconChevronDown size={14} />
+                  </Group>
+                </UnstyledButton>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>{user.email}</Menu.Label>
+                <Menu.Item leftSection={<IconKey size={16} />} onClick={passwordModal.open}>
+                  Şifre değiştir
+                </Menu.Item>
+                <Menu.Item
+                  color="red"
+                  leftSection={<IconLogout size={16} />}
+                  onClick={() => void logout()}
+                >
+                  Çıkış
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          )}
         </Group>
       </AppShell.Header>
 
       <AppShell.Navbar p="xs">
-        {mainItems.map(renderItem)}
+        {visible(mainItems).map(renderItem)}
         <Text size="xs" c="dimmed" fw={600} tt="uppercase" mt="md" mb={4} px="sm">
           Geliştirici
         </Text>
-        {devItems.map(renderItem)}
+        {visible(devItems).map(renderItem)}
       </AppShell.Navbar>
 
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+
+      <ChangePasswordModal opened={passwordOpened} onClose={passwordModal.close} />
     </AppShell>
   )
 }

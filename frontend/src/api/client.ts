@@ -38,14 +38,50 @@ export class ApiError extends Error {
 
 const BASE_URL = '/api'
 
-type RefreshHandler = () => Promise<boolean>
+// Access token lives only in memory (never in localStorage/sessionStorage).
+let accessToken: string | null = null
 
-// Filled in Phase 1.1: calls /auth/refresh and reports whether a new access token was obtained.
-let refreshHandler: RefreshHandler = async () => false
-
-export function setRefreshHandler(handler: RefreshHandler) {
-  refreshHandler = handler
+export const tokenStore = {
+  get: () => accessToken,
+  set: (token: string | null) => {
+    accessToken = token
+  },
 }
+
+interface SessionHandlers {
+  /** Obtains a new access token via the refresh cookie; resolves to false when the session is gone. */
+  refresh: () => Promise<boolean>
+  /** Called when a request is still unauthorized after a refresh attempt. */
+  onExpired: () => void
+}
+
+let sessionHandlers: SessionHandlers = {
+  refresh: async () => false,
+  onExpired: () => {},
+}
+
+export function setSessionHandlers(handlers: SessionHandlers) {
+  sessionHandlers = handlers
+}
+
+let refreshInFlight: Promise<boolean> | null = null
+
+/**
+ * Single-flight refresh: concurrent callers share one /auth/refresh request. The backend rotates
+ * refresh tokens and treats a replayed token as theft, so parallel refreshes must never happen.
+ */
+export function refreshSession(): Promise<boolean> {
+  refreshInFlight ??= sessionHandlers
+    .refresh()
+    .catch(() => false)
+    .finally(() => {
+      refreshInFlight = null
+    })
+  return refreshInFlight
+}
+
+// Auth endpoints answer 401 for bad credentials or an expired refresh cookie; never refresh for them.
+const isAuthEndpoint = (path: string) => path.startsWith('/auth/')
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
@@ -59,6 +95,10 @@ async function request<T>(
   if (body !== undefined) {
     headers.set('Content-Type', 'application/json')
   }
+  const token = tokenStore.get()
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
 
   let response: Response
   try {
@@ -71,8 +111,11 @@ async function request<T>(
     throw new ApiError(0, { title: 'Sunucuya ulaşılamadı.' })
   }
 
-  if (response.status === 401 && !retried && (await refreshHandler())) {
-    return request<T>(method, path, body, true)
+  if (response.status === 401 && !isAuthEndpoint(path)) {
+    if (!retried && (await refreshSession())) {
+      return request<T>(method, path, body, true)
+    }
+    sessionHandlers.onExpired()
   }
 
   if (!response.ok) {
@@ -115,6 +158,10 @@ export const apiClient = {
   put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
   patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
   delete: <T = void>(path: string) => request<T>('DELETE', path),
+}
+
+export function isApiError(error: unknown, status?: number): error is ApiError {
+  return error instanceof ApiError && (status === undefined || error.status === status)
 }
 
 export function getErrorMessage(error: unknown): string {

@@ -3,6 +3,7 @@ using Serilog;
 using Serilog.Formatting.Compact;
 using StockTracker.Api.Authentication;
 using StockTracker.Api.ExceptionHandling;
+using StockTracker.Api.OpenApi;
 using StockTracker.Api.Options;
 using StockTracker.Api.Services;
 using StockTracker.Application;
@@ -34,6 +35,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+    // Generated frontend types follow C# nullability: non-nullable members become required.
+    options.SupportNonNullableReferenceTypes();
+    options.NonNullableReferenceTypesAsRequired();
+    options.SchemaFilter<RequireNonNullablePropertiesSchemaFilter>();
+
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
