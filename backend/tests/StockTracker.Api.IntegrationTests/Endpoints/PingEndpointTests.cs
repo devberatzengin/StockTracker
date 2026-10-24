@@ -21,13 +21,25 @@ public class PingEndpointTests(ApiFactory factory)
     [Fact]
     public async Task UnknownRoute_ReturnsProblemDetailsWithTraceId()
     {
-        var client = factory.CreateClient();
+        var client = factory.CreateApiClient();
+        var session = await AuthApi.LoginAsync(client);
 
-        var response = await client.GetAsync("/api/does-not-exist");
+        var response = await client.SendAsync(
+            AuthApi.Authorized(HttpMethod.Get, "/api/does-not-exist", session.AccessToken));
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
         (await response.Content.ReadAsStringAsync()).Should().Contain("traceId");
+    }
+
+    [Fact]
+    public async Task UnknownRoute_WithoutToken_Returns401()
+    {
+        // The fallback policy also covers unmatched routes, so anonymous callers cannot probe them.
+        var response = await factory.CreateClient().GetAsync("/api/does-not-exist");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
     }
 
     [Fact]

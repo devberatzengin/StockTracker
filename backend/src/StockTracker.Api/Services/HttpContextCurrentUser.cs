@@ -1,8 +1,10 @@
 using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
 using StockTracker.Application.Common.Interfaces;
 
 namespace StockTracker.Api.Services;
 
+/// <summary>Reads the user from the JWT claims (inbound claim mapping is disabled, so "sub" stays "sub").</summary>
 public sealed class HttpContextCurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
 {
     private ClaimsPrincipal? User => httpContextAccessor.HttpContext?.User;
@@ -10,5 +12,5 @@ public sealed class HttpContextCurrentUser(IHttpContextAccessor httpContextAcces
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
 
     public Guid? UserId =>
-        Guid.TryParse(User?.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
+        IsAuthenticated && Guid.TryParse(User!.FindFirstValue(JwtRegisteredClaimNames.Sub), out var id) ? id : null;
 }

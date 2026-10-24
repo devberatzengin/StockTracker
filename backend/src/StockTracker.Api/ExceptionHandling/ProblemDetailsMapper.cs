@@ -16,6 +16,7 @@ public static class ProblemDetailsMapper
             Title = "Validation failed.",
             Detail = e.Message,
         },
+        UnauthorizedException e => Create(StatusCodes.Status401Unauthorized, "Unauthorized.", e.Message),
         NotFoundException e => Create(StatusCodes.Status404NotFound, "Resource not found.", e.Message),
         DomainException e => WithCode(
             Create(StatusCodes.Status422UnprocessableEntity, "Business rule violated.", e.Message),

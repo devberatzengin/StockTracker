@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockTracker.Application.Ping;
 
@@ -6,6 +7,7 @@ namespace StockTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/ping")]
+[AllowAnonymous]
 public sealed class PingController(ISender sender) : ControllerBase
 {
     [HttpGet]

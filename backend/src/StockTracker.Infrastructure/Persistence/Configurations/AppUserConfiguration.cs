@@ -12,7 +12,11 @@ public sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
 
         // Identity hard-codes these index names; rename them to match the snake_case convention.
         builder.HasIndex(u => u.NormalizedUserName).HasDatabaseName("ix_users_normalized_user_name");
-        builder.HasIndex(u => u.NormalizedEmail).HasDatabaseName("ix_users_normalized_email");
+        // Unique only when set: users without login permission may have no email.
+        builder.HasIndex(u => u.NormalizedEmail)
+            .HasDatabaseName("ix_users_normalized_email")
+            .IsUnique()
+            .HasFilter("normalized_email IS NOT NULL");
 
         builder.Property(u => u.FullName).HasMaxLength(AppUser.FullNameMaxLength).IsRequired();
         builder.Property(u => u.Department).HasMaxLength(AppUser.DepartmentMaxLength);

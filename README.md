@@ -36,13 +36,19 @@ cd backend
 dotnet tool restore
 dotnet build
 dotnet test
-ConnectionStrings__Default="Host=localhost;Database=stocktracker;Username=...;Password=..." \
-  dotnet run --project src/StockTracker.Api
+export ConnectionStrings__Default="Host=localhost;Database=stocktracker;Username=...;Password=..."
+export Jwt__Issuer=stocktracker Jwt__Audience=stocktracker Jwt__SigningKey="$(openssl rand -base64 48)"
+export SEED_ADMIN_EMAIL=admin@example.com SEED_ADMIN_PASSWORD=Admin12345
+dotnet ef database update -p src/StockTracker.Infrastructure -s src/StockTracker.Api --connection "$ConnectionStrings__Default"
+dotnet run --project src/StockTracker.Api
 ```
 
 The API listens on http://localhost:5180. Swagger UI: http://localhost:5180/swagger (Development only).
 
 `GET /health` reports `Healthy` when the database is reachable.
+
+Sign in from Swagger with `POST /api/auth/login`, then paste the `accessToken` into **Authorize**.
+The refresh token is set as an `HttpOnly` cookie scoped to `/api/auth`.
 
 ### Frontend
 

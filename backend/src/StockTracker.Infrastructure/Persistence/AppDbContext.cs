@@ -11,6 +11,8 @@ namespace StockTracker.Infrastructure.Persistence;
 public class AppDbContext(DbContextOptions options)
     : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>(options), IAppDbContext
 {
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

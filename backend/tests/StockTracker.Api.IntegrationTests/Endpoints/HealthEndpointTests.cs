@@ -23,8 +23,8 @@ public class HealthEndpointTests(ApiFactory factory)
     public async Task GetHealth_WithUnreachableDatabase_ReturnsUnhealthy()
     {
         await using var unreachable = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.UseSetting(
-                "ConnectionStrings:Default",
+            TestSettings.Apply(
+                builder,
                 "Host=127.0.0.1;Port=1;Database=none;Username=none;Password=none;Timeout=2"));
         var client = unreachable.CreateClient();
 
