@@ -1,1 +1,22 @@
+# Secrets
+.env
+
+# .NET
+bin/
+obj/
+*.user
+TestResults/
+
+# Node
+node_modules/
+dist/
+
+# Runtime data
+uploads/
+
+# IDE / OS
+.idea/
+.vs/
+.vscode/
 .DS_Store
+.claude/settings.local.json
