@@ -14,8 +14,8 @@ import {
 import { useDebouncedValue, useDisclosure } from '@mantine/hooks'
 import { IconPlus, IconSearch } from '@tabler/icons-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
-import type { TrackingType } from '@/api/types'
+import { useNavigate, useSearchParams } from 'react-router'
+import type { BarcodeFormat, TrackingType } from '@/api/types'
 import { usePermission } from '@/features/auth/authContext'
 import { Permissions } from '@/features/auth/permissions'
 import { useCategoryOptions, useProducts } from '@/features/catalog/catalogApi'
@@ -34,6 +34,22 @@ export function ProductsPage() {
   const [includeInactive, setIncludeInactive] = useState(false)
   const [debouncedSearch] = useDebouncedValue(search.trim(), 300)
   const [formOpened, form] = useDisclosure()
+
+  // "Create product with this barcode" after scanning an unknown EAN lands here with the barcode.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const scannedBarcode = searchParams.get('newBarcode')
+  const initialBarcode = scannedBarcode
+    ? {
+        value: scannedBarcode,
+        format: (searchParams.get('barcodeFormat') ?? 'Ean13') as BarcodeFormat,
+      }
+    : null
+  const closeForm = () => {
+    form.close()
+    if (scannedBarcode) {
+      setSearchParams({}, { replace: true })
+    }
+  }
 
   const { data: categories } = useCategoryOptions()
   const { data, isPending } = useProducts({
@@ -169,7 +185,13 @@ export function ProductsPage() {
 
       {totalPages > 1 && <Pagination value={page} onChange={setPage} total={totalPages} />}
 
-      {canManage && <ProductFormModal opened={formOpened} onClose={form.close} />}
+      {canManage && (
+        <ProductFormModal
+          opened={formOpened || initialBarcode !== null}
+          onClose={closeForm}
+          initialBarcode={initialBarcode}
+        />
+      )}
     </Stack>
   )
 }

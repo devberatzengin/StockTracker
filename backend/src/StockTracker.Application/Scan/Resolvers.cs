@@ -1,0 +1,89 @@
+using Microsoft.EntityFrameworkCore;
+using StockTracker.Application.Common.Interfaces;
+using StockTracker.Domain.Common.Codes;
+
+namespace StockTracker.Application.Scan;
+
+public sealed class ProductCodeScanResolver(IAppDbContext db) : IScanCodeResolver
+{
+    public CodePrefix Prefix => CodePrefix.Product;
+
+    public Task<ScanResultDto?> ResolveAsync(string code, CancellationToken cancellationToken) =>
+        ProductScanProjection.FindAsync(db, db.Products.IgnoreQueryFilters().Where(p => p.Code == code), cancellationToken);
+}
+
+public sealed class LocationCodeScanResolver(IAppDbContext db) : IScanCodeResolver
+{
+    public CodePrefix Prefix => CodePrefix.Location;
+
+    public async Task<ScanResultDto?> ResolveAsync(string code, CancellationToken cancellationToken)
+    {
+        var locations = db.Locations.IgnoreQueryFilters().AsNoTracking();
+        var location = await locations
+            .Where(l => l.Code == code)
+            .Select(l => new { l.Id, l.Code, l.Name, l.Path, l.IsActive })
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (location is null)
+        {
+            return null;
+        }
+
+        var ancestorIds = location.Path
+            .Split('/', StringSplitOptions.RemoveEmptyEntries)
+            .Select(Guid.Parse)
+            .Where(id => id != location.Id)
+            .ToList();
+
+        var ancestorNames = await locations
+            .Where(l => ancestorIds.Contains(l.Id))
+            .OrderBy(l => l.Depth)
+            .Select(l => l.Name)
+            .ToListAsync(cancellationToken);
+
+        return new ScanResultDto(
+            ScanResultTypes.Location,
+            location.Id,
+            location.Code,
+            location.Name,
+            ancestorNames.Count > 0 ? string.Join(" › ", ancestorNames) : null,
+            location.IsActive,
+            Status: null);
+    }
+}
+
+/// <summary>Finds the product owning a barcode (barcodes have no prefix).</summary>
+public sealed class ProductBarcodeScanResolver(IAppDbContext db)
+{
+    /// <param name="barcode">Whitespace-free value as scanned.</param>
+    public Task<ScanResultDto?> ResolveAsync(string barcode, CancellationToken cancellationToken)
+    {
+        // Codes are upper-cased during normalization, but Code 128 values may contain lower case.
+        var upper = barcode.ToUpperInvariant();
+        var productIds = db.ProductBarcodes.Where(b => b.Value == barcode || b.Value == upper).Select(b => b.ProductId);
+
+        return ProductScanProjection.FindAsync(
+            db,
+            db.Products.IgnoreQueryFilters().Where(p => productIds.Contains(p.Id)),
+            cancellationToken);
+    }
+}
+
+internal static class ProductScanProjection
+{
+    public static Task<ScanResultDto?> FindAsync(
+        IAppDbContext db,
+        IQueryable<Domain.Catalog.Product> products,
+        CancellationToken cancellationToken) =>
+        products
+            .AsNoTracking()
+            .Select(p => new ScanResultDto(
+                ScanResultTypes.Product,
+                p.Id,
+                p.Code,
+                p.Name,
+                db.Categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                p.IsActive,
+                null))
+            .FirstOrDefaultAsync(cancellationToken);
+}

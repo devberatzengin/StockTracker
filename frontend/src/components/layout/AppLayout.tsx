@@ -18,7 +18,6 @@ import {
   IconLogout,
   IconMapPin,
   IconPackage,
-  IconScan,
   IconUsers,
 } from '@tabler/icons-react'
 import type { ReactNode } from 'react'
@@ -26,6 +25,7 @@ import { NavLink as RouterNavLink, Outlet, useLocation } from 'react-router'
 import { ChangePasswordModal } from '@/features/auth/ChangePasswordModal'
 import { useAuth } from '@/features/auth/authContext'
 import { Permissions, type Permission } from '@/features/auth/permissions'
+import { ScanButton } from '@/features/scan/ScanButton'
 import { roleLabel } from '@/features/users/roles'
 
 interface NavItem {
@@ -51,11 +51,6 @@ const mainItems: NavItem[] = [
     icon: <IconUsers size={18} />,
     permission: Permissions.CanManageUsers,
   },
-]
-
-// Temporary developer tools from Phase 0.
-const devItems: NavItem[] = [
-  { label: 'Tarama denemesi', to: '/dev/scan', icon: <IconScan size={18} /> },
 ]
 
 function initials(fullName: string) {
@@ -102,50 +97,47 @@ export function AppLayout() {
           </Group>
 
           {user && (
-            <Menu position="bottom-end" width={220}>
-              <Menu.Target>
-                <UnstyledButton aria-label="Profil menüsü">
-                  <Group gap="xs" wrap="nowrap">
-                    <Avatar radius="xl" size="sm" color="blue">
-                      {initials(user.fullName)}
-                    </Avatar>
-                    <div style={{ lineHeight: 1.1 }}>
-                      <Text size="sm" fw={500} visibleFrom="xs">
-                        {user.fullName}
-                      </Text>
-                      <Text size="xs" c="dimmed" visibleFrom="xs">
-                        {roleLabel(user.role)}
-                      </Text>
-                    </div>
-                    <IconChevronDown size={14} />
-                  </Group>
-                </UnstyledButton>
-              </Menu.Target>
-              <Menu.Dropdown>
-                <Menu.Label>{user.email}</Menu.Label>
-                <Menu.Item leftSection={<IconKey size={16} />} onClick={passwordModal.open}>
-                  Şifre değiştir
-                </Menu.Item>
-                <Menu.Item
-                  color="red"
-                  leftSection={<IconLogout size={16} />}
-                  onClick={() => void logout()}
-                >
-                  Çıkış
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
+            <Group gap="sm" wrap="nowrap">
+              <ScanButton />
+              <Menu position="bottom-end" width={220}>
+                <Menu.Target>
+                  <UnstyledButton aria-label="Profil menüsü">
+                    <Group gap="xs" wrap="nowrap">
+                      <Avatar radius="xl" size="sm" color="blue">
+                        {initials(user.fullName)}
+                      </Avatar>
+                      <div style={{ lineHeight: 1.1 }}>
+                        <Text size="sm" fw={500} visibleFrom="xs">
+                          {user.fullName}
+                        </Text>
+                        <Text size="xs" c="dimmed" visibleFrom="xs">
+                          {roleLabel(user.role)}
+                        </Text>
+                      </div>
+                      <IconChevronDown size={14} />
+                    </Group>
+                  </UnstyledButton>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>{user.email}</Menu.Label>
+                  <Menu.Item leftSection={<IconKey size={16} />} onClick={passwordModal.open}>
+                    Şifre değiştir
+                  </Menu.Item>
+                  <Menu.Item
+                    color="red"
+                    leftSection={<IconLogout size={16} />}
+                    onClick={() => void logout()}
+                  >
+                    Çıkış
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            </Group>
           )}
         </Group>
       </AppShell.Header>
 
-      <AppShell.Navbar p="xs">
-        {visible(mainItems).map(renderItem)}
-        <Text size="xs" c="dimmed" fw={600} tt="uppercase" mt="md" mb={4} px="sm">
-          Geliştirici
-        </Text>
-        {visible(devItems).map(renderItem)}
-      </AppShell.Navbar>
+      <AppShell.Navbar p="xs">{visible(mainItems).map(renderItem)}</AppShell.Navbar>
 
       <AppShell.Main>
         <Outlet />

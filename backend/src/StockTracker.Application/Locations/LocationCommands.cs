@@ -1,8 +1,10 @@
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
+using StockTracker.Application.Common.Codes;
 using StockTracker.Application.Common.Exceptions;
 using StockTracker.Application.Common.Interfaces;
+using StockTracker.Domain.Common.Codes;
 using StockTracker.Domain.Locations;
 using ValidationException = StockTracker.Application.Common.Exceptions.ValidationException;
 
@@ -73,7 +75,7 @@ public sealed class UpdateLocationCommandValidator : AbstractValidator<UpdateLoc
 
 public sealed class CreateLocationCommandHandler(
     ILocationRepository locations,
-    ILocationCodeGenerator codeGenerator,
+    ICodeGenerator codeGenerator,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateLocationCommand, Guid>
 {
     public async Task<Guid> Handle(CreateLocationCommand request, CancellationToken cancellationToken)
@@ -85,7 +87,7 @@ public sealed class CreateLocationCommandHandler(
         await LocationRules.EnsureNameAvailableAsync(locations, parent?.Id, request.Name, excludeId: null, cancellationToken);
 
         var location = Location.Create(
-            await codeGenerator.GenerateAsync(cancellationToken),
+            await codeGenerator.GenerateAsync(CodePrefix.Location, cancellationToken),
             request.Name,
             request.Type,
             parent);

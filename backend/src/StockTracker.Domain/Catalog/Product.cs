@@ -8,7 +8,7 @@ public class Product : BaseEntity, ISoftDeletable
 {
     public const int NameMaxLength = 150;
     public const int DescriptionMaxLength = 1000;
-    public const int CodeLength = 10;
+    public const int CodeLength = Common.Codes.EntityCode.Length;
 
     private readonly List<ProductBarcode> _barcodes = [];
 

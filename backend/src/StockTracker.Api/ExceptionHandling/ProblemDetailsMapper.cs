@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using StockTracker.Application.Common.Exceptions;
+using StockTracker.Application.Scan;
 using StockTracker.Domain.Exceptions;
 
 namespace StockTracker.Api.ExceptionHandling;
@@ -17,6 +18,7 @@ public static class ProblemDetailsMapper
             Detail = e.Message,
         },
         UnauthorizedException e => Create(StatusCodes.Status401Unauthorized, e.Message),
+        ScanNotFoundException e => ScanNotFound(e),
         NotFoundException e => Create(StatusCodes.Status404NotFound, e.Message),
         DomainException e => WithCode(Create(StatusCodes.Status422UnprocessableEntity, e.Message), e.Code),
         ConcurrencyException e => Create(StatusCodes.Status409Conflict, e.Message),
@@ -27,6 +29,23 @@ public static class ProblemDetailsMapper
 
     private static ProblemDetails Create(int status, string? detail) =>
         new() { Status = status, Title = ProblemTitles.For(status), Detail = detail };
+
+    public const string SuggestCreateProductKey = "suggestCreateProduct";
+    public const string BarcodeKey = "barcode";
+    public const string BarcodeFormatKey = "barcodeFormat";
+
+    private static ProblemDetails ScanNotFound(ScanNotFoundException exception)
+    {
+        var problem = Create(StatusCodes.Status404NotFound, "Bu koda ya da barkoda ait kayıt bulunamadı.");
+        problem.Extensions[SuggestCreateProductKey] = exception.SuggestCreateProduct;
+        if (exception.SuggestCreateProduct)
+        {
+            problem.Extensions[BarcodeKey] = exception.SuggestedBarcode;
+            problem.Extensions[BarcodeFormatKey] = exception.SuggestedFormat?.ToString();
+        }
+
+        return problem;
+    }
 
     private static ProblemDetails WithCode(ProblemDetails problem, string code)
     {

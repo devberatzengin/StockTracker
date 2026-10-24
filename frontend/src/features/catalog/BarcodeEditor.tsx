@@ -8,11 +8,14 @@ import {
   Table,
   Text,
   TextInput,
+  Tooltip,
 } from '@mantine/core'
-import { IconPlus, IconTrash } from '@tabler/icons-react'
+import { IconCamera, IconPlus, IconTrash } from '@tabler/icons-react'
 import { useState } from 'react'
 import type { BarcodeFormat } from '@/api/types'
 import { BARCODE_FORMAT_LABELS, BARCODE_FORMAT_OPTIONS } from '@/features/catalog/labels'
+import { toBarcodeFormat } from '@/features/scan/barcodeFormats'
+import { ScanDialog } from '@/features/scan/ScanDialog'
 
 export interface BarcodeRow {
   /** Server id for saved barcodes; a local key for unsaved ones. */
@@ -34,6 +37,7 @@ const normalize = (value: string) => value.replace(/\s+/g, '')
 export function BarcodeEditor({ barcodes, onAdd, onRemove, disabled }: Props) {
   const [value, setValue] = useState('')
   const [format, setFormat] = useState<BarcodeFormat>('Ean13')
+  const [scanning, setScanning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -122,6 +126,17 @@ export function BarcodeEditor({ barcodes, onAdd, onRemove, disabled }: Props) {
           disabled={disabled}
           w={130}
         />
+        <Tooltip label="Kamerayla okut">
+          <ActionIcon
+            variant="light"
+            size="lg"
+            aria-label="Kamerayla okut"
+            onClick={() => setScanning(true)}
+            disabled={disabled}
+          >
+            <IconCamera size={18} />
+          </ActionIcon>
+        </Tooltip>
         <Button
           variant="light"
           leftSection={<IconPlus size={16} />}
@@ -132,6 +147,19 @@ export function BarcodeEditor({ barcodes, onAdd, onRemove, disabled }: Props) {
           Ekle
         </Button>
       </Group>
+
+      <ScanDialog
+        opened={scanning}
+        onClose={() => setScanning(false)}
+        title="Barkod okut"
+        onScan={(scanned, scannedFormat) => {
+          // The value is only filled in; the user confirms it with "Ekle".
+          setValue(normalize(scanned))
+          setFormat(toBarcodeFormat(scannedFormat) ?? format)
+          setError(null)
+          setScanning(false)
+        }}
+      />
     </Stack>
   )
 }

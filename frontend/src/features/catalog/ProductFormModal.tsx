@@ -85,9 +85,11 @@ interface Props {
   onClose: () => void
   /** Present when editing. */
   product?: ProductDto
+  /** Pre-filled barcode for a new product, e.g. after scanning an unknown EAN. */
+  initialBarcode?: { value: string; format: BarcodeFormat } | null
 }
 
-export function ProductFormModal({ opened, onClose, product }: Props) {
+export function ProductFormModal({ opened, onClose, product, initialBarcode }: Props) {
   return (
     <Modal
       opened={opened}
@@ -96,19 +98,29 @@ export function ProductFormModal({ opened, onClose, product }: Props) {
       title={product ? 'Ürünü düzenle' : 'Yeni ürün'}
     >
       {/* Modal content unmounts on close, so every open starts with fresh form state. */}
-      <ProductForm product={product} onClose={onClose} />
+      <ProductForm product={product} onClose={onClose} initialBarcode={initialBarcode} />
     </Modal>
   )
 }
 
-function ProductForm({ product, onClose }: { product?: ProductDto; onClose: () => void }) {
+function ProductForm({
+  product,
+  onClose,
+  initialBarcode,
+}: {
+  product?: ProductDto
+  onClose: () => void
+  initialBarcode?: { value: string; format: BarcodeFormat } | null
+}) {
   const navigate = useNavigate()
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct()
   const { data: categories } = useCategoryOptions()
   const [formError, setFormError] = useState<string | null>(null)
   // New products send their barcodes with the create request.
-  const [pendingBarcodes, setPendingBarcodes] = useState<BarcodeRow[]>([])
+  const [pendingBarcodes, setPendingBarcodes] = useState<BarcodeRow[]>(() =>
+    initialBarcode ? [{ key: 'initial', ...initialBarcode }] : [],
+  )
 
   const {
     register,

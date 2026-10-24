@@ -26,3 +26,5 @@ export type UpdateProductRequest = Schemas['UpdateProductRequest']
 export type LocationType = Schemas['LocationType']
 export type LocationTreeNode = Schemas['LocationTreeNodeDto']
 export type LocationDto = Schemas['LocationDto']
+
+export type ScanResult = Schemas['ScanResultDto']

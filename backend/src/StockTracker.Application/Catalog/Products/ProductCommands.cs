@@ -1,8 +1,10 @@
 using FluentValidation;
 using MediatR;
+using StockTracker.Application.Common.Codes;
 using StockTracker.Application.Common.Exceptions;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Domain.Catalog;
+using StockTracker.Domain.Common.Codes;
 using Unit = StockTracker.Domain.Catalog.Unit;
 using StockTracker.Domain.Exceptions;
 
@@ -76,7 +78,7 @@ internal static class ProductHandlerHelpers
 public sealed class CreateProductCommandHandler(
     ICategoryRepository categories,
     IProductRepository products,
-    IProductCodeGenerator codeGenerator,
+    ICodeGenerator codeGenerator,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, Guid>
 {
     public async Task<Guid> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -84,7 +86,7 @@ public sealed class CreateProductCommandHandler(
         var category = await ProductHandlerHelpers.LoadCategoryAsync(categories, request.CategoryId, cancellationToken);
 
         var product = Product.Create(
-            await codeGenerator.GenerateAsync(cancellationToken),
+            await codeGenerator.GenerateAsync(CodePrefix.Product, cancellationToken),
             request.Name,
             request.Description,
             category,

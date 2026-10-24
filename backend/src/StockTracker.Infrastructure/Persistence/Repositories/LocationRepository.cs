@@ -12,9 +12,6 @@ public sealed class LocationRepository(AppDbContext db) : ILocationRepository
     public Task<Location?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         db.Locations.IgnoreQueryFilters().SingleOrDefaultAsync(l => l.Id == id, cancellationToken);
 
-    public Task<bool> CodeExistsAsync(string code, CancellationToken cancellationToken) =>
-        db.Locations.IgnoreQueryFilters().AnyAsync(l => l.Code == code, cancellationToken);
-
     public Task<bool> IsNameTakenAmongSiblingsAsync(
         Guid? parentId,
         string normalizedName,

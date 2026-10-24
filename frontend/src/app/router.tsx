@@ -69,10 +69,10 @@ export const router = createBrowserRouter([
                 }),
               },
               {
-                path: 'dev/scan',
-                // Lazy: the barcode reader is large and only needed on this page.
+                // QR label URLs ({PUBLIC_BASE_URL}/s/{code}); ProtectedRoute handles login first.
+                path: 's/:code',
                 lazy: async () => ({
-                  Component: (await import('@/features/scan/DevScanPage')).DevScanPage,
+                  Component: (await import('@/features/scan/ScanRedirectPage')).ScanRedirectPage,
                 }),
               },
               { path: '*', element: <NotFoundPage /> },

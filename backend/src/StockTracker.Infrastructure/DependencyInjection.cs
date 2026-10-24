@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StockTracker.Application.Common.Codes;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Infrastructure.Catalog;
+using StockTracker.Infrastructure.Codes;
 using StockTracker.Infrastructure.Identity;
 using StockTracker.Infrastructure.Locations;
 using StockTracker.Infrastructure.Persistence;
@@ -39,11 +41,13 @@ public static class DependencyInjection
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IProductStockChecker, NoStockProductStockChecker>();
-        services.AddScoped<IProductCodeGenerator, TemporaryProductCodeGenerator>();
 
         services.AddScoped<ILocationRepository, LocationRepository>();
         services.AddScoped<ILocationContentChecker, EmptyLocationContentChecker>();
-        services.AddScoped<ILocationCodeGenerator, TemporaryLocationCodeGenerator>();
+
+        // Items register their own check when the Item entity arrives.
+        services.AddScoped<ICodeUniquenessCheck, ProductCodeUniquenessCheck>();
+        services.AddScoped<ICodeUniquenessCheck, LocationCodeUniquenessCheck>();
 
         services.AddHealthChecks().AddDbContextCheck<AppDbContext>("database");
 

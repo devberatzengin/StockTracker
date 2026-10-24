@@ -67,6 +67,8 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Lokasyon ad benzersizliği | Aktif kardeşler arasında, büyük/küçük harf duyarsız; kök lokasyonlar da kendi aralarında benzersiz (`NULLS NOT DISTINCT` partial unique index). |
 | Lokasyon ağacı ucu | `GET /locations/tree` iç içe ağacı tek seferde döner; liste ucu sayfalama konvansiyonunun istisnası. |
 | Lokasyon taşıma | Taşıma ve pasifleştirme `pg_advisory_xact_lock` ile sıraya girer (eşzamanlı taşımalar döngü oluşturamaz). Pasif lokasyona ekleme/taşıma ve pasif lokasyonu taşıma reddedilir; yeniden aktifleştirme yok. |
+| Kod üretimi | `ICodeGenerator` her denemede kodun varlığını (unique index üzerinden) sorgular, en fazla 3 deneme; kayıt anındaki yarışta index ihlali olursa hata döner. |
+| Tarama girdisi | URL ise host kontrol edilmez, sadece `/s/{kod}` alınır. Elle giriş alanı tarama penceresinde her zaman görünür. |
 | Lokasyon detayı (1.3) | Breadcrumb ve alt lokasyon listesi; içerik tablosu ve "alt lokasyonlar dahil" anahtarı `/contents` ile 1.5'te. |
 
 ## Mimari
@@ -160,7 +162,7 @@ Tekil (Serialized) hareketlerde `ItemId` zorunlu ve miktar her zaman 1'dir. Mikt
 
 - Format: `PRD-`, `ITM-`, `LOC-` + 6 karakter Crockford Base32 (0/O, 1/I/L karışıklığı yok). Kod üretimi `ICodeGenerator` ile yapılır; her tabloda benzersiz index vardır.
 - `GET /api/scan/{input}` sırası: (1) giriş URL ise kodu ayıkla, (2) büyük harfe çevir, boşlukları sil, (3) ön ek varsa ilgili tablodan bul, (4) ön ek yoksa `ProductBarcode` tablosunda ara, (5) bulunamazsa 404.
-- Dönüş: `{ type: "product" | "item" | "location", id, code, title, summary }`. Frontend bu tipe göre detay sayfasına yönlendirir.
+- Dönüş: `{ type: "product" | "item" | "location", id, code, title, subtitle, isActive, status }` (ayrıntı 1.4'te). Frontend bu tipe göre detay sayfasına yönlendirir.
 
 ## Faz 0 — Kurulum ve altyapı
 

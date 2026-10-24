@@ -10,7 +10,7 @@ namespace StockTracker.Domain.Locations;
 public class Location : BaseEntity, ISoftDeletable
 {
     public const int NameMaxLength = 100;
-    public const int CodeLength = 10;
+    public const int CodeLength = Common.Codes.EntityCode.Length;
     public const int MaxDepth = 8;
 
     // 9 levels × ("/" + 36-char Guid) + trailing "/".

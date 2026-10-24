@@ -82,7 +82,8 @@ The camera only works over HTTPS. Start the Cloudflare quick tunnel:
 docker compose --profile tunnel up --build
 ```
 
-Open the `https://….trycloudflare.com` URL printed in the `cloudflared` logs on the phone and go to `/dev/scan`.
+Open the `https://….trycloudflare.com` URL printed in the `cloudflared` logs on the phone, sign in and use **Tara** in the top bar.
+Set `PUBLIC_BASE_URL` to that address so printed QR labels (`{PUBLIC_BASE_URL}/s/{code}`) open the app from the phone's own camera.
 The tunnel URL is public while it runs.
 
 ## Configuration
