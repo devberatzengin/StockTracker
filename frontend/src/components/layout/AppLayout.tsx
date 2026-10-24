@@ -16,6 +16,7 @@ import {
   IconHome,
   IconKey,
   IconLogout,
+  IconMapPin,
   IconPackage,
   IconScan,
   IconUsers,
@@ -37,6 +38,7 @@ interface NavItem {
 const mainItems: NavItem[] = [
   { label: 'Ana sayfa', to: '/', icon: <IconHome size={18} /> },
   { label: 'Ürünler', to: '/products', icon: <IconPackage size={18} /> },
+  { label: 'Lokasyonlar', to: '/locations', icon: <IconMapPin size={18} /> },
   {
     label: 'Kategoriler',
     to: '/categories',

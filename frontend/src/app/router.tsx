@@ -56,6 +56,19 @@ export const router = createBrowserRouter([
                 ],
               },
               {
+                path: 'locations',
+                lazy: async () => ({
+                  Component: (await import('@/features/locations/LocationsPage')).LocationsPage,
+                }),
+              },
+              {
+                path: 'locations/:id',
+                lazy: async () => ({
+                  Component: (await import('@/features/locations/LocationDetailPage'))
+                    .LocationDetailPage,
+                }),
+              },
+              {
                 path: 'dev/scan',
                 // Lazy: the barcode reader is large and only needed on this page.
                 lazy: async () => ({

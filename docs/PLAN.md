@@ -63,7 +63,11 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Unique index ihlali | Eşzamanlı isteklerde unique index ihlali (barkod, aktif kategori adı) 422 domain hatasına çevrilir. |
 | Enum saklama | API'de ve veritabanında string (`"Serialized"`, `"Piece"`). |
 | Barkod düzenleme | Yeni üründe barkodlar oluşturma isteğiyle birlikte kaydedilir; var olan üründe ekleme/silme ayrı uçlarla anında kaydedilir. |
-| Geçici implementasyonlar | `IProductStockChecker` stok tabloları gelene kadar (1.5) her zaman "stok yok" döner. `PRD-` kodu ortak `ICodeGenerator` gelene kadar geçici üreticiyle üretilir. |
+| Geçici implementasyonlar | `IProductStockChecker` ve `ILocationContentChecker` stok tabloları gelene kadar (1.5) her zaman "stok yok / boş" döner. `PRD-` ve `LOC-` kodları ortak `ICodeGenerator` gelene kadar geçici üreticiyle üretilir. |
+| Lokasyon ad benzersizliği | Aktif kardeşler arasında, büyük/küçük harf duyarsız; kök lokasyonlar da kendi aralarında benzersiz (`NULLS NOT DISTINCT` partial unique index). |
+| Lokasyon ağacı ucu | `GET /locations/tree` iç içe ağacı tek seferde döner; liste ucu sayfalama konvansiyonunun istisnası. |
+| Lokasyon taşıma | Taşıma ve pasifleştirme `pg_advisory_xact_lock` ile sıraya girer (eşzamanlı taşımalar döngü oluşturamaz). Pasif lokasyona ekleme/taşıma ve pasif lokasyonu taşıma reddedilir; yeniden aktifleştirme yok. |
+| Lokasyon detayı (1.3) | Breadcrumb ve alt lokasyon listesi; içerik tablosu ve "alt lokasyonlar dahil" anahtarı `/contents` ile 1.5'te. |
 
 ## Mimari
 

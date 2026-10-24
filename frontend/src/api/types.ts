@@ -22,3 +22,7 @@ export type ProductBarcodeDto = Schemas['ProductBarcodeDto']
 export type BarcodeInput = Schemas['BarcodeInput']
 export type CreateProductRequest = Schemas['CreateProductCommand']
 export type UpdateProductRequest = Schemas['UpdateProductRequest']
+
+export type LocationType = Schemas['LocationType']
+export type LocationTreeNode = Schemas['LocationTreeNodeDto']
+export type LocationDto = Schemas['LocationDto']

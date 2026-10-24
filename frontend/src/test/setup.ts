@@ -34,3 +34,6 @@ if (!document.fonts) {
     value: { addEventListener: () => {}, removeEventListener: () => {} },
   })
 }
+
+// Mantine's combobox scrolls the active option into view.
+Element.prototype.scrollIntoView ??= () => {}

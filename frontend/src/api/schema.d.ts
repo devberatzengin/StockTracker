@@ -343,6 +343,228 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/locations/tree": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    IncludeInactive?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["LocationTreeNodeDto"][];
+                        "application/json": components["schemas"]["LocationTreeNodeDto"][];
+                        "text/json": components["schemas"]["LocationTreeNodeDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/locations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["LocationDto"];
+                        "application/json": components["schemas"]["LocationDto"];
+                        "text/json": components["schemas"]["LocationDto"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateLocationRequest"];
+                    "text/json": components["schemas"]["UpdateLocationRequest"];
+                    "application/*+json": components["schemas"]["UpdateLocationRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreateLocationCommand"];
+                    "text/json": components["schemas"]["CreateLocationCommand"];
+                    "application/*+json": components["schemas"]["CreateLocationCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CreatedResponse"];
+                        "application/json": components["schemas"]["CreatedResponse"];
+                        "text/json": components["schemas"]["CreatedResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/locations/{id}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["MoveLocationRequest"];
+                    "text/json": components["schemas"]["MoveLocationRequest"];
+                    "application/*+json": components["schemas"]["MoveLocationRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/locations/{id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ping": {
         parameters: {
             query?: never;
@@ -859,6 +1081,12 @@ export interface components {
             currentPassword: string;
             newPassword: string;
         };
+        CreateLocationCommand: {
+            name: string;
+            type: components["schemas"]["LocationType"];
+            /** Format: uuid */
+            parentId?: string | null;
+        };
         CreateProductCommand: {
             name: string;
             description?: string | null;
@@ -892,9 +1120,54 @@ export interface components {
             role: string;
             permissions: string[];
         };
+        LocationChildDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            type: components["schemas"]["LocationType"];
+            isActive: boolean;
+        };
+        LocationDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            type: components["schemas"]["LocationType"];
+            /** Format: uuid */
+            parentId?: string | null;
+            /** Format: int32 */
+            depth: number;
+            isActive: boolean;
+            ancestors: components["schemas"]["LocationRefDto"][];
+            children: components["schemas"]["LocationChildDto"][];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        LocationRefDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+        };
+        LocationTreeNodeDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            type: components["schemas"]["LocationType"];
+            isActive: boolean;
+            children: components["schemas"]["LocationTreeNodeDto"][];
+        };
+        /** @enum {string} */
+        LocationType: "Building" | "Room" | "Cabinet" | "Shelf" | "Box" | "Other";
         LoginCommand: {
             email: string;
             password: string;
+        };
+        MoveLocationRequest: {
+            /** Format: uuid */
+            newParentId?: string | null;
         };
         ProductBarcodeDto: {
             /** Format: uuid */
@@ -957,6 +1230,10 @@ export interface components {
         TrackingType: "Serialized" | "Quantity";
         /** @enum {string} */
         Unit: "Piece" | "Kg" | "Meter" | "Liter" | "Package" | "Box";
+        UpdateLocationRequest: {
+            name: string;
+            type: components["schemas"]["LocationType"];
+        };
         UpdateProductRequest: {
             name: string;
             description?: string | null;

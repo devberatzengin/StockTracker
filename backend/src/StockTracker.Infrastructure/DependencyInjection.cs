@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Infrastructure.Catalog;
 using StockTracker.Infrastructure.Identity;
+using StockTracker.Infrastructure.Locations;
 using StockTracker.Infrastructure.Persistence;
 using StockTracker.Infrastructure.Persistence.Interceptors;
 using StockTracker.Infrastructure.Persistence.Repositories;
@@ -39,6 +40,10 @@ public static class DependencyInjection
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IProductStockChecker, NoStockProductStockChecker>();
         services.AddScoped<IProductCodeGenerator, TemporaryProductCodeGenerator>();
+
+        services.AddScoped<ILocationRepository, LocationRepository>();
+        services.AddScoped<ILocationContentChecker, EmptyLocationContentChecker>();
+        services.AddScoped<ILocationCodeGenerator, TemporaryLocationCodeGenerator>();
 
         services.AddHealthChecks().AddDbContextCheck<AppDbContext>("database");
 

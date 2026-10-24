@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Domain.Catalog;
+using StockTracker.Domain.Locations;
 using StockTracker.Domain.Common;
 using StockTracker.Infrastructure.Identity;
 
@@ -19,6 +20,8 @@ public class AppDbContext(DbContextOptions options)
     public DbSet<Product> Products => Set<Product>();
 
     public DbSet<ProductBarcode> ProductBarcodes => Set<ProductBarcode>();
+
+    public DbSet<Location> Locations => Set<Location>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StockTracker.Domain.Catalog;
+using StockTracker.Domain.Locations;
 
 namespace StockTracker.Application.Common.Interfaces;
 
@@ -14,4 +15,6 @@ public interface IAppDbContext
     DbSet<Product> Products { get; }
 
     DbSet<ProductBarcode> ProductBarcodes { get; }
+
+    DbSet<Location> Locations { get; }
 }
