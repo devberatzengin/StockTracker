@@ -1,0 +1,43 @@
+name: docker
+
+# Builds the images to make sure the Dockerfiles stay valid. Nothing is pushed.
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", "frontend/**", ".github/workflows/docker.yml"]
+  pull_request:
+    paths: ["backend/**", "frontend/**", ".github/workflows/docker.yml"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            context: backend
+            file: backend/Dockerfile
+          - name: migrator
+            context: backend
+            file: backend/Dockerfile.migrator
+          - name: web
+            context: frontend
+            file: frontend/Dockerfile
+    name: build (${{ matrix.name }})
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: false
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}

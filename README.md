@@ -25,6 +25,7 @@ docs/       Plan and documentation
 ### Prerequisites
 
 - .NET SDK 10
+- Node.js 24+
 - Docker (integration tests use Testcontainers; also needed for Compose)
 - An external PostgreSQL server
 
@@ -43,15 +44,40 @@ The API listens on http://localhost:5180. Swagger UI: http://localhost:5180/swag
 
 `GET /health` reports `Healthy` when the database is reachable.
 
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev        # http://localhost:5273, proxies /api to http://localhost:5180
+npm run lint
+npm run test
+npm run build
+npm run gen:api    # regenerates src/api/schema.d.ts; the backend must be running in Development
+```
+
+Set `API_PROXY_TARGET` to proxy `/api` somewhere other than `http://localhost:5180`.
+
 ### Docker Compose
 
 ```bash
 cp .env.example .env            # then set ConnectionStrings__Default
 docker compose run --rm migrator  # apply migrations (never automatic)
-docker compose up --build api
+docker compose up --build         # web on http://localhost:8080
 ```
 
-The `api` container listens on 8080 inside the compose network and is not published to the host.
+The `api` container is not published to the host; `web` (nginx) serves the app and proxies `/api` to it.
+
+### Testing on a phone
+
+The camera only works over HTTPS. Start the Cloudflare quick tunnel:
+
+```bash
+docker compose --profile tunnel up --build
+```
+
+Open the `https://….trycloudflare.com` URL printed in the `cloudflared` logs on the phone and go to `/dev/scan`.
+The tunnel URL is public while it runs.
 
 ## Configuration
 

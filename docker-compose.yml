@@ -34,24 +34,26 @@ services:
     # Profile keeps it out of `docker compose up`; `docker compose run` still starts it.
     profiles: ["tools"]
 
-  # Added in Phase 0.5 (frontend).
-  # web:
-  #   build:
-  #     context: ./frontend
-  #   ports:
-  #     - "8080:80"
-  #   depends_on:
-  #     api:
-  #       condition: service_healthy
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
 
-  # Exposes web:80 through an HTTPS quick tunnel. Start with: docker compose --profile tunnel up
-  # Enable together with the web service.
-  # cloudflared:
-  #   image: cloudflare/cloudflared:latest
-  #   command: tunnel --no-autoupdate --url http://web:80
-  #   profiles: ["tunnel"]
-  #   depends_on:
-  #     - web
+  # Exposes web:80 through an HTTPS quick tunnel (random *.trycloudflare.com URL in the logs).
+  # Start with: docker compose --profile tunnel up --build
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://web:80
+    profiles: ["tunnel"]
+    depends_on:
+      - web
+    restart: unless-stopped
 
 volumes:
   uploads:

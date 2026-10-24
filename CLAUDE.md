@@ -70,7 +70,7 @@ cd backend && dotnet build && dotnet test
 # migration ekleme (yerelde)
 dotnet ef migrations add <Name> -p src/StockTracker.Infrastructure -s src/StockTracker.Api
 # frontend
-cd frontend && npm run dev | npm run lint | npm run build | npm run gen:api
+cd frontend && npm run dev | npm run lint | npm run test | npm run build | npm run gen:api
 # docker
 docker compose run --rm migrator
 docker compose up --build
