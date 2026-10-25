@@ -1,8 +1,10 @@
+using System.Text.Json;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Application.Common.Behaviors;
 using StockTracker.Application.Common.Codes;
 using StockTracker.Application.Scan;
+using StockTracker.Domain.Inventory;
 
 namespace StockTracker.Application;
 
@@ -11,6 +13,10 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         var assembly = typeof(DependencyInjection).Assembly;
+
+        // Error keys match the JSON payload: "email", "lines[2].quantity" instead of "Email", "Lines[2].Quantity".
+        ValidatorOptions.Global.PropertyNameResolver = (_, member, _) =>
+            member is null ? null : JsonNamingPolicy.CamelCase.ConvertName(member.Name);
 
         services.AddMediatR(cfg =>
         {
@@ -23,10 +29,12 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
         services.AddScoped<ICodeGenerator, CodeGenerator>();
+        services.AddSingleton<StockMovementService>();
 
-        // One resolver per code prefix; the item resolver arrives with the Item entity.
+        // One resolver per code prefix.
         services.AddScoped<IScanCodeResolver, ProductCodeScanResolver>();
         services.AddScoped<IScanCodeResolver, LocationCodeScanResolver>();
+        services.AddScoped<IScanCodeResolver, ItemCodeScanResolver>();
         services.AddScoped<ProductBarcodeScanResolver>();
 
         return services;

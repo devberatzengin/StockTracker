@@ -11,6 +11,9 @@ public sealed class ProductRepository(AppDbContext db) : IProductRepository
             .Include(p => p.Barcodes)
             .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
 
+    public async Task<IReadOnlyList<Product>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken) =>
+        ids.Count == 0 ? [] : await db.Products.IgnoreQueryFilters().Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
+
     public Task<bool> BarcodeExistsAsync(string normalizedValue, CancellationToken cancellationToken) =>
         db.ProductBarcodes.IgnoreQueryFilters().AnyAsync(b => b.Value == normalizedValue, cancellationToken);
 

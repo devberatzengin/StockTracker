@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockTracker.Api.Contracts;
 using StockTracker.Application.Catalog.Products;
+using StockTracker.Application.Inventory;
 using StockTracker.Application.Common.Models;
 using StockTracker.Application.Common.Security;
 
@@ -21,6 +22,10 @@ public sealed class ProductsController(ISender sender) : ControllerBase
     [HttpGet("{id:guid}")]
     public Task<ProductDto> Get(Guid id, CancellationToken cancellationToken) =>
         sender.Send(new GetProductQuery(id), cancellationToken);
+
+    [HttpGet("{id:guid}/stock")]
+    public Task<ProductStockDto> Stock(Guid id, CancellationToken cancellationToken) =>
+        sender.Send(new GetProductStockQuery(id), cancellationToken);
 
     [HttpPost]
     [Authorize(Policy = Permissions.CanManageCatalog)]

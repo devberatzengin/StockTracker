@@ -53,7 +53,7 @@ internal static class ProductHandlerHelpers
         Guid categoryId,
         CancellationToken cancellationToken) =>
         await categories.GetByIdAsync(categoryId, cancellationToken)
-        ?? throw CatalogValidation.FieldError("CategoryId", "Kategori bulunamadı.");
+        ?? throw CatalogValidation.FieldError("categoryId", "Kategori bulunamadı.");
 
     public static async Task<Product> LoadProductAsync(
         IProductRepository products,

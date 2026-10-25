@@ -4,6 +4,7 @@ using StockTracker.Application.Common.Exceptions;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Exceptions;
+using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
 using StockTracker.Infrastructure.Persistence.Configurations;
 
@@ -12,12 +13,18 @@ namespace StockTracker.Infrastructure.Persistence;
 public sealed class UnitOfWork(AppDbContext dbContext) : IUnitOfWork
 {
     // Unique indexes that back business rules. Handlers check first; these cover concurrent requests.
-    private static readonly Dictionary<string, Func<DomainException>> UniqueViolations = new()
+    public const string StockChangedMessage = "Stok bu arada değişti, tekrar deneyin.";
+
+    private static readonly Dictionary<string, Func<Exception>> UniqueViolations = new()
     {
         [ProductBarcodeConfiguration.ValueIndex] = () =>
             new DomainException(CatalogErrors.BarcodeDuplicate, "Bu barkod başka bir ürüne kayıtlı."),
         [CategoryConfiguration.ActiveNameIndex] = () =>
             new DomainException(CatalogErrors.CategoryNameTaken, "Bu adla aktif bir kategori zaten var."),
+        // Two requests creating the same (product, location) balance at once.
+        [StockBalanceConfiguration.ProductLocationIndex] = () => new ConcurrencyException(StockChangedMessage),
+        [ItemConfiguration.SerialNumberIndex] = () =>
+            new DomainException(InventoryErrors.SerialNumberTaken, "Bu seri numarası bu üründe zaten kayıtlı.", "serialNumbers"),
         [LocationConfiguration.SiblingNameIndex] = () =>
             new DomainException(LocationErrors.NameTaken, "Aynı üst lokasyon altında bu adla bir lokasyon zaten var."),
     };
@@ -37,17 +44,20 @@ public sealed class UnitOfWork(AppDbContext dbContext) : IUnitOfWork
         {
             return await dbContext.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateConcurrencyException)
+        catch (DbUpdateConcurrencyException ex)
         {
-            throw new ConcurrencyException();
+            // Balances and items carry xmin tokens; a conflict there means stock changed meanwhile.
+            throw ex.Entries.Any(e => e.Entity is StockBalance or Item)
+                ? new ConcurrencyException(StockChangedMessage)
+                : new ConcurrencyException();
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException
         {
             SqlState: PostgresErrorCodes.UniqueViolation,
             ConstraintName: { } constraint,
-        } && UniqueViolations.TryGetValue(constraint, out var toDomainException))
+        } && UniqueViolations.TryGetValue(constraint, out var translate))
         {
-            throw toDomainException();
+            throw translate();
         }
     }
 }

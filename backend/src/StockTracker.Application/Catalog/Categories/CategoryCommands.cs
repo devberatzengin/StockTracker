@@ -38,7 +38,7 @@ internal static class CategoryRules
     {
         if (await categories.IsNameTakenAsync(Category.Normalize(name), excludeId, cancellationToken))
         {
-            throw CatalogValidation.FieldError("Name", "Bu adla aktif bir kategori zaten var.");
+            throw CatalogValidation.FieldError("name", "Bu adla aktif bir kategori zaten var.");
         }
     }
 }

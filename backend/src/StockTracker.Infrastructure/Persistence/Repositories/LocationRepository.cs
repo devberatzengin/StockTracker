@@ -12,6 +12,9 @@ public sealed class LocationRepository(AppDbContext db) : ILocationRepository
     public Task<Location?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         db.Locations.IgnoreQueryFilters().SingleOrDefaultAsync(l => l.Id == id, cancellationToken);
 
+    public async Task<IReadOnlyList<Location>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken) =>
+        ids.Count == 0 ? [] : await db.Locations.IgnoreQueryFilters().Where(l => ids.Contains(l.Id)).ToListAsync(cancellationToken);
+
     public Task<bool> IsNameTakenAmongSiblingsAsync(
         Guid? parentId,
         string normalizedName,

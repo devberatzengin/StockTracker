@@ -63,10 +63,16 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Unique index ihlali | Eşzamanlı isteklerde unique index ihlali (barkod, aktif kategori adı) 422 domain hatasına çevrilir. |
 | Enum saklama | API'de ve veritabanında string (`"Serialized"`, `"Piece"`). |
 | Barkod düzenleme | Yeni üründe barkodlar oluşturma isteğiyle birlikte kaydedilir; var olan üründe ekleme/silme ayrı uçlarla anında kaydedilir. |
-| Geçici implementasyonlar | `IProductStockChecker` ve `ILocationContentChecker` stok tabloları gelene kadar (1.5) her zaman "stok yok / boş" döner. `PRD-` ve `LOC-` kodları ortak `ICodeGenerator` gelene kadar geçici üreticiyle üretilir. |
+| Stok kontrolleri | `IProductStockChecker` ve `ILocationContentChecker` 1.5'ten itibaren bakiye, Item ve hareket tablolarına bakar (1.2–1.4'te geçici "stok yok / boş" implementasyonları vardı). |
 | Lokasyon ad benzersizliği | Aktif kardeşler arasında, büyük/küçük harf duyarsız; kök lokasyonlar da kendi aralarında benzersiz (`NULLS NOT DISTINCT` partial unique index). |
 | Lokasyon ağacı ucu | `GET /locations/tree` iç içe ağacı tek seferde döner; liste ucu sayfalama konvansiyonunun istisnası. |
 | Lokasyon taşıma | Taşıma ve pasifleştirme `pg_advisory_xact_lock` ile sıraya girer (eşzamanlı taşımalar döngü oluşturamaz). Pasif lokasyona ekleme/taşıma ve pasif lokasyonu taşıma reddedilir; yeniden aktifleştirme yok. |
+| Hareket defteri koruması | `StockMovement` güncelleme/silmesi hem interceptor hem veritabanı trigger'ı ile reddedilir. `StockMovement` audit alanı taşımaz (`OccurredAt`, `UserId` yeterli). |
+| Hareket hataları | Satır alan hataları 400, satırdaki iş kuralı ihlalleri 422 + `code`; ikisinde de `errors["lines[2].quantity"]`. Tüm hata anahtarları camelCase. |
+| Stok eşzamanlılığı | `StockBalance` ve `Item` `xmin` ile korunur; çakışmada 409 "Stok bu arada değişti, tekrar deneyin." Aynı (ürün, lokasyon) bakiyesinin eşzamanlı oluşturulması da 409. |
+| Çıkış sebebi | Sebep ve not çıkış komutunda tektir, tüm satırların hareketlerine kopyalanır. |
+| Item durumları | State pattern tüm geçişleriyle (zimmet, tamir dahil) 1.5'te yazıldı; zimmet ve tamir komutları Faz 2'de kullanır. |
+| Toplu kod üretimi | `ICodeGenerator.GenerateManyAsync` kodları tek sorguyla kontrol eder (girişte 100 satır × 100 adete kadar). |
 | Kod üretimi | `ICodeGenerator` her denemede kodun varlığını (unique index üzerinden) sorgular, en fazla 3 deneme; kayıt anındaki yarışta index ihlali olursa hata döner. |
 | Tarama girdisi | URL ise host kontrol edilmez, sadece `/s/{kod}` alınır. Elle giriş alanı tarama penceresinde her zaman görünür. |
 | Lokasyon detayı (1.3) | Breadcrumb ve alt lokasyon listesi; içerik tablosu ve "alt lokasyonlar dahil" anahtarı `/contents` ile 1.5'te. |

@@ -195,7 +195,7 @@ public class CatalogEndpointsTests(ApiFactory factory)
         var duplicate = await _client.SendAsync(Authorized(HttpMethod.Post, "/api/categories", token, new { name = name.ToUpperInvariant() }));
 
         duplicate.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await ReadJsonAsync(duplicate)).GetProperty("errors").TryGetProperty("Name", out _).Should().BeTrue();
+        (await ReadJsonAsync(duplicate)).GetProperty("errors").TryGetProperty("name", out _).Should().BeTrue();
     }
 
     [Fact]

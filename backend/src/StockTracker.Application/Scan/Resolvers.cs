@@ -52,6 +52,46 @@ public sealed class LocationCodeScanResolver(IAppDbContext db) : IScanCodeResolv
     }
 }
 
+public sealed class ItemCodeScanResolver(IAppDbContext db) : IScanCodeResolver
+{
+    public CodePrefix Prefix => CodePrefix.Item;
+
+    public async Task<ScanResultDto?> ResolveAsync(string code, CancellationToken cancellationToken)
+    {
+        var products = db.Products.IgnoreQueryFilters();
+        var item = await db.Items.AsNoTracking()
+            .Where(i => i.Code == code)
+            .Select(i => new
+            {
+                i.Id,
+                i.Code,
+                i.SerialNumber,
+                i.Status,
+                i.CurrentLocationId,
+                ProductName = products.Where(p => p.Id == i.ProductId).Select(p => p.Name).First(),
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (item is null)
+        {
+            return null;
+        }
+
+        var location = item.CurrentLocationId is { } locationId
+            ? (await Locations.LocationPaths.BuildAsync(db, [locationId], cancellationToken)).GetValueOrDefault(locationId)
+            : null;
+
+        return new ScanResultDto(
+            ScanResultTypes.Item,
+            item.Id,
+            item.Code,
+            item.SerialNumber is null ? item.Code : $"{item.Code} · {item.SerialNumber}",
+            location is null ? item.ProductName : $"{item.ProductName} · {location}",
+            item.Status != Domain.Inventory.ItemStatus.Disposed,
+            item.Status.ToString());
+    }
+}
+
 /// <summary>Finds the product owning a barcode (barcodes have no prefix).</summary>
 public sealed class ProductBarcodeScanResolver(IAppDbContext db)
 {

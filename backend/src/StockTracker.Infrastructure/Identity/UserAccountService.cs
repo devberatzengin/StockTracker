@@ -56,6 +56,15 @@ public sealed class UserAccountService(
         return new PagedResult<UserDto>(items, totalCount, criteria.Page, criteria.PageSize);
     }
 
+    public async Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
+        IReadOnlyCollection<Guid> userIds,
+        CancellationToken cancellationToken) =>
+        userIds.Count == 0
+            ? new Dictionary<Guid, string>()
+            : await db.Users.IgnoreQueryFilters().AsNoTracking()
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u.FullName, cancellationToken);
+
     public async Task<Guid> CreateAsync(NewUserData data, CancellationToken cancellationToken)
     {
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
@@ -74,8 +83,8 @@ public sealed class UserAccountService(
         var created = data.Password is null
             ? await userManager.CreateAsync(user)
             : await userManager.CreateAsync(user, data.Password);
-        created.ThrowIfFailed("Password");
-        (await userManager.AddToRoleAsync(user, data.Role)).ThrowIfFailed("Role");
+        created.ThrowIfFailed("password");
+        (await userManager.AddToRoleAsync(user, data.Role)).ThrowIfFailed("role");
 
         await transaction.CommitAsync(cancellationToken);
         return user.Id;
@@ -100,7 +109,7 @@ public sealed class UserAccountService(
         var hasPassword = await userManager.HasPasswordAsync(user);
         if (data.CanLogin && !hasPassword && data.Password is null)
         {
-            throw IdentityErrors.Validation("Password", "Giriş yetkisi verilen kullanıcı için şifre zorunludur.");
+            throw IdentityErrors.Validation("password", "Giriş yetkisi verilen kullanıcı için şifre zorunludur.");
         }
 
         var revokeSessions = user.CanLogin && !data.CanLogin;
@@ -110,7 +119,7 @@ public sealed class UserAccountService(
         user.Email = data.Email;
         user.CanLogin = data.CanLogin;
         user.UserName = UserNameFor(user);
-        (await userManager.UpdateAsync(user)).ThrowIfFailed("Email");
+        (await userManager.UpdateAsync(user)).ThrowIfFailed("email");
 
         if (data.Password is not null)
         {
@@ -122,10 +131,10 @@ public sealed class UserAccountService(
         {
             if (await userManager.IsInRoleAsync(user, currentRole))
             {
-                (await userManager.RemoveFromRoleAsync(user, currentRole)).ThrowIfFailed("Role");
+                (await userManager.RemoveFromRoleAsync(user, currentRole)).ThrowIfFailed("role");
             }
 
-            (await userManager.AddToRoleAsync(user, data.Role)).ThrowIfFailed("Role");
+            (await userManager.AddToRoleAsync(user, data.Role)).ThrowIfFailed("role");
         }
 
         if (revokeSessions)
@@ -155,7 +164,7 @@ public sealed class UserAccountService(
             await CountActiveAdminsAsync(cancellationToken));
 
         user.IsActive = false;
-        (await userManager.UpdateAsync(user)).ThrowIfFailed("Id");
+        (await userManager.UpdateAsync(user)).ThrowIfFailed("id");
         await db.RevokeAllRefreshTokensAsync(user.Id, dateTime.UtcNow, cancellationToken);
 
         await transaction.CommitAsync(cancellationToken);
@@ -190,10 +199,10 @@ public sealed class UserAccountService(
     {
         if (hasPassword)
         {
-            (await userManager.RemovePasswordAsync(user)).ThrowIfFailed("Password");
+            (await userManager.RemovePasswordAsync(user)).ThrowIfFailed("password");
         }
 
-        (await userManager.AddPasswordAsync(user, password)).ThrowIfFailed("Password");
+        (await userManager.AddPasswordAsync(user, password)).ThrowIfFailed("password");
     }
 
     private async Task EnsureEmailAvailableAsync(string? email, Guid? excludeUserId, CancellationToken cancellationToken)
@@ -209,7 +218,7 @@ public sealed class UserAccountService(
 
         if (taken)
         {
-            throw IdentityErrors.Validation("Email", "Bu e-posta adresi zaten kullanılıyor.");
+            throw IdentityErrors.Validation("email", "Bu e-posta adresi zaten kullanılıyor.");
         }
     }
 

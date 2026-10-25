@@ -129,7 +129,7 @@ public class LocationEndpointsTests(ApiFactory factory)
 
         var duplicate = await CreateRawAsync(token, "raf a1", "Shelf", cabinet);
         duplicate.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await ReadJsonAsync(duplicate)).GetProperty("errors").TryGetProperty("Name", out _).Should().BeTrue();
+        (await ReadJsonAsync(duplicate)).GetProperty("errors").TryGetProperty("name", out _).Should().BeTrue();
 
         // Same name under another parent is fine.
         (await CreateRawAsync(token, "Raf A1", "Shelf", room)).StatusCode.Should().Be(HttpStatusCode.Created);

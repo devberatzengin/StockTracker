@@ -6,14 +6,29 @@ namespace StockTracker.Application.Tests.Codes;
 
 public class CodeGeneratorTests
 {
+    /// <summary>Reports the first <paramref name="collisions"/> checked codes as taken.</summary>
     private sealed class FakeCheck(CodePrefix prefix, int collisions) : ICodeUniquenessCheck
     {
-        public int Calls { get; private set; }
+        private int _checked;
+
+        public int Rounds { get; private set; }
 
         public CodePrefix Prefix => prefix;
 
-        public Task<bool> ExistsAsync(string code, CancellationToken cancellationToken) =>
-            Task.FromResult(++Calls <= collisions);
+        public Task<IReadOnlySet<string>> ExistingAsync(IReadOnlyCollection<string> codes, CancellationToken cancellationToken)
+        {
+            Rounds++;
+            var taken = new HashSet<string>();
+            foreach (var code in codes)
+            {
+                if (_checked++ < collisions)
+                {
+                    taken.Add(code);
+                }
+            }
+
+            return Task.FromResult<IReadOnlySet<string>>(taken);
+        }
     }
 
     [Theory]
@@ -37,11 +52,11 @@ public class CodeGeneratorTests
 
         await generator.GenerateAsync(CodePrefix.Product, CancellationToken.None);
 
-        check.Calls.Should().Be(3);
+        check.Rounds.Should().Be(3);
     }
 
     [Fact]
-    public async Task Generate_GivesUpAfterThreeCollisions()
+    public async Task Generate_GivesUpAfterThreeRounds()
     {
         var check = new FakeCheck(CodePrefix.Product, collisions: 3);
         var generator = new CodeGenerator([check]);
@@ -49,7 +64,19 @@ public class CodeGeneratorTests
         var act = () => generator.GenerateAsync(CodePrefix.Product, CancellationToken.None);
 
         await act.Should().ThrowAsync<InvalidOperationException>();
-        check.Calls.Should().Be(CodeGenerator.MaxAttempts);
+        check.Rounds.Should().Be(CodeGenerator.MaxAttempts);
+    }
+
+    [Fact]
+    public async Task GenerateMany_ReturnsDistinctCodes_RegeneratingOnlyCollisions()
+    {
+        var check = new FakeCheck(CodePrefix.Item, collisions: 10);
+        var generator = new CodeGenerator([check]);
+
+        var codes = await generator.GenerateManyAsync(CodePrefix.Item, 100, CancellationToken.None);
+
+        codes.Should().HaveCount(100).And.OnlyHaveUniqueItems();
+        check.Rounds.Should().Be(2);
     }
 
     [Fact]

@@ -33,6 +33,11 @@ public interface IUserAccountService
 
     Task<PagedResult<UserDto>> ListAsync(UserListCriteria criteria, CancellationToken cancellationToken);
 
+    /// <summary>Full names of the given users (including inactive ones), for history lists.</summary>
+    Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
+        IReadOnlyCollection<Guid> userIds,
+        CancellationToken cancellationToken);
+
     Task<Guid> CreateAsync(NewUserData data, CancellationToken cancellationToken);
 
     Task UpdateAsync(Guid actorId, Guid userId, UserUpdateData data, CancellationToken cancellationToken);

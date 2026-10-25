@@ -52,7 +52,7 @@ function ChangePasswordForm({ onClose }: { onClose: () => void }) {
       notifications.show({ color: 'green', message: 'Şifreniz değiştirildi.' })
       onClose()
     } catch (e) {
-      const currentPasswordError = isApiError(e, 400) ? e.errors?.CurrentPassword?.[0] : undefined
+      const currentPasswordError = isApiError(e, 400) ? e.errors?.currentPassword?.[0] : undefined
       if (currentPasswordError) {
         setFieldError('currentPassword', { message: currentPasswordError })
       } else {

@@ -7,6 +7,9 @@ public interface ILocationRepository
     /// <summary>Includes inactive locations.</summary>
     Task<Location?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
+    /// <summary>Loads several locations; includes inactive ones.</summary>
+    Task<IReadOnlyList<Location>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken);
+
     /// <summary>Whether another active location under the same parent (or among roots) uses the name.</summary>
     Task<bool> IsNameTakenAmongSiblingsAsync(
         Guid? parentId,

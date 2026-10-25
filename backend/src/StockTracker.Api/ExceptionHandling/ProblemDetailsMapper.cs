@@ -20,7 +20,7 @@ public static class ProblemDetailsMapper
         UnauthorizedException e => Create(StatusCodes.Status401Unauthorized, e.Message),
         ScanNotFoundException e => ScanNotFound(e),
         NotFoundException e => Create(StatusCodes.Status404NotFound, e.Message),
-        DomainException e => WithCode(Create(StatusCodes.Status422UnprocessableEntity, e.Message), e.Code),
+        DomainException e => DomainProblem(e),
         ConcurrencyException e => Create(StatusCodes.Status409Conflict, e.Message),
         ForbiddenException e => Create(StatusCodes.Status403Forbidden, e.Message),
         // Never leak internal exception details to the client.
@@ -45,6 +45,21 @@ public static class ProblemDetailsMapper
         }
 
         return problem;
+    }
+
+    /// <summary>422 with the error code; errors attributed to a field also get an "errors" entry like validation.</summary>
+    private static ProblemDetails DomainProblem(DomainException exception)
+    {
+        ProblemDetails problem = exception.Target is { } target
+            ? new ValidationProblemDetails(new Dictionary<string, string[]> { [target] = [exception.Message] })
+            {
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Title = ProblemTitles.For(StatusCodes.Status422UnprocessableEntity),
+                Detail = exception.Message,
+            }
+            : Create(StatusCodes.Status422UnprocessableEntity, exception.Message);
+
+        return WithCode(problem, exception.Code);
     }
 
     private static ProblemDetails WithCode(ProblemDetails problem, string code)

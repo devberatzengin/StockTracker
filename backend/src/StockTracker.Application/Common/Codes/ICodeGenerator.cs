@@ -6,12 +6,15 @@ namespace StockTracker.Application.Common.Codes;
 public interface ICodeGenerator
 {
     Task<string> GenerateAsync(CodePrefix prefix, CancellationToken cancellationToken);
+
+    /// <summary>Generates <paramref name="count"/> distinct unused codes with one lookup per round.</summary>
+    Task<IReadOnlyList<string>> GenerateManyAsync(CodePrefix prefix, int count, CancellationToken cancellationToken);
 }
 
-/// <summary>Checks whether a code is already used in the table that owns the prefix.</summary>
+/// <summary>Checks which codes are already used in the table that owns the prefix.</summary>
 public interface ICodeUniquenessCheck
 {
     CodePrefix Prefix { get; }
 
-    Task<bool> ExistsAsync(string code, CancellationToken cancellationToken);
+    Task<IReadOnlySet<string>> ExistingAsync(IReadOnlyCollection<string> codes, CancellationToken cancellationToken);
 }

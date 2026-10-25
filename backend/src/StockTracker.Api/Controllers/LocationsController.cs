@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockTracker.Api.Contracts;
 using StockTracker.Application.Common.Security;
+using StockTracker.Application.Inventory;
 using StockTracker.Application.Locations;
 
 namespace StockTracker.Api.Controllers;
@@ -20,6 +21,10 @@ public sealed class LocationsController(ISender sender) : ControllerBase
     [HttpGet("{id:guid}")]
     public Task<LocationDto> Get(Guid id, CancellationToken cancellationToken) =>
         sender.Send(new GetLocationQuery(id), cancellationToken);
+
+    [HttpGet("{id:guid}/contents")]
+    public Task<LocationContentsDto> Contents(Guid id, [FromQuery] bool includeChildren, CancellationToken cancellationToken) =>
+        sender.Send(new GetLocationContentsQuery(id, includeChildren), cancellationToken);
 
     [HttpPost]
     [Authorize(Policy = Permissions.CanManageCatalog)]

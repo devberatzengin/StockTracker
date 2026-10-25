@@ -129,10 +129,10 @@ public sealed class AuthService(
         var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
         if (result.Errors.Any(e => e.Code == nameof(IdentityErrorDescriber.PasswordMismatch)))
         {
-            throw IdentityErrors.Validation("CurrentPassword", "Mevcut şifre hatalı.");
+            throw IdentityErrors.Validation("currentPassword", "Mevcut şifre hatalı.");
         }
 
-        result.ThrowIfFailed("NewPassword");
+        result.ThrowIfFailed("newPassword");
 
         await db.RevokeAllRefreshTokensAsync(userId, dateTime.UtcNow, cancellationToken);
 

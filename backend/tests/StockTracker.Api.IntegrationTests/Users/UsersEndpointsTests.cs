@@ -77,7 +77,7 @@ public class UsersEndpointsTests(ApiFactory factory)
         }));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await ReadJsonAsync(response)).GetProperty("errors").TryGetProperty("Password", out _).Should().BeTrue();
+        (await ReadJsonAsync(response)).GetProperty("errors").TryGetProperty("password", out _).Should().BeTrue();
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class UsersEndpointsTests(ApiFactory factory)
         }));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await ReadJsonAsync(response)).GetProperty("errors").TryGetProperty("Email", out _).Should().BeTrue();
+        (await ReadJsonAsync(response)).GetProperty("errors").TryGetProperty("email", out _).Should().BeTrue();
     }
 
     [Fact]

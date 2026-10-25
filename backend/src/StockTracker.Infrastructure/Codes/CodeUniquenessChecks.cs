@@ -9,14 +9,25 @@ public sealed class ProductCodeUniquenessCheck(AppDbContext db) : ICodeUniquenes
 {
     public CodePrefix Prefix => CodePrefix.Product;
 
-    public Task<bool> ExistsAsync(string code, CancellationToken cancellationToken) =>
-        db.Products.IgnoreQueryFilters().AnyAsync(p => p.Code == code, cancellationToken);
+    public async Task<IReadOnlySet<string>> ExistingAsync(IReadOnlyCollection<string> codes, CancellationToken cancellationToken) =>
+        (await db.Products.IgnoreQueryFilters().Where(p => codes.Contains(p.Code)).Select(p => p.Code).ToListAsync(cancellationToken))
+        .ToHashSet();
 }
 
 public sealed class LocationCodeUniquenessCheck(AppDbContext db) : ICodeUniquenessCheck
 {
     public CodePrefix Prefix => CodePrefix.Location;
 
-    public Task<bool> ExistsAsync(string code, CancellationToken cancellationToken) =>
-        db.Locations.IgnoreQueryFilters().AnyAsync(l => l.Code == code, cancellationToken);
+    public async Task<IReadOnlySet<string>> ExistingAsync(IReadOnlyCollection<string> codes, CancellationToken cancellationToken) =>
+        (await db.Locations.IgnoreQueryFilters().Where(l => codes.Contains(l.Code)).Select(l => l.Code).ToListAsync(cancellationToken))
+        .ToHashSet();
+}
+
+public sealed class ItemCodeUniquenessCheck(AppDbContext db) : ICodeUniquenessCheck
+{
+    public CodePrefix Prefix => CodePrefix.Item;
+
+    public async Task<IReadOnlySet<string>> ExistingAsync(IReadOnlyCollection<string> codes, CancellationToken cancellationToken) =>
+        (await db.Items.Where(i => codes.Contains(i.Code)).Select(i => i.Code).ToListAsync(cancellationToken))
+        .ToHashSet();
 }

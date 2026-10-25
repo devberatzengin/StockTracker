@@ -38,7 +38,7 @@ internal static class LocationRules
         {
             throw new ValidationException(
             [
-                new ValidationFailure("Name", "Aynı üst lokasyon altında bu adla bir lokasyon zaten var."),
+                new ValidationFailure("name", "Aynı üst lokasyon altında bu adla bir lokasyon zaten var."),
             ]);
         }
     }
@@ -81,7 +81,7 @@ public sealed class CreateLocationCommandHandler(
     public async Task<Guid> Handle(CreateLocationCommand request, CancellationToken cancellationToken)
     {
         var parent = request.ParentId is { } parentId
-            ? await LocationRules.LoadParentAsync(locations, parentId, nameof(request.ParentId), cancellationToken)
+            ? await LocationRules.LoadParentAsync(locations, parentId, "parentId", cancellationToken)
             : null;
 
         await LocationRules.EnsureNameAvailableAsync(locations, parent?.Id, request.Name, excludeId: null, cancellationToken);
@@ -137,7 +137,7 @@ public sealed class MoveLocationCommandHandler(
                 }
 
                 var newParent = request.NewParentId is { } parentId
-                    ? await LocationRules.LoadParentAsync(locations, parentId, nameof(request.NewParentId), ct)
+                    ? await LocationRules.LoadParentAsync(locations, parentId, "newParentId", ct)
                     : null;
 
                 var oldPath = location.Path;
