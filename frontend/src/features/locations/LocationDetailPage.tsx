@@ -17,6 +17,8 @@ import { NotFoundPage } from '@/components/NotFoundPage'
 import { LOCATION_TYPE_LABELS } from '@/features/locations/labels'
 import { LocationTypeIcon } from '@/features/locations/LocationTypeIcon'
 import { useLocation } from '@/features/locations/locationsApi'
+import { LocationContentsSection } from '@/features/movements/LocationContentsSection'
+import { MovementList } from '@/features/movements/MovementList'
 
 export function LocationDetailPage() {
   const { id = '' } = useParams()
@@ -106,6 +108,19 @@ export function LocationDetailPage() {
             </Table.Tbody>
           </Table>
         )}
+      </div>
+
+      <LocationContentsSection locationId={location.id} />
+
+      <div>
+        <Title order={4} mb="xs">
+          Hareket geçmişi
+        </Title>
+        <MovementList
+          filters={{ locationId: location.id }}
+          variant="grouped"
+          emptyText="Bu lokasyona giren ya da çıkan hareket yok."
+        />
       </div>
     </Stack>
   )

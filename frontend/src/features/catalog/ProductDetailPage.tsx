@@ -29,12 +29,9 @@ import {
   UNIT_LABELS,
 } from '@/features/catalog/labels'
 import { ProductFormModal } from '@/features/catalog/ProductFormModal'
-
-const dateFormatter = new Intl.DateTimeFormat('tr-TR', {
-  timeZone: 'Europe/Istanbul',
-  dateStyle: 'medium',
-  timeStyle: 'short',
-})
+import { MovementList } from '@/features/movements/MovementList'
+import { ProductItemsTab, ProductStockTab } from '@/features/movements/ProductStockTabs'
+import { formatDateTime } from '@/lib/dates'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -134,9 +131,12 @@ function ProductDetail({ product }: { product: ProductDto }) {
         </Alert>
       )}
 
-      <Tabs defaultValue="general">
+      <Tabs defaultValue="general" keepMounted={false}>
         <Tabs.List>
           <Tabs.Tab value="general">Genel</Tabs.Tab>
+          <Tabs.Tab value="stock">Stok</Tabs.Tab>
+          {product.trackingType === 'Serialized' && <Tabs.Tab value="items">Adetler</Tabs.Tab>}
+          <Tabs.Tab value="movements">Hareketler</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="general" pt="md">
@@ -150,7 +150,7 @@ function ProductDetail({ product }: { product: ProductDto }) {
               <Field label="Birim">{UNIT_LABELS[product.unit]}</Field>
               <Field label="Zimmetlenebilir">{product.isAssignable ? 'Evet' : 'Hayır'}</Field>
               <Field label="Minimum stok">{formatQuantity(product.minStockLevel)}</Field>
-              <Field label="Oluşturulma">{dateFormatter.format(new Date(product.createdAt))}</Field>
+              <Field label="Oluşturulma">{formatDateTime(product.createdAt)}</Field>
             </SimpleGrid>
 
             <Field label="Açıklama">{product.description ?? '—'}</Field>
@@ -177,6 +177,20 @@ function ProductDetail({ product }: { product: ProductDto }) {
               )}
             </div>
           </Stack>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="stock" pt="md">
+          <ProductStockTab product={product} />
+        </Tabs.Panel>
+
+        {product.trackingType === 'Serialized' && (
+          <Tabs.Panel value="items" pt="md">
+            <ProductItemsTab productId={product.id} />
+          </Tabs.Panel>
+        )}
+
+        <Tabs.Panel value="movements" pt="md">
+          <MovementList filters={{ productId: product.id }} emptyText="Bu ürünün hareketi yok." />
         </Tabs.Panel>
       </Tabs>
 

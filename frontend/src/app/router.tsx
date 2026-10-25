@@ -56,6 +56,55 @@ export const router = createBrowserRouter([
                 ],
               },
               {
+                path: 'movements',
+                lazy: async () => ({
+                  Component: (await import('@/features/movements/MovementsPage')).MovementsPage,
+                }),
+              },
+              {
+                path: 'movements/ref/:referenceId',
+                lazy: async () => ({
+                  Component: (await import('@/features/movements/MovementResultPage'))
+                    .MovementResultPage,
+                }),
+              },
+              {
+                path: 'items/:id',
+                lazy: async () => ({
+                  Component: (await import('@/features/movements/ItemDetailPage')).ItemDetailPage,
+                }),
+              },
+              {
+                element: <RequirePermission permission={Permissions.CanMoveStock} />,
+                children: [
+                  {
+                    path: 'movements/in',
+                    lazy: async () => ({
+                      Component: (await import('@/features/movements/StockInPage')).StockInPage,
+                    }),
+                  },
+                  {
+                    path: 'movements/out',
+                    lazy: async () => ({
+                      Component: (await import('@/features/movements/StockOutPage')).StockOutPage,
+                    }),
+                  },
+                  {
+                    path: 'movements/transfer',
+                    lazy: async () => ({
+                      Component: (await import('@/features/movements/StockTransferPage'))
+                        .StockTransferPage,
+                    }),
+                  },
+                  {
+                    path: 'scan-move',
+                    lazy: async () => ({
+                      Component: (await import('@/features/movements/ScanMovePage')).ScanMovePage,
+                    }),
+                  },
+                ],
+              },
+              {
                 path: 'locations',
                 lazy: async () => ({
                   Component: (await import('@/features/locations/LocationsPage')).LocationsPage,

@@ -11,8 +11,10 @@ import {
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import {
+  IconArrowsMove,
   IconCategory,
   IconChevronDown,
+  IconHistory,
   IconHome,
   IconKey,
   IconLogout,
@@ -39,6 +41,13 @@ const mainItems: NavItem[] = [
   { label: 'Ana sayfa', to: '/', icon: <IconHome size={18} /> },
   { label: 'Ürünler', to: '/products', icon: <IconPackage size={18} /> },
   { label: 'Lokasyonlar', to: '/locations', icon: <IconMapPin size={18} /> },
+  { label: 'Hareketler', to: '/movements', icon: <IconHistory size={18} /> },
+  {
+    label: 'Tara-taşı',
+    to: '/scan-move',
+    icon: <IconArrowsMove size={18} />,
+    permission: Permissions.CanMoveStock,
+  },
   {
     label: 'Kategoriler',
     to: '/categories',

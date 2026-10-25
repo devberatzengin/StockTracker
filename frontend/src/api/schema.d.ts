@@ -343,6 +343,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    ProductId?: string;
+                    Status?: components["schemas"]["ItemStatus"];
+                    LocationId?: string;
+                    IncludeChildren?: boolean;
+                    Sort?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ItemListItemDtoPagedResult"];
+                        "application/json": components["schemas"]["ItemListItemDtoPagedResult"];
+                        "text/json": components["schemas"]["ItemListItemDtoPagedResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ItemDto"];
+                        "application/json": components["schemas"]["ItemDto"];
+                        "text/json": components["schemas"]["ItemDto"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateItemRequest"];
+                    "text/json": components["schemas"]["UpdateItemRequest"];
+                    "application/*+json": components["schemas"]["UpdateItemRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/locations/tree": {
         parameters: {
             query?: never;
@@ -439,6 +549,47 @@ export interface paths {
                 };
             };
         };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/locations/{id}/contents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    includeChildren?: boolean;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["LocationContentsDto"];
+                        "application/json": components["schemas"]["LocationContentsDto"];
+                        "text/json": components["schemas"]["LocationContentsDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -556,6 +707,184 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/movements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Page?: number;
+                    PageSize?: number;
+                    From?: string;
+                    To?: string;
+                    Type?: components["schemas"]["MovementType"];
+                    ProductId?: string;
+                    ItemId?: string;
+                    LocationId?: string;
+                    UserId?: string;
+                    ReferenceId?: string;
+                    Sort?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MovementDtoPagedResult"];
+                        "application/json": components["schemas"]["MovementDtoPagedResult"];
+                        "text/json": components["schemas"]["MovementDtoPagedResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/movements/in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["StockInCommand"];
+                    "text/json": components["schemas"]["StockInCommand"];
+                    "application/*+json": components["schemas"]["StockInCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MovementResultDto"];
+                        "application/json": components["schemas"]["MovementResultDto"];
+                        "text/json": components["schemas"]["MovementResultDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/movements/out": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["StockOutCommand"];
+                    "text/json": components["schemas"]["StockOutCommand"];
+                    "application/*+json": components["schemas"]["StockOutCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MovementResultDto"];
+                        "application/json": components["schemas"]["MovementResultDto"];
+                        "text/json": components["schemas"]["MovementResultDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/movements/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["StockTransferCommand"];
+                    "text/json": components["schemas"]["StockTransferCommand"];
+                    "application/*+json": components["schemas"]["StockTransferCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MovementResultDto"];
+                        "application/json": components["schemas"]["MovementResultDto"];
+                        "text/json": components["schemas"]["MovementResultDto"];
+                    };
                 };
             };
         };
@@ -729,6 +1058,45 @@ export interface paths {
                 };
             };
         };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{id}/stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProductStockDto"];
+                        "application/json": components["schemas"]["ProductStockDto"];
+                        "text/json": components["schemas"]["ProductStockDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -1131,6 +1499,31 @@ export interface components {
             currentPassword: string;
             newPassword: string;
         };
+        ContentBalanceDto: {
+            /** Format: uuid */
+            productId: string;
+            productCode: string;
+            productName: string;
+            unit: components["schemas"]["Unit"];
+            /** Format: uuid */
+            locationId: string;
+            locationPath: string;
+            /** Format: double */
+            quantity: number;
+        };
+        ContentItemDto: {
+            /** Format: uuid */
+            itemId: string;
+            code: string;
+            /** Format: uuid */
+            productId: string;
+            productName: string;
+            serialNumber?: string | null;
+            status: components["schemas"]["ItemStatus"];
+            /** Format: uuid */
+            locationId: string;
+            locationPath: string;
+        };
         CreateLocationCommand: {
             name: string;
             type: components["schemas"]["LocationType"];
@@ -1157,6 +1550,14 @@ export interface components {
             role: string;
             canLogin: boolean;
         };
+        CreatedItemDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            /** Format: uuid */
+            productId: string;
+            serialNumber?: string | null;
+        };
         CreatedResponse: {
             /** Format: uuid */
             id: string;
@@ -1170,6 +1571,53 @@ export interface components {
             role: string;
             permissions: string[];
         };
+        ItemDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            /** Format: uuid */
+            productId: string;
+            productCode: string;
+            productName: string;
+            productIsAssignable: boolean;
+            serialNumber?: string | null;
+            status: components["schemas"]["ItemStatus"];
+            /** Format: uuid */
+            currentLocationId?: string | null;
+            locationPath?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ItemListItemDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            /** Format: uuid */
+            productId: string;
+            productCode: string;
+            productName: string;
+            serialNumber?: string | null;
+            status: components["schemas"]["ItemStatus"];
+            /** Format: uuid */
+            currentLocationId?: string | null;
+            locationPath?: string | null;
+        };
+        ItemListItemDtoPagedResult: {
+            items: components["schemas"]["ItemListItemDto"][];
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+        };
+        /** @enum {string} */
+        ItemStatus: "InStock" | "Assigned" | "InRepair" | "Disposed";
+        ItemStatusCountDto: {
+            status: components["schemas"]["ItemStatus"];
+            /** Format: int32 */
+            count: number;
+        };
         LocationChildDto: {
             /** Format: uuid */
             id: string;
@@ -1177,6 +1625,13 @@ export interface components {
             name: string;
             type: components["schemas"]["LocationType"];
             isActive: boolean;
+        };
+        LocationContentsDto: {
+            /** Format: uuid */
+            locationId: string;
+            includeChildren: boolean;
+            balances: components["schemas"]["ContentBalanceDto"][];
+            items: components["schemas"]["ContentItemDto"][];
         };
         LocationDto: {
             /** Format: uuid */
@@ -1193,6 +1648,13 @@ export interface components {
             children: components["schemas"]["LocationChildDto"][];
             /** Format: date-time */
             createdAt: string;
+        };
+        LocationQuantityDto: {
+            /** Format: uuid */
+            locationId: string;
+            locationPath: string;
+            /** Format: double */
+            quantity: number;
         };
         LocationRefDto: {
             /** Format: uuid */
@@ -1219,6 +1681,59 @@ export interface components {
             /** Format: uuid */
             newParentId?: string | null;
         };
+        MovementDto: {
+            /** Format: uuid */
+            id: string;
+            type: components["schemas"]["MovementType"];
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: uuid */
+            productId: string;
+            productCode: string;
+            productName: string;
+            unit: components["schemas"]["Unit"];
+            /** Format: uuid */
+            itemId?: string | null;
+            itemCode?: string | null;
+            serialNumber?: string | null;
+            /** Format: uuid */
+            fromLocationId?: string | null;
+            fromLocationName?: string | null;
+            /** Format: uuid */
+            toLocationId?: string | null;
+            toLocationName?: string | null;
+            /** Format: double */
+            quantity: number;
+            reason?: components["schemas"]["MovementReason"];
+            note?: string | null;
+            /** Format: uuid */
+            referenceId: string;
+            /** Format: uuid */
+            userId: string;
+            userName: string;
+            fromStatus?: components["schemas"]["ItemStatus"];
+            toStatus?: components["schemas"]["ItemStatus"];
+        };
+        MovementDtoPagedResult: {
+            items: components["schemas"]["MovementDto"][];
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+        };
+        /** @enum {string} */
+        MovementReason: "Consumed" | "Damaged" | "Lost" | "Other";
+        MovementResultDto: {
+            /** Format: uuid */
+            referenceId: string;
+            /** Format: int32 */
+            movementCount: number;
+            createdItems: components["schemas"]["CreatedItemDto"][];
+        };
+        /** @enum {string} */
+        MovementType: "In" | "Out" | "Transfer" | "Adjustment" | "Assign" | "Return" | "StatusChange";
         ProblemDetails: {
             type?: string | null;
             title?: string | null;
@@ -1283,6 +1798,15 @@ export interface components {
             /** Format: int32 */
             pageSize: number;
         };
+        ProductStockDto: {
+            /** Format: uuid */
+            productId: string;
+            trackingType: components["schemas"]["TrackingType"];
+            /** Format: double */
+            totalQuantity: number;
+            locations: components["schemas"]["LocationQuantityDto"][];
+            statusCounts: components["schemas"]["ItemStatusCountDto"][];
+        };
         ResetPasswordRequest: {
             newPassword: string;
         };
@@ -1296,10 +1820,45 @@ export interface components {
             isActive: boolean;
             status?: string | null;
         };
+        StockInCommand: {
+            /** Format: uuid */
+            toLocationId: string;
+            lines: components["schemas"]["StockInLine"][];
+        };
+        StockInLine: {
+            /** Format: uuid */
+            productId: string;
+            /** Format: double */
+            quantity: number;
+            serialNumbers?: string[] | null;
+        };
+        StockLine: {
+            /** Format: uuid */
+            itemId?: string | null;
+            /** Format: uuid */
+            productId?: string | null;
+            /** Format: uuid */
+            fromLocationId?: string | null;
+            /** Format: double */
+            quantity?: number | null;
+        };
+        StockOutCommand: {
+            reason: components["schemas"]["MovementReason"];
+            note?: string | null;
+            lines: components["schemas"]["StockLine"][];
+        };
+        StockTransferCommand: {
+            /** Format: uuid */
+            toLocationId: string;
+            lines: components["schemas"]["StockLine"][];
+        };
         /** @enum {string} */
         TrackingType: "Serialized" | "Quantity";
         /** @enum {string} */
         Unit: "Piece" | "Kg" | "Meter" | "Liter" | "Package" | "Box";
+        UpdateItemRequest: {
+            serialNumber?: string | null;
+        };
         UpdateLocationRequest: {
             name: string;
             type: components["schemas"]["LocationType"];

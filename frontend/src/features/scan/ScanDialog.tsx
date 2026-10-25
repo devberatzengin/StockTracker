@@ -37,18 +37,15 @@ export function ScanDialog({
   return (
     <Modal opened={opened} onClose={onClose} title={title} size="md">
       {/* Content unmounts on close, which also stops the camera. */}
-      <ScanDialogContent onScan={onScan} mode={mode}>
+      <ScanPanel onScan={onScan} mode={mode}>
         {children}
-      </ScanDialogContent>
+      </ScanPanel>
     </Modal>
   )
 }
 
-function ScanDialogContent({
-  onScan,
-  mode,
-  children,
-}: Pick<Props, 'onScan' | 'mode' | 'children'>) {
+/** Camera + manual entry, usable inside a dialog or directly on a page (e.g. the scan-and-move flow). */
+export function ScanPanel({ onScan, mode, children }: Pick<Props, 'onScan' | 'mode' | 'children'>) {
   const [manualValue, setManualValue] = useState('')
   const [busy, setBusy] = useState(false)
   const busyRef = useRef(false)
