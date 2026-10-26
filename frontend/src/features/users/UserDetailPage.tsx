@@ -5,6 +5,9 @@ import { isApiError } from '@/api/client'
 import { NotFoundPage } from '@/components/NotFoundPage'
 import { useUser } from '@/features/assignments/assignmentsApi'
 import { AssignmentTable } from '@/features/assignments/AssignmentTable'
+import { AuditHistory } from '@/features/audit/AuditHistory'
+import { usePermission } from '@/features/auth/authContext'
+import { Permissions } from '@/features/auth/permissions'
 import { roleLabel } from '@/features/users/roles'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -25,6 +28,7 @@ export function UserDetailPage() {
   const { id = '' } = useParams()
   const { data: user, isPending, error } = useUser(id)
   const [page, setPage] = useState(1)
+  const canViewAudit = usePermission(Permissions.CanViewAudit)
 
   if (isApiError(error, 404) || isApiError(error, 400)) return <NotFoundPage />
   if (isPending || !user) return <Text c="dimmed">Yükleniyor…</Text>
@@ -61,6 +65,15 @@ export function UserDetailPage() {
           canReturn
         />
       </div>
+
+      {canViewAudit && (
+        <div>
+          <Title order={4} mb="sm">
+            Değişiklik geçmişi
+          </Title>
+          <AuditHistory filters={{ entityType: 'User', entityId: user.id }} />
+        </div>
+      )}
     </Stack>
   )
 }

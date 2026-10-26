@@ -16,6 +16,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public string ConnectionString => _database.GetConnectionString();
 
+    /// <summary>Local file storage root for this test host; removed on dispose.</summary>
+    public string UploadsPath { get; } = Path.Combine(Path.GetTempPath(), $"stocktracker-uploads-{Guid.NewGuid():N}");
+
     public async Task InitializeAsync()
     {
         await _database.StartAsync();
@@ -37,6 +40,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         await DisposeAsync();
         await _database.DisposeAsync();
+        if (Directory.Exists(UploadsPath))
+        {
+            Directory.Delete(UploadsPath, recursive: true);
+        }
     }
 
     /// <summary>HTTPS base address so Secure cookies are issued; cookies are handled manually by tests.</summary>
@@ -50,7 +57,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        TestSettings.Apply(builder, ConnectionString);
+        TestSettings.Apply(builder, ConnectionString, UploadsPath);
     }
 }
 

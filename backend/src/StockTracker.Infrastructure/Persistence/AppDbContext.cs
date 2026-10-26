@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Domain.Assignments;
+using StockTracker.Domain.Auditing;
 using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Counts;
 using StockTracker.Domain.Inventory;
@@ -35,6 +36,10 @@ public class AppDbContext(DbContextOptions options)
     public DbSet<Assignment> Assignments => Set<Assignment>();
 
     public DbSet<CountSession> CountSessions => Set<CountSession>();
+
+    public DbSet<ProductPhoto> ProductPhotos => Set<ProductPhoto>();
+
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

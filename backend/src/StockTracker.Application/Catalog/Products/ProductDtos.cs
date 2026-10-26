@@ -15,7 +15,8 @@ public sealed record ProductListItemDto(
     bool IsAssignable,
     decimal? MinStockLevel,
     bool IsActive,
-    IReadOnlyList<string> Barcodes);
+    IReadOnlyList<string> Barcodes,
+    string? ThumbnailUrl);
 
 public sealed record ProductDto(
     Guid Id,
@@ -32,6 +33,7 @@ public sealed record ProductDto(
     bool IsActive,
     bool TrackingTypeLocked,
     IReadOnlyList<ProductBarcodeDto> Barcodes,
+    IReadOnlyList<ProductPhotoDto> Photos,
     DateTime CreatedAt,
     DateTime? UpdatedAt);
 

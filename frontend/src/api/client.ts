@@ -92,7 +92,9 @@ async function request<T>(
   retried = false,
 ): Promise<T> {
   const headers = new Headers({ Accept: 'application/json, text/plain' })
-  if (body !== undefined) {
+  // FormData (file uploads) sets its own multipart content type with the boundary.
+  const isForm = body instanceof FormData
+  if (body !== undefined && !isForm) {
     headers.set('Content-Type', 'application/json')
   }
   const token = tokenStore.get()
@@ -105,7 +107,7 @@ async function request<T>(
     response = await fetch(`${BASE_URL}${path}`, {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     })
   } catch {
     throw new ApiError(0, { title: 'Sunucuya ulaşılamadı.' })

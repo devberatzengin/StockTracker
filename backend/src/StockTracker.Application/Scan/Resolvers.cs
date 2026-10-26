@@ -1,15 +1,16 @@
+using StockTracker.Application.Catalog.Products;
 using Microsoft.EntityFrameworkCore;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Domain.Common.Codes;
 
 namespace StockTracker.Application.Scan;
 
-public sealed class ProductCodeScanResolver(IAppDbContext db) : IScanCodeResolver
+public sealed class ProductCodeScanResolver(IAppDbContext db, IFileStorage storage) : IScanCodeResolver
 {
     public CodePrefix Prefix => CodePrefix.Product;
 
     public Task<ScanResultDto?> ResolveAsync(string code, CancellationToken cancellationToken) =>
-        ProductScanProjection.FindAsync(db, db.Products.IgnoreQueryFilters().Where(p => p.Code == code), cancellationToken);
+        ProductScanProjection.FindAsync(db, storage, db.Products.IgnoreQueryFilters().Where(p => p.Code == code), cancellationToken);
 }
 
 public sealed class LocationCodeScanResolver(IAppDbContext db) : IScanCodeResolver
@@ -52,7 +53,7 @@ public sealed class LocationCodeScanResolver(IAppDbContext db) : IScanCodeResolv
     }
 }
 
-public sealed class ItemCodeScanResolver(IAppDbContext db) : IScanCodeResolver
+public sealed class ItemCodeScanResolver(IAppDbContext db, IFileStorage storage) : IScanCodeResolver
 {
     public CodePrefix Prefix => CodePrefix.Item;
 
@@ -69,6 +70,7 @@ public sealed class ItemCodeScanResolver(IAppDbContext db) : IScanCodeResolver
                 i.Status,
                 i.CurrentLocationId,
                 ProductName = products.Where(p => p.Id == i.ProductId).Select(p => p.Name).First(),
+                Thumbnail = db.ProductPhotos.Where(f => f.ProductId == i.ProductId && f.IsPrimary).Select(f => f.ThumbnailKey).FirstOrDefault(),
             })
             .SingleOrDefaultAsync(cancellationToken);
 
@@ -88,12 +90,13 @@ public sealed class ItemCodeScanResolver(IAppDbContext db) : IScanCodeResolver
             item.SerialNumber is null ? item.Code : $"{item.Code} · {item.SerialNumber}",
             location is null ? item.ProductName : $"{item.ProductName} · {location}",
             item.Status != Domain.Inventory.ItemStatus.Disposed,
-            item.Status.ToString());
+            item.Status.ToString(),
+            storage.Read(item.Thumbnail));
     }
 }
 
 /// <summary>Finds the product owning a barcode (barcodes have no prefix).</summary>
-public sealed class ProductBarcodeScanResolver(IAppDbContext db)
+public sealed class ProductBarcodeScanResolver(IAppDbContext db, IFileStorage storage)
 {
     /// <param name="barcode">Whitespace-free value as scanned.</param>
     public Task<ScanResultDto?> ResolveAsync(string barcode, CancellationToken cancellationToken)
@@ -104,6 +107,7 @@ public sealed class ProductBarcodeScanResolver(IAppDbContext db)
 
         return ProductScanProjection.FindAsync(
             db,
+            storage,
             db.Products.IgnoreQueryFilters().Where(p => productIds.Contains(p.Id)),
             cancellationToken);
     }
@@ -111,19 +115,29 @@ public sealed class ProductBarcodeScanResolver(IAppDbContext db)
 
 internal static class ProductScanProjection
 {
-    public static Task<ScanResultDto?> FindAsync(
+    public static async Task<ScanResultDto?> FindAsync(
         IAppDbContext db,
+        IFileStorage storage,
         IQueryable<Domain.Catalog.Product> products,
-        CancellationToken cancellationToken) =>
-        products
+        CancellationToken cancellationToken)
+    {
+        var found = await products
             .AsNoTracking()
-            .Select(p => new ScanResultDto(
-                ScanResultTypes.Product,
-                p.Id,
-                p.Code,
-                p.Name,
-                db.Categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
-                p.IsActive,
-                null))
+            .Select(p => new
+            {
+                Result = new ScanResultDto(
+                    ScanResultTypes.Product,
+                    p.Id,
+                    p.Code,
+                    p.Name,
+                    db.Categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                    p.IsActive,
+                    null,
+                    null),
+                Thumbnail = p.Photos.Where(f => f.IsPrimary).Select(f => f.ThumbnailKey).FirstOrDefault(),
+            })
             .FirstOrDefaultAsync(cancellationToken);
+
+        return found is null ? null : found.Result with { ThumbnailUrl = storage.Read(found.Thumbnail) };
+    }
 }

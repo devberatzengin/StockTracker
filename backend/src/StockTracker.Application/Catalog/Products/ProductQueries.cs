@@ -37,10 +37,10 @@ public sealed class GetProductsQueryValidator : AbstractValidator<GetProductsQue
     }
 }
 
-public sealed class GetProductsQueryHandler(IAppDbContext db)
+public sealed class GetProductsQueryHandler(IAppDbContext db, IFileStorage storage)
     : IRequestHandler<GetProductsQuery, PagedResult<ProductListItemDto>>
 {
-    public Task<PagedResult<ProductListItemDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<ProductListItemDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
         // IgnoreQueryFilters applies to the whole query (including the category subquery below),
         // so the soft-delete filter is applied explicitly instead.
@@ -82,25 +82,37 @@ public sealed class GetProductsQueryHandler(IAppDbContext db)
             _ => descending ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
         };
 
-        return ordered
+        var page = await ordered
             .ThenBy(p => p.Id)
-            .Select(p => new ProductListItemDto(
-                p.Id,
-                p.Code,
-                p.Name,
-                p.CategoryId,
-                categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).First(),
-                p.Unit,
-                p.TrackingType,
-                p.IsAssignable,
-                p.MinStockLevel,
-                p.IsActive,
-                p.Barcodes.OrderBy(b => b.CreatedAt).Select(b => b.Value).ToList()))
+            .Select(p => new
+            {
+                Dto = new ProductListItemDto(
+                    p.Id,
+                    p.Code,
+                    p.Name,
+                    p.CategoryId,
+                    categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).First(),
+                    p.Unit,
+                    p.TrackingType,
+                    p.IsAssignable,
+                    p.MinStockLevel,
+                    p.IsActive,
+                    p.Barcodes.OrderBy(b => b.CreatedAt).Select(b => b.Value).ToList(),
+                    null),
+                Thumbnail = p.Photos.Where(f => f.IsPrimary).Select(f => f.ThumbnailKey).FirstOrDefault(),
+            })
             .ToPagedResultAsync(request, cancellationToken);
+
+        // URLs are signed after loading (they expire; never stored).
+        return new PagedResult<ProductListItemDto>(
+            [.. page.Items.Select(x => x.Dto with { ThumbnailUrl = storage.Read(x.Thumbnail) })],
+            page.TotalCount,
+            page.Page,
+            page.PageSize);
     }
 }
 
-public sealed class GetProductQueryHandler(IAppDbContext db, IProductStockChecker stockChecker)
+public sealed class GetProductQueryHandler(IAppDbContext db, IProductStockChecker stockChecker, IFileStorage storage)
     : IRequestHandler<GetProductQuery, ProductDto>
 {
     public async Task<ProductDto> Handle(GetProductQuery request, CancellationToken cancellationToken)
@@ -116,6 +128,7 @@ public sealed class GetProductQueryHandler(IAppDbContext db, IProductStockChecke
                     .OrderBy(b => b.CreatedAt)
                     .Select(b => new ProductBarcodeDto(b.Id, b.Value, b.Format))
                     .ToList(),
+                Photos = p.Photos.OrderBy(f => f.SortOrder).ToList(),
             })
             .SingleOrDefaultAsync(cancellationToken)
             ?? throw new NotFoundException("Ürün", request.Id);
@@ -136,6 +149,7 @@ public sealed class GetProductQueryHandler(IAppDbContext db, IProductStockChecke
             p.IsActive,
             await stockChecker.HasStockOrMovementsAsync(p.Id, cancellationToken),
             product.Barcodes,
+            [.. product.Photos.Select(storage.ToDto)],
             p.CreatedAt,
             p.UpdatedAt);
     }

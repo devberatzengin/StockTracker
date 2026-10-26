@@ -19,6 +19,7 @@ import { Link, useParams } from 'react-router'
 import { isApiError } from '@/api/client'
 import type { ProductDto } from '@/api/types'
 import { NotFoundPage } from '@/components/NotFoundPage'
+import { AuditHistory } from '@/features/audit/AuditHistory'
 import { usePermission } from '@/features/auth/authContext'
 import { Permissions } from '@/features/auth/permissions'
 import { useDeactivateProduct, useProduct } from '@/features/catalog/catalogApi'
@@ -28,6 +29,7 @@ import {
   TRACKING_TYPE_LABELS,
   UNIT_LABELS,
 } from '@/features/catalog/labels'
+import { ProductGallery } from '@/features/catalog/ProductGallery'
 import { ProductFormModal } from '@/features/catalog/ProductFormModal'
 import { MovementList } from '@/features/movements/MovementList'
 import { ProductItemsTab, ProductStockTab } from '@/features/movements/ProductStockTabs'
@@ -63,6 +65,7 @@ export function ProductDetailPage() {
 
 function ProductDetail({ product }: { product: ProductDto }) {
   const canManage = usePermission(Permissions.CanManageCatalog)
+  const canViewAudit = usePermission(Permissions.CanViewAudit)
   const deactivate = useDeactivateProduct()
   const [formOpened, form] = useDisclosure()
 
@@ -137,6 +140,7 @@ function ProductDetail({ product }: { product: ProductDto }) {
           <Tabs.Tab value="stock">Stok</Tabs.Tab>
           {product.trackingType === 'Serialized' && <Tabs.Tab value="items">Adetler</Tabs.Tab>}
           <Tabs.Tab value="movements">Hareketler</Tabs.Tab>
+          {canViewAudit && <Tabs.Tab value="history">Değişiklik geçmişi</Tabs.Tab>}
         </Tabs.List>
 
         <Tabs.Panel value="general" pt="md">
@@ -176,6 +180,8 @@ function ProductDetail({ product }: { product: ProductDto }) {
                 </Table>
               )}
             </div>
+
+            <ProductGallery productId={product.id} photos={product.photos} canManage={canManage} />
           </Stack>
         </Tabs.Panel>
 
@@ -192,6 +198,12 @@ function ProductDetail({ product }: { product: ProductDto }) {
         <Tabs.Panel value="movements" pt="md">
           <MovementList filters={{ productId: product.id }} emptyText="Bu ürünün hareketi yok." />
         </Tabs.Panel>
+
+        {canViewAudit && (
+          <Tabs.Panel value="history" pt="md">
+            <AuditHistory filters={{ entityType: 'Product', entityId: product.id }} />
+          </Tabs.Panel>
+        )}
       </Tabs>
 
       {canManage && <ProductFormModal opened={formOpened} onClose={form.close} product={product} />}

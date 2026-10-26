@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StockTracker.Domain.Assignments;
+using StockTracker.Domain.Auditing;
 using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Counts;
 using StockTracker.Domain.Inventory;
@@ -30,4 +31,8 @@ public interface IAppDbContext
     DbSet<Assignment> Assignments { get; }
 
     DbSet<CountSession> CountSessions { get; }
+
+    DbSet<ProductPhoto> ProductPhotos { get; }
+
+    DbSet<AuditLog> AuditLogs { get; }
 }

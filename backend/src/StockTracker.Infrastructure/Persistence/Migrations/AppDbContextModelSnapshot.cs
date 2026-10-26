@@ -302,6 +302,64 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("assignments", (string)null);
                 });
 
+            modelBuilder.Entity("StockTracker.Domain.Auditing.AuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("action");
+
+                    b.Property<string>("Changes")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("changes");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entity_id");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("entity_type");
+
+                    b.Property<Guid?>("ParentEntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_entity_id");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_audit_logs");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_audit_logs_created_at");
+
+                    b.HasIndex("ParentEntityId")
+                        .HasDatabaseName("ix_audit_logs_parent_entity_id")
+                        .HasFilter("parent_entity_id IS NOT NULL");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_audit_logs_user_id");
+
+                    b.HasIndex("EntityType", "EntityId")
+                        .HasDatabaseName("ix_audit_logs_entity_type_entity_id");
+
+                    b.ToTable("audit_logs", (string)null);
+                });
+
             modelBuilder.Entity("StockTracker.Domain.Catalog.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -482,6 +540,71 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_product_barcodes_value");
 
                     b.ToTable("product_barcodes", (string)null);
+                });
+
+            modelBuilder.Entity("StockTracker.Domain.Catalog.ProductPhoto", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("content_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_primary");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size_bytes");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("storage_key");
+
+                    b.Property<string>("ThumbnailKey")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("thumbnail_key");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_product_photos");
+
+                    b.HasIndex("ProductId", "SortOrder")
+                        .HasDatabaseName("ix_product_photos_product_id_sort_order");
+
+                    b.ToTable("product_photos", (string)null);
                 });
 
             modelBuilder.Entity("StockTracker.Domain.Counts.CountLine", b =>
@@ -1280,6 +1403,16 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_product_barcodes_products_product_id");
                 });
 
+            modelBuilder.Entity("StockTracker.Domain.Catalog.ProductPhoto", b =>
+                {
+                    b.HasOne("StockTracker.Domain.Catalog.Product", null)
+                        .WithMany("Photos")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_product_photos_products_product_id");
+                });
+
             modelBuilder.Entity("StockTracker.Domain.Counts.CountLine", b =>
                 {
                     b.HasOne("StockTracker.Domain.Counts.CountSession", null)
@@ -1420,6 +1553,8 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("StockTracker.Domain.Catalog.Product", b =>
                 {
                     b.Navigation("Barcodes");
+
+                    b.Navigation("Photos");
                 });
 
             modelBuilder.Entity("StockTracker.Domain.Counts.CountSession", b =>

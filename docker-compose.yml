@@ -14,6 +14,8 @@ services:
     # Not published to the host; only reachable inside the compose network.
     expose:
       - "8080"
+    environment:
+      Storage__LocalPath: /app/uploads
     volumes:
       - uploads:/app/uploads
     healthcheck:

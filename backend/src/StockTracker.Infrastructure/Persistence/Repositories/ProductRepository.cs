@@ -9,6 +9,8 @@ public sealed class ProductRepository(AppDbContext db) : IProductRepository
     public Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         db.Products.IgnoreQueryFilters()
             .Include(p => p.Barcodes)
+            .Include(p => p.Photos)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
 
     public async Task<IReadOnlyList<Product>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken) =>
@@ -19,6 +21,9 @@ public sealed class ProductRepository(AppDbContext db) : IProductRepository
 
     public Task<bool> HasActiveProductsInCategoryAsync(Guid categoryId, CancellationToken cancellationToken) =>
         db.Products.AnyAsync(p => p.CategoryId == categoryId, cancellationToken);
+
+    public Task LockAsync(Guid id, CancellationToken cancellationToken) =>
+        db.Database.ExecuteSqlAsync($"SELECT 1 FROM products WHERE id = {id} FOR UPDATE", cancellationToken);
 
     public void Add(Product product) => db.Products.Add(product);
 }

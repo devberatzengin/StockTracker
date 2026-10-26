@@ -11,6 +11,8 @@ export interface ItemLine {
   code: string
   title: string
   subtitle: string | null
+  /** Product photo of the scanned item (scan-and-move list). */
+  thumbnailUrl?: string | null
 }
 
 export interface QuantityLine {

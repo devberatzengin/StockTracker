@@ -31,5 +31,11 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasForeignKey(b => b.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(p => p.Barcodes).UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasMany(p => p.Photos)
+            .WithOne()
+            .HasForeignKey(p => p.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.Navigation(p => p.Photos).UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

@@ -198,6 +198,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Page?: number;
+                    PageSize?: number;
+                    EntityType?: string;
+                    EntityId?: string;
+                    UserId?: string;
+                    From?: string;
+                    To?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AuditLogDtoPagedResult"];
+                        "application/json": components["schemas"]["AuditLogDtoPagedResult"];
+                        "text/json": components["schemas"]["AuditLogDtoPagedResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login": {
         parameters: {
             query?: never;
@@ -874,6 +919,44 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/files/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    exp?: number;
+                    sig?: string;
+                };
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1557,6 +1640,165 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/products/{productId}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "multipart/form-data": {
+                        /** Format: binary */
+                        file?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProductPhotoDto"];
+                        "application/json": components["schemas"]["ProductPhotoDto"];
+                        "text/json": components["schemas"]["ProductPhotoDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{productId}/photos/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ReorderPhotosRequest"];
+                    "text/json": components["schemas"]["ReorderPhotosRequest"];
+                    "application/*+json": components["schemas"]["ReorderPhotosRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{productId}/photos/{photoId}/primary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: string;
+                    photoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/products/{productId}/photos/{photoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    productId: string;
+                    photoId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/products": {
         parameters: {
             query?: never;
@@ -2228,6 +2470,39 @@ export interface components {
         /** @enum {string} */
         AssignmentStatus: "Open" | "Overdue" | "Returned";
         /** @enum {string} */
+        AuditAction: "Created" | "Updated" | "Deactivated" | "Reactivated" | "Deleted";
+        AuditChangeDto: {
+            field: string;
+            old?: string | null;
+            new?: string | null;
+        };
+        AuditLogDto: {
+            /** Format: uuid */
+            id: string;
+            entityType: string;
+            /** Format: uuid */
+            entityId: string;
+            entityLabel?: string | null;
+            /** Format: uuid */
+            parentEntityId?: string | null;
+            action: components["schemas"]["AuditAction"];
+            changes: components["schemas"]["AuditChangeDto"][];
+            /** Format: uuid */
+            userId?: string | null;
+            userName?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AuditLogDtoPagedResult: {
+            items: components["schemas"]["AuditLogDto"][];
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+        };
+        /** @enum {string} */
         BarcodeFormat: "Ean13" | "Ean8" | "UpcA" | "Code128" | "Other";
         BarcodeInput: {
             value: string;
@@ -2713,6 +2988,7 @@ export interface components {
             isActive: boolean;
             trackingTypeLocked: boolean;
             barcodes: components["schemas"]["ProductBarcodeDto"][];
+            photos: components["schemas"]["ProductPhotoDto"][];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -2733,6 +3009,7 @@ export interface components {
             minStockLevel?: number | null;
             isActive: boolean;
             barcodes: string[];
+            thumbnailUrl?: string | null;
         };
         ProductListItemDtoPagedResult: {
             items: components["schemas"]["ProductListItemDto"][];
@@ -2743,6 +3020,17 @@ export interface components {
             /** Format: int32 */
             pageSize: number;
         };
+        ProductPhotoDto: {
+            /** Format: uuid */
+            id: string;
+            url: string;
+            thumbnailUrl: string;
+            isPrimary: boolean;
+            /** Format: int32 */
+            sortOrder: number;
+            /** Format: int64 */
+            sizeBytes: number;
+        };
         ProductStockDto: {
             /** Format: uuid */
             productId: string;
@@ -2751,6 +3039,9 @@ export interface components {
             totalQuantity: number;
             locations: components["schemas"]["LocationQuantityDto"][];
             statusCounts: components["schemas"]["ItemStatusCountDto"][];
+        };
+        ReorderPhotosRequest: {
+            photoIds: string[];
         };
         ResetPasswordRequest: {
             newPassword: string;
@@ -2772,6 +3063,7 @@ export interface components {
             subtitle?: string | null;
             isActive: boolean;
             status?: string | null;
+            thumbnailUrl?: string | null;
         };
         StartCountCommand: {
             /** Format: uuid */

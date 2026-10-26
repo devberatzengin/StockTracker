@@ -107,6 +107,22 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Eşzamanlı okutma | `CountSession` `xmin` ile korunur; her okutma oturumun sıra numarasını artırır, çakışmada 409 "Sayım bu arada değişti, tekrar okutun." |
 | Yetkiler | Okutma, geri alma, incelemeye gönderme, liste ve detay: herkes. Başlatma, inceleme (`/review`), onay ve iptal: `CanApproveCount`. |
 
+**Uygulama sırasında alınan kararlar** (Faz 3.1–3.2, 27 Ekim):
+
+| Konu | Karar |
+| --- | --- |
+| Görsel kütüphanesi | SkiaSharp (MIT) + `SkiaSharp.NativeAssets.Linux.NoDependencies`. ImageSharp 3.1.12'de bilinen yüksek önemli açıklar var; açıkları kapatan 3.2.0 ve 4.1.x Release derlemede Six Labors lisans anahtarı istiyor. |
+| Audit kapsamı | PLAN listesine ek olarak `StockBalance`, `CountLine`, `CountScan` ve Identity claim/token/rol tabloları yazılmaz; `Normalized*`, `UserName`, `AccessFailedCount`, `LockoutEnd`, `LockoutEnabled`, `EmailConfirmed`, `PhoneNumber*`, `TwoFactorEnabled`, `xmin`, `ScanSequence`, `CreatedAt/By` alanları yazılmaz. |
+| Audit işlemleri | `Deleted` eklendi (fotoğraf ve barkod fiziksel silinir). `Created` satırı tüm alanların yeni değerini taşır. Kullanıcısız işlemlerde (seed) `UserId` boştur. |
+| Alt kayıtlar | `ParentEntityId` kolonu: barkod ve fotoğraf satırları ürünün id'sini taşır; ürünün "Değişiklik geçmişi" bunları da gösterir. |
+| Rol değişikliği | `user_roles` satırları kullanıcının geçmişine `role: { old, new }` olarak yazılır; Identity'nin aynı istekteki "rol sil" ve "rol ekle" kayıtları tek satırda birleştirilir. |
+| Audit yetkisi | `GET /audit` ve tüm "Değişiklik geçmişi" bölümleri `CanViewAudit` (Admin). AuditLog da defter gibi append-only (interceptor). |
+| Fotoğraf depolama | `Storage__Provider` (`Local` varsayılan, `R2`), `Storage__SigningKey` (yerel imza, ≥ 32 karakter), `Storage__R2__*`; seçili sağlayıcının ayarı eksikse API açılmaz. Docker'da `Storage__LocalPath=/app/uploads` compose'ta verilir. |
+| Fotoğraf işleme | Dosya imzası (JPEG/PNG/WebP) + Skia ile çözme; 40 megapiksel üstü reddedilir. EXIF yönü piksele uygulanır, yeniden kodlama metadata taşımaz. Ana 1600 px (q82), thumbnail 400 px (q75), WebP; küçük görsel büyütülmez. Geçersiz dosya 400 (`errors.file`), 10 sınırı 422. |
+| Fotoğraf tutarlılığı | Yükleme ürün satırını `FOR UPDATE` ile kilitler; dosyalar yazılır, veritabanı kaydı başarısızsa silinir. Silmede önce satır, sonra dosya (kalan dosya sadece loglanır). |
+| İmzalı URL | `/api/files/{key}?exp=&sig=` göreli döner, anonim; HMAC-SHA256 (`"{key}:{exp}"`), süresi geçmiş ya da hatalı imza 403, `Cache-Control: private, max-age=<kalan süre>`. |
+| Galeri | Ürün detayının "Genel" sekmesinde (yeni ürün kaydedildikten sonra). Sürükle-bırak + telefon için ok düğmeleri; `accept="image/*" capture="environment"`. Thumbnail ürün listesinde, ürün seçicide ve tara-taşı listesinde. |
+
 ## Mimari
 
 Bağımlılıklar her zaman içe doğru akar: API → Application → Domain. Infrastructure, Application'daki arayüzleri uygular. Domain hiçbir pakete bağımlı değildir.
@@ -151,7 +167,7 @@ Bağımlılıklar her zaman içe doğru akar: API → Application → Domain. In
 | Log | Serilog |
 | Test | xUnit, FluentAssertions, Testcontainers (PostgreSQL) |
 
-Ek kütüphaneler: Mantine + Mantine Charts (UI ve grafik), ImageSharp (thumbnail), AWSSDK.S3 (Cloudflare R2 erişimi).
+Ek kütüphaneler: Mantine + Mantine Charts (UI ve grafik), SkiaSharp (thumbnail), AWSSDK.S3 (Cloudflare R2 erişimi).
 
 ## Domain modeli
 
@@ -620,7 +636,7 @@ Amaç: sistemi "veri tutan" halden "kullanılan ürün" haline getirmek. Adımla
 **Veri (ProductPhoto):** `ProductId`, `StorageKey`, `ThumbnailKey`, `ContentType`, `SizeBytes`, `SortOrder`, `IsPrimary`.
 
 - [ ] `IFileStorage`: `SaveAsync`, `DeleteAsync`, `GetReadUrl(key, süre)`. İki uygulama: `LocalFileStorage` (Docker `uploads` volume'ü) ve `R2FileStorage` (deploy'da); `StorageOptions.Provider` ile seçilir
-- [ ] Yükleme akışı: multipart → boyut (≤ 5 MB) ve dosya imzası (magic bytes) kontrolü, uzantıya güvenilmez → ImageSharp ile EXIF yönü düzeltilir ve EXIF silinir → uzun kenarı 1600 px'e küçültülmüş ana görsel + 400 px thumbnail, ikisi de WebP
+- [ ] Yükleme akışı: multipart → boyut (≤ 5 MB) ve dosya imzası (magic bytes) kontrolü, uzantıya güvenilmez → SkiaSharp ile EXIF yönü düzeltilir ve EXIF silinir → uzun kenarı 1600 px'e küçültülmüş ana görsel + 400 px thumbnail, ikisi de WebP
 - [ ] Okuma: access token bellekte olduğu için `<img>` etiketi kimlik gönderemez. Bu yüzden API, 1 saat geçerli imzalı URL döner: yerel depolamada HMAC imzalı `/api/files/{key}?exp=&sig=`, R2'de presigned URL
 - [ ] Kurallar: ürün başına en fazla 10 fotoğraf; ilk yüklenen otomatik ana fotoğraf; ana fotoğraf silinirse sıradaki ana olur
 - [ ] Fotoğraflar soft delete kuralının istisnasıdır: hiçbir hareket onlara referans vermediği için dosya ve satır fiziksel olarak silinir

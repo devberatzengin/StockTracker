@@ -14,6 +14,9 @@ import { IconArrowLeft } from '@tabler/icons-react'
 import { Link, useParams } from 'react-router'
 import { isApiError } from '@/api/client'
 import { NotFoundPage } from '@/components/NotFoundPage'
+import { AuditHistory } from '@/features/audit/AuditHistory'
+import { usePermission } from '@/features/auth/authContext'
+import { Permissions } from '@/features/auth/permissions'
 import { LOCATION_TYPE_LABELS } from '@/features/locations/labels'
 import { LocationTypeIcon } from '@/features/locations/LocationTypeIcon'
 import { useLocation } from '@/features/locations/locationsApi'
@@ -23,6 +26,7 @@ import { MovementList } from '@/features/movements/MovementList'
 export function LocationDetailPage() {
   const { id = '' } = useParams()
   const { data: location, isPending, error } = useLocation(id)
+  const canViewAudit = usePermission(Permissions.CanViewAudit)
 
   if (isApiError(error, 404) || isApiError(error, 400)) {
     return <NotFoundPage />
@@ -122,6 +126,15 @@ export function LocationDetailPage() {
           emptyText="Bu lokasyona giren ya da çıkan hareket yok."
         />
       </div>
+
+      {canViewAudit && (
+        <div>
+          <Title order={4} mb="xs">
+            Değişiklik geçmişi
+          </Title>
+          <AuditHistory filters={{ entityType: 'Location', entityId: location.id }} />
+        </div>
+      )}
     </Stack>
   )
 }

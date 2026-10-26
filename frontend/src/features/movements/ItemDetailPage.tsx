@@ -28,6 +28,7 @@ import { isApiError } from '@/api/client'
 import type { ItemDetail } from '@/api/types'
 import { useItemStatusChange, type StatusChangeAction } from '@/features/assignments/assignmentsApi'
 import { AssignmentTable } from '@/features/assignments/AssignmentTable'
+import { AuditHistory } from '@/features/audit/AuditHistory'
 import { NotFoundPage } from '@/components/NotFoundPage'
 import { usePermission } from '@/features/auth/authContext'
 import { Permissions } from '@/features/auth/permissions'
@@ -67,6 +68,7 @@ const STATUS_CHANGES: Record<StatusChangeAction, { title: string; done: string }
 
 function ItemDetail({ item }: { item: ItemDetail }) {
   const canEdit = usePermission(Permissions.CanMoveStock)
+  const canViewAudit = usePermission(Permissions.CanViewAudit)
   const [editing, edit] = useDisclosure()
   const [statusChange, setStatusChange] = useState<StatusChangeAction | null>(null)
   const [assignmentPage, setAssignmentPage] = useState(1)
@@ -203,6 +205,15 @@ function ItemDetail({ item }: { item: ItemDetail }) {
         </Title>
         <MovementList filters={{ itemId: item.id }} variant="timeline" />
       </div>
+
+      {canViewAudit && (
+        <div>
+          <Title order={4} mb="sm">
+            Değişiklik geçmişi
+          </Title>
+          <AuditHistory filters={{ entityType: 'Item', entityId: item.id }} />
+        </div>
+      )}
 
       <Modal opened={editing} onClose={edit.close} title="Seri numarasını düzenle">
         <SerialForm item={item} onClose={edit.close} />

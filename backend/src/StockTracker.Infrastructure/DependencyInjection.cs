@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using StockTracker.Application.Common.Codes;
 using StockTracker.Application.Common.Interfaces;
+using StockTracker.Application.Files;
 using StockTracker.Infrastructure.Codes;
 using StockTracker.Infrastructure.Identity;
 using StockTracker.Infrastructure.Inventory;
@@ -10,6 +12,7 @@ using StockTracker.Infrastructure.Persistence;
 using StockTracker.Infrastructure.Persistence.Interceptors;
 using StockTracker.Infrastructure.Persistence.Repositories;
 using StockTracker.Infrastructure.Services;
+using StockTracker.Infrastructure.Storage;
 
 namespace StockTracker.Infrastructure;
 
@@ -27,15 +30,18 @@ public static class DependencyInjection
         }
 
         services.AddSingleton<IDateTime, SystemDateTime>();
+        AddStorage(services, configuration);
 
         services.AddScoped<AuditableEntityInterceptor>();
+        services.AddScoped<AuditInterceptor>();
         services.AddSingleton<AppendOnlyLedgerInterceptor>();
         // Migrations are never applied here; run them with the migrator container.
         services.AddDbContext<AppDbContext>((sp, options) => options
             .UseStockTrackerNpgsql(connectionString)
             .AddInterceptors(
                 sp.GetRequiredService<AuditableEntityInterceptor>(),
-                sp.GetRequiredService<AppendOnlyLedgerInterceptor>()));
+                sp.GetRequiredService<AppendOnlyLedgerInterceptor>(),
+                sp.GetRequiredService<AuditInterceptor>()));
 
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -63,6 +69,35 @@ public static class DependencyInjection
         AddIdentity(services);
 
         return services;
+    }
+
+    /// <summary>Photo storage: local disk or Cloudflare R2 (Storage:Provider); misconfiguration fails at startup.</summary>
+    private static void AddStorage(IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(StorageOptions.SectionName);
+        var options = section.Get<StorageOptions>() ?? new StorageOptions();
+        var errors = options.Validate().ToList();
+        if (errors.Count > 0)
+        {
+            throw new InvalidOperationException(string.Join(" ", errors));
+        }
+
+        services.AddOptions<StorageOptions>().Bind(section);
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<IImageProcessor, SkiaImageProcessor>();
+
+        if (options.Provider == StorageProvider.R2)
+        {
+            services.AddSingleton<R2FileStorage>();
+            services.AddSingleton<IFileStorage>(sp => sp.GetRequiredService<R2FileStorage>());
+            services.AddSingleton<ISignedFileStore>(sp => sp.GetRequiredService<R2FileStorage>());
+        }
+        else
+        {
+            services.AddSingleton<LocalFileStorage>();
+            services.AddSingleton<IFileStorage>(sp => sp.GetRequiredService<LocalFileStorage>());
+            services.AddSingleton<ISignedFileStore>(sp => sp.GetRequiredService<LocalFileStorage>());
+        }
     }
 
     private static void AddIdentity(IServiceCollection services)

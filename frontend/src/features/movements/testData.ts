@@ -26,6 +26,7 @@ const productDetail = (p: typeof laptop) => ({
   isActive: true,
   trackingTypeLocked: false,
   barcodes: [],
+  photos: [],
   createdAt: '2026-10-25T10:00:00Z',
   updatedAt: null,
 })

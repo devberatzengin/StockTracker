@@ -18,6 +18,7 @@ import {
   IconHistory,
   IconHome,
   IconKey,
+  IconListDetails,
   IconLogout,
   IconMapPin,
   IconPackage,
@@ -70,6 +71,12 @@ const mainItems: NavItem[] = [
     to: '/users',
     icon: <IconUsers size={18} />,
     permission: Permissions.CanManageUsers,
+  },
+  {
+    label: 'Değişiklik kaydı',
+    to: '/audit',
+    icon: <IconListDetails size={18} />,
+    permission: Permissions.CanViewAudit,
   },
 ]
 

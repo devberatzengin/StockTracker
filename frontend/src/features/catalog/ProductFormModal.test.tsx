@@ -145,6 +145,7 @@ describe('ProductFormModal', () => {
       isActive: true,
       trackingTypeLocked: true,
       barcodes: [],
+      photos: [],
       createdAt: '2026-10-24T10:00:00Z',
       updatedAt: null,
     })

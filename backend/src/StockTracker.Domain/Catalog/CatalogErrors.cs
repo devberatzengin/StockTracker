@@ -19,6 +19,9 @@ public static class CatalogErrors
     public const string ProductTrackingTypeLocked = "Product.TrackingTypeLocked";
     public const string ProductHasStock = "Product.HasStock";
     public const string ProductHasOpenAssignments = "Product.HasOpenAssignments";
+    public const string ProductPhotoLimit = "Product.PhotoLimit";
+    public const string ProductPhotoNotFound = "Product.PhotoNotFound";
+    public const string ProductPhotoOrderInvalid = "Product.PhotoOrderInvalid";
     public const string ProductDuplicateBarcode = "Product.DuplicateBarcode";
     public const string ProductBarcodeNotFound = "Product.BarcodeNotFound";
 

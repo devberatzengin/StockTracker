@@ -20,7 +20,6 @@ builder.Services.AddSerilog((services, logger) => logger
     .Enrich.FromLogContext()
     .WriteTo.Console(new RenderedCompactJsonFormatter()));
 
-builder.Services.AddOptions<StorageOptions>().BindConfiguration(StorageOptions.SectionName);
 builder.Services.AddOptions<CorsOptions>().BindConfiguration(CorsOptions.SectionName);
 
 builder.Services

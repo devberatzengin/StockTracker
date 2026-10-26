@@ -15,5 +15,8 @@ public interface IProductRepository
 
     Task<bool> HasActiveProductsInCategoryAsync(Guid categoryId, CancellationToken cancellationToken);
 
+    /// <summary>Locks the product row until the transaction ends (photo changes).</summary>
+    Task LockAsync(Guid id, CancellationToken cancellationToken);
+
     void Add(Product product);
 }

@@ -9,6 +9,7 @@ public static class ScanResultTypes
 
 /// <param name="Type">One of <see cref="ScanResultTypes"/>; the frontend opens the matching detail page.</param>
 /// <param name="Status">Item status; null for products and locations.</param>
+/// <param name="ThumbnailUrl">Primary photo thumbnail of the product (or of the item's product); signed, expires.</param>
 public sealed record ScanResultDto(
     string Type,
     Guid Id,
@@ -16,4 +17,5 @@ public sealed record ScanResultDto(
     string Title,
     string? Subtitle,
     bool IsActive,
-    string? Status);
+    string? Status,
+    string? ThumbnailUrl = null);

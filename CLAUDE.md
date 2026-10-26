@@ -8,7 +8,7 @@ Ayrıntılı plan: `docs/PLAN.md`. Bir kararı burada bulamazsan önce oraya bak
 - Backend: ASP.NET Core (Controller + MediatR), Clean Architecture, CQRS
 - Veri: EF Core + Npgsql, **harici PostgreSQL** (bağlantı `.env` → `ConnectionStrings__Default`)
 - Frontend: React + TypeScript (Vite), Mantine, Mantine Charts, TanStack Query, React Router, React Hook Form + Zod
-- Tarama: `@zxing/browser` · QR: QRCoder · PDF: QuestPDF · Excel: ClosedXML · Görsel: ImageSharp
+- Tarama: `@zxing/browser` · QR: QRCoder · PDF: QuestPDF · Excel: ClosedXML · Görsel: SkiaSharp (ImageSharp'ın yamalı sürümleri Release derlemede lisans anahtarı istiyor)
 - Test: xUnit, FluentAssertions, Testcontainers (PostgreSQL), Vitest + React Testing Library
 - Çalışma ortamı: Docker Compose (`api`, `web`, `migrator`, `cloudflared`); veritabanı konteynerde DEĞİL
 - Geliştirici makinesi: macOS (Apple Silicon). Windows komutu yazma.

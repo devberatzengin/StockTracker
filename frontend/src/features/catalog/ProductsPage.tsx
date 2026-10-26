@@ -21,6 +21,7 @@ import { Permissions } from '@/features/auth/permissions'
 import { useCategoryOptions, useProducts } from '@/features/catalog/catalogApi'
 import { TRACKING_TYPE_LABELS, TRACKING_TYPE_OPTIONS, UNIT_LABELS } from '@/features/catalog/labels'
 import { ProductFormModal } from '@/features/catalog/ProductFormModal'
+import { ProductThumb } from '@/features/catalog/ProductThumb'
 
 const PAGE_SIZE = 25
 
@@ -121,6 +122,7 @@ export function ProductsPage() {
         <Table striped highlightOnHover withTableBorder>
           <Table.Thead>
             <Table.Tr>
+              <Table.Th w={52} />
               <Table.Th>Kod</Table.Th>
               <Table.Th>Ad</Table.Th>
               <Table.Th>Kategori</Table.Th>
@@ -133,7 +135,7 @@ export function ProductsPage() {
           <Table.Tbody>
             {isPending || data?.items.length === 0 ? (
               <Table.Tr>
-                <Table.Td colSpan={7}>
+                <Table.Td colSpan={8}>
                   <Text c="dimmed" size="sm">
                     {isPending ? 'Yükleniyor…' : 'Ürün bulunamadı.'}
                   </Text>
@@ -146,6 +148,9 @@ export function ProductsPage() {
                   onClick={() => navigate(`/products/${product.id}`)}
                   style={{ cursor: 'pointer' }}
                 >
+                  <Table.Td>
+                    <ProductThumb url={product.thumbnailUrl} />
+                  </Table.Td>
                   <Table.Td ff="monospace">{product.code}</Table.Td>
                   <Table.Td>
                     <Group gap={6}>

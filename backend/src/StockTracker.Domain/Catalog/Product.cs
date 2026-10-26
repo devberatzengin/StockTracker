@@ -10,7 +10,10 @@ public class Product : BaseEntity, ISoftDeletable
     public const int DescriptionMaxLength = 1000;
     public const int CodeLength = Common.Codes.EntityCode.Length;
 
+    public const int MaxPhotos = 10;
+
     private readonly List<ProductBarcode> _barcodes = [];
+    private readonly List<ProductPhoto> _photos = [];
 
     private Product()
     {
@@ -36,6 +39,9 @@ public class Product : BaseEntity, ISoftDeletable
     public bool IsActive { get; private set; } = true;
 
     public IReadOnlyCollection<ProductBarcode> Barcodes => _barcodes.AsReadOnly();
+
+    /// <summary>Gallery in display order; exactly one is primary while any exist.</summary>
+    public IReadOnlyList<ProductPhoto> Photos => [.. _photos.OrderBy(p => p.SortOrder)];
 
     public static Product Create(
         string code,
@@ -101,6 +107,82 @@ public class Product : BaseEntity, ISoftDeletable
         var barcode = _barcodes.SingleOrDefault(b => b.Id == barcodeId)
             ?? throw new DomainException(CatalogErrors.ProductBarcodeNotFound, "Barkod bu ürüne ait değil.");
         _barcodes.Remove(barcode);
+    }
+
+    /// <summary>Adds a photo at the end of the gallery; the first photo becomes the primary one.</summary>
+    public ProductPhoto AddPhoto(Guid photoId, string storageKey, string thumbnailKey, string contentType, long sizeBytes)
+    {
+        if (_photos.Count >= MaxPhotos)
+        {
+            throw new DomainException(
+                CatalogErrors.ProductPhotoLimit,
+                $"Bir ürüne en fazla {MaxPhotos} fotoğraf eklenebilir.",
+                "file");
+        }
+
+        var photo = ProductPhoto.Create(
+            photoId,
+            Id,
+            storageKey,
+            thumbnailKey,
+            contentType,
+            sizeBytes,
+            _photos.Count,
+            isPrimary: _photos.Count == 0);
+        _photos.Add(photo);
+        return photo;
+    }
+
+    /// <summary>Removes a photo; when it was the primary one, the next photo in order takes over.</summary>
+    public ProductPhoto RemovePhoto(Guid photoId)
+    {
+        var photo = FindPhoto(photoId);
+        _photos.Remove(photo);
+        Renumber(_photos.OrderBy(p => p.SortOrder).ToList());
+
+        if (photo.IsPrimary && _photos.Count > 0)
+        {
+            _photos.MinBy(p => p.SortOrder)!.SetPrimary(true);
+        }
+
+        return photo;
+    }
+
+    public void SetPrimaryPhoto(Guid photoId)
+    {
+        var photo = FindPhoto(photoId);
+        foreach (var other in _photos)
+        {
+            other.SetPrimary(other == photo);
+        }
+    }
+
+    /// <summary>Puts the gallery in the given order; every photo must be listed exactly once.</summary>
+    public void ReorderPhotos(IReadOnlyList<Guid> photoIds)
+    {
+        if (photoIds.Count != _photos.Count
+            || photoIds.Distinct().Count() != photoIds.Count
+            || !photoIds.All(id => _photos.Any(p => p.Id == id)))
+        {
+            throw new DomainException(
+                CatalogErrors.ProductPhotoOrderInvalid,
+                "Sıralama ürünün tüm fotoğraflarını birer kez içermelidir.",
+                "photoIds");
+        }
+
+        Renumber([.. photoIds.Select(FindPhoto)]);
+    }
+
+    private ProductPhoto FindPhoto(Guid photoId) =>
+        _photos.SingleOrDefault(p => p.Id == photoId)
+        ?? throw new DomainException(CatalogErrors.ProductPhotoNotFound, "Fotoğraf bu ürüne ait değil.", "photoId");
+
+    private static void Renumber(IReadOnlyList<ProductPhoto> ordered)
+    {
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            ordered[i].MoveTo(i);
+        }
     }
 
     /// <param name="hasStock">Whether the product has a positive balance or items in stock, assigned or in repair.</param>

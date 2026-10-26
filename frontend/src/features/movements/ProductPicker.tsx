@@ -4,6 +4,7 @@ import { IconScan } from '@tabler/icons-react'
 import { useState } from 'react'
 import { getErrorMessage, isApiError } from '@/api/client'
 import { useProducts } from '@/features/catalog/catalogApi'
+import { ProductThumb } from '@/features/catalog/ProductThumb'
 import { fetchPickedProduct, type PickedProduct } from '@/features/movements/pickedProduct'
 import { lookupScan } from '@/features/scan/scanApi'
 import { ScanDialog } from '@/features/scan/ScanDialog'
@@ -29,6 +30,7 @@ export function ProductPicker({ value, onChange, error, label = 'Ürün' }: Prop
     name: p.name,
     trackingType: p.trackingType,
     unit: p.unit,
+    thumbnailUrl: p.thumbnailUrl,
   }))
   // Keep the selected product selectable even when it is not in the current search results.
   const all = value && !results.some((p) => p.id === value.id) ? [value, ...results] : results
@@ -64,6 +66,12 @@ export function ProductPicker({ value, onChange, error, label = 'Ürün' }: Prop
           searchValue={search}
           onSearchChange={setSearch}
           filter={({ options }) => options}
+          renderOption={({ option }) => (
+            <Group gap="xs" wrap="nowrap">
+              <ProductThumb url={all.find((p) => p.id === option.value)?.thumbnailUrl} size={28} />
+              <span>{option.label}</span>
+            </Group>
+          )}
           nothingFoundMessage="Ürün bulunamadı"
           error={error}
           style={{ flex: 1 }}

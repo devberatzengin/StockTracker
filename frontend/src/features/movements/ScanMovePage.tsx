@@ -20,6 +20,7 @@ import { useNavigate } from 'react-router'
 import { getErrorMessage, isApiError } from '@/api/client'
 import type { LocationQuantityDto, ScanResult } from '@/api/types'
 import { formatQuantity, UNIT_LABELS } from '@/features/catalog/labels'
+import { ProductThumb } from '@/features/catalog/ProductThumb'
 import { parseLineErrors, type LineErrors } from '@/features/movements/lineErrors'
 import { fetchProductStock, useStockTransfer } from '@/features/movements/movementsApi'
 import { fetchPickedProduct, type PickedProduct } from '@/features/movements/pickedProduct'
@@ -90,6 +91,7 @@ export function ScanMovePage() {
             code: result.code,
             title: result.title,
             subtitle: result.subtitle ?? null,
+            thumbnailUrl: result.thumbnailUrl,
           },
         ])
         setMessage({ color: 'green', text: `Eklendi: ${result.title}` })
@@ -288,28 +290,33 @@ function ScannedLines({
       {lines.map((line, i) => (
         <Paper key={line.key} withBorder p="sm">
           <Group justify="space-between" wrap="nowrap">
-            <div>
-              <Group gap={6}>
-                <Badge size="xs" variant="light" color={line.kind === 'item' ? 'blue' : 'teal'}>
-                  {line.kind === 'item' ? 'Adet' : 'Miktar'}
-                </Badge>
-                <Text size="sm" fw={600}>
-                  {line.kind === 'item'
-                    ? line.title
-                    : `${line.product?.name} · ${formatQuantity(Number(line.quantity))}`}
-                </Text>
-              </Group>
-              {(line.kind === 'item' ? line.subtitle : line.sourcePath) && (
-                <Text size="xs" c="dimmed">
-                  {line.kind === 'item' ? line.subtitle : `Kaynak: ${line.sourcePath}`}
-                </Text>
-              )}
-              {errors?.lines[i] && (
-                <Text size="xs" c="red">
-                  {Object.values(errors.lines[i])[0]}
-                </Text>
-              )}
-            </div>
+            <Group gap="xs" wrap="nowrap">
+              <ProductThumb
+                url={line.kind === 'item' ? line.thumbnailUrl : line.product?.thumbnailUrl}
+              />
+              <div>
+                <Group gap={6}>
+                  <Badge size="xs" variant="light" color={line.kind === 'item' ? 'blue' : 'teal'}>
+                    {line.kind === 'item' ? 'Adet' : 'Miktar'}
+                  </Badge>
+                  <Text size="sm" fw={600}>
+                    {line.kind === 'item'
+                      ? line.title
+                      : `${line.product?.name} · ${formatQuantity(Number(line.quantity))}`}
+                  </Text>
+                </Group>
+                {(line.kind === 'item' ? line.subtitle : line.sourcePath) && (
+                  <Text size="xs" c="dimmed">
+                    {line.kind === 'item' ? line.subtitle : `Kaynak: ${line.sourcePath}`}
+                  </Text>
+                )}
+                {errors?.lines[i] && (
+                  <Text size="xs" c="red">
+                    {Object.values(errors.lines[i])[0]}
+                  </Text>
+                )}
+              </div>
+            </Group>
             <ActionIcon
               size="lg"
               variant="subtle"
