@@ -75,6 +75,18 @@ export const router = createBrowserRouter([
                 }),
               },
               {
+                path: 'counts',
+                lazy: async () => ({
+                  Component: (await import('@/features/counts/CountsPage')).CountsPage,
+                }),
+              },
+              {
+                path: 'counts/:id',
+                lazy: async () => ({
+                  Component: (await import('@/features/counts/CountPage')).CountPage,
+                }),
+              },
+              {
                 path: 'my-assignments',
                 lazy: async () => ({
                   Component: (await import('@/features/assignments/MyAssignmentsPage'))

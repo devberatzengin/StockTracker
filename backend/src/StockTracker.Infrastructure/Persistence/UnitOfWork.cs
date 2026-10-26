@@ -3,6 +3,7 @@ using Npgsql;
 using StockTracker.Application.Common.Exceptions;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Domain.Catalog;
+using StockTracker.Domain.Counts;
 using StockTracker.Domain.Exceptions;
 using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
@@ -52,7 +53,9 @@ public sealed class UnitOfWork(AppDbContext dbContext) : IUnitOfWork
             // Balances and items carry xmin tokens; a conflict there means stock changed meanwhile.
             throw ex.Entries.Any(e => e.Entity is StockBalance or Item)
                 ? new ConcurrencyException(StockChangedMessage)
-                : new ConcurrencyException();
+                : ex.Entries.Any(e => e.Entity is CountSession)
+                    ? new ConcurrencyException("Sayım bu arada değişti, tekrar okutun.")
+                    : new ConcurrencyException();
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException
         {

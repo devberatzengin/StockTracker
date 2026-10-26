@@ -537,6 +537,349 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Page?: number;
+                    PageSize?: number;
+                    Status?: components["schemas"]["CountStatus"];
+                    LocationId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CountListItemDtoPagedResult"];
+                        "application/json": components["schemas"]["CountListItemDtoPagedResult"];
+                        "text/json": components["schemas"]["CountListItemDtoPagedResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["StartCountCommand"];
+                    "text/json": components["schemas"]["StartCountCommand"];
+                    "application/*+json": components["schemas"]["StartCountCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CreatedResponse"];
+                        "application/json": components["schemas"]["CreatedResponse"];
+                        "text/json": components["schemas"]["CreatedResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/counts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CountDto"];
+                        "application/json": components["schemas"]["CountDto"];
+                        "text/json": components["schemas"]["CountDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/counts/{id}/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CountScanRequest"];
+                    "text/json": components["schemas"]["CountScanRequest"];
+                    "application/*+json": components["schemas"]["CountScanRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CountScanResultDto"];
+                        "application/json": components["schemas"]["CountScanResultDto"];
+                        "text/json": components["schemas"]["CountScanResultDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/counts/{id}/lines/{lineId}/last-scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    lineId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/counts/{id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/counts/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CountReviewDto"];
+                        "application/json": components["schemas"]["CountReviewDto"];
+                        "text/json": components["schemas"]["CountReviewDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/counts/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ApproveCountRequest"];
+                    "text/json": components["schemas"]["ApproveCountRequest"];
+                    "application/*+json": components["schemas"]["ApproveCountRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["CountApprovalResultDto"];
+                        "application/json": components["schemas"]["CountApprovalResultDto"];
+                        "text/json": components["schemas"]["CountApprovalResultDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/counts/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/items": {
         parameters: {
             query?: never;
@@ -1020,6 +1363,7 @@ export interface paths {
                     LocationId?: string;
                     UserId?: string;
                     ReferenceId?: string;
+                    CountId?: string;
                     Sort?: string;
                 };
                 header?: never;
@@ -1816,6 +2160,9 @@ export interface components {
             value: string;
             format: components["schemas"]["BarcodeFormat"];
         };
+        ApproveCountRequest: {
+            decisions: components["schemas"]["CountDecision"][];
+        };
         AssignItemCommand: {
             /** Format: uuid */
             itemId: string;
@@ -1935,6 +2282,173 @@ export interface components {
             locationId: string;
             locationPath: string;
         };
+        CountApprovalResultDto: {
+            /** Format: uuid */
+            referenceId: string;
+            /** Format: int32 */
+            movementCount: number;
+        };
+        CountDecision: {
+            /** Format: uuid */
+            lineId: string;
+            resolution: components["schemas"]["CountResolution"];
+        };
+        CountDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            locationId: string;
+            locationName: string;
+            locationPath: string;
+            includeChildren: boolean;
+            status: components["schemas"]["CountStatus"];
+            note?: string | null;
+            /** Format: uuid */
+            startedBy: string;
+            startedByName: string;
+            /** Format: date-time */
+            startedAt: string;
+            approvedByName?: string | null;
+            /** Format: date-time */
+            approvedAt?: string | null;
+            /** Format: uuid */
+            approvalReferenceId?: string | null;
+            progress: components["schemas"]["CountProgressDto"];
+            lines: components["schemas"]["CountLineDto"][];
+            recentScans: components["schemas"]["CountScanDto"][];
+        };
+        CountLineDto: {
+            /** Format: uuid */
+            id: string;
+            lineType: components["schemas"]["CountLineType"];
+            /** Format: uuid */
+            locationId: string;
+            locationName: string;
+            locationPath: string;
+            /** Format: uuid */
+            productId: string;
+            productCode: string;
+            productName: string;
+            unit: components["schemas"]["Unit"];
+            /** Format: uuid */
+            itemId?: string | null;
+            itemCode?: string | null;
+            serialNumber?: string | null;
+            /** Format: double */
+            expectedQuantity: number;
+            /** Format: double */
+            countedQuantity?: number | null;
+            resolution?: components["schemas"]["CountResolution"];
+        };
+        /** @enum {string} */
+        CountLineState: "Matched" | "NotCountedEmpty" | "QuantityDifference" | "QuantityNotCounted" | "ItemMissing" | "ItemFoundElsewhere" | "ItemMovedDuringCount" | "UnexpectedMovable" | "UnexpectedAlreadyHere" | "UnexpectedNoteOnly";
+        /** @enum {string} */
+        CountLineType: "Expected" | "Unexpected";
+        CountListItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            locationId: string;
+            locationPath: string;
+            includeChildren: boolean;
+            status: components["schemas"]["CountStatus"];
+            startedByName: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            approvedAt?: string | null;
+            /** Format: int32 */
+            expectedLines: number;
+            /** Format: int32 */
+            countedExpectedLines: number;
+            /** Format: int32 */
+            unexpectedLines: number;
+        };
+        CountListItemDtoPagedResult: {
+            items: components["schemas"]["CountListItemDto"][];
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+        };
+        CountProgressDto: {
+            /** Format: int32 */
+            expectedLines: number;
+            /** Format: int32 */
+            countedExpectedLines: number;
+            /** Format: int32 */
+            unexpectedLines: number;
+        };
+        /** @enum {string} */
+        CountResolution: "ApplyDifference" | "AcceptZero" | "OutOfScope" | "MarkLost" | "MoveHere" | "Ignore";
+        CountReviewDto: {
+            /** Format: uuid */
+            countId: string;
+            status: components["schemas"]["CountStatus"];
+            lines: components["schemas"]["CountReviewLineDto"][];
+            /** Format: int32 */
+            movementsSinceStart: number;
+        };
+        CountReviewLineDto: {
+            line: components["schemas"]["CountLineDto"];
+            state: components["schemas"]["CountLineState"];
+            /** Format: double */
+            currentQuantity: number;
+            /** Format: double */
+            difference: number;
+            options: components["schemas"]["CountResolution"][];
+            itemStatus?: components["schemas"]["ItemStatus"];
+            itemLocationPath?: string | null;
+        };
+        CountScanDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            lineId: string;
+            /** Format: int32 */
+            sequence: number;
+            /** Format: double */
+            quantity: number;
+            /** Format: date-time */
+            scannedAt: string;
+            scannedByName: string;
+            productName: string;
+            unit: components["schemas"]["Unit"];
+            itemCode?: string | null;
+            locationName: string;
+            lineType: components["schemas"]["CountLineType"];
+            canUndo: boolean;
+        };
+        /** @enum {string} */
+        CountScanKind: "Location" | "QuantityRequired" | "Counted" | "Unexpected" | "AlreadyCounted";
+        CountScanRequest: {
+            /** Format: uuid */
+            locationId?: string | null;
+            code: string;
+            /** Format: double */
+            quantity?: number | null;
+        };
+        CountScanResultDto: {
+            kind: components["schemas"]["CountScanKind"];
+            title: string;
+            /** Format: uuid */
+            locationId?: string | null;
+            locationPath?: string | null;
+            /** Format: uuid */
+            productId?: string | null;
+            unit?: components["schemas"]["Unit"];
+            /** Format: uuid */
+            lineId?: string | null;
+            /** Format: double */
+            countedQuantity?: number | null;
+            itemStatus?: components["schemas"]["ItemStatus"];
+            itemLocationPath?: string | null;
+            progress: components["schemas"]["CountProgressDto"];
+        };
+        /** @enum {string} */
+        CountStatus: "Counting" | "Reviewing" | "Approved" | "Cancelled";
         CreateLocationCommand: {
             name: string;
             type: components["schemas"]["LocationType"];
@@ -2258,6 +2772,12 @@ export interface components {
             subtitle?: string | null;
             isActive: boolean;
             status?: string | null;
+        };
+        StartCountCommand: {
+            /** Format: uuid */
+            locationId: string;
+            includeChildren: boolean;
+            note?: string | null;
         };
         StockInCommand: {
             /** Format: uuid */

@@ -77,6 +77,8 @@ export interface MovementFilters {
   locationId?: string | null
   userId?: string | null
   referenceId?: string | null
+  /** Movements in a count's scope after it started. */
+  countId?: string | null
 }
 
 export function useMovements(filters: MovementFilters, enabled = true) {

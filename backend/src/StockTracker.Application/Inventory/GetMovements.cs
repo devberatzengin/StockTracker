@@ -3,12 +3,14 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Application.Common.Models;
+using StockTracker.Application.Counts;
 using StockTracker.Domain.Inventory;
 
 namespace StockTracker.Application.Inventory;
 
 /// <summary>
-/// Ledger entries, newest first by default. LocationId matches either source or target.
+/// Ledger entries, newest first by default. LocationId matches either source or target;
+/// CountId limits to the count's scope after it started.
 /// Sort: occurredAt or -occurredAt.
 /// </summary>
 public sealed record GetMovementsQuery(
@@ -22,6 +24,7 @@ public sealed record GetMovementsQuery(
     Guid? LocationId = null,
     Guid? UserId = null,
     Guid? ReferenceId = null,
+    Guid? CountId = null,
     string? Sort = null) : IRequest<PagedResult<MovementDto>>, IPagedQuery;
 
 public sealed class GetMovementsQueryValidator : AbstractValidator<GetMovementsQuery>
@@ -82,6 +85,13 @@ public sealed class GetMovementsQueryHandler(IAppDbContext db, IUserAccountServi
         if (request.ReferenceId is { } referenceId)
         {
             query = query.Where(m => m.ReferenceId == referenceId);
+        }
+
+        if (request.CountId is { } countId)
+        {
+            // Movements in the count's scope after it started (review warnings).
+            var sinceStart = await CountReadModel.MovementsSinceStartAsync(db, countId, cancellationToken);
+            query = query.Where(m => sinceStart.Any(s => s.Id == m.Id));
         }
 
         // Movements of one operation share OccurredAt. A status change there (faulty return) follows

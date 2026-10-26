@@ -92,6 +92,21 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Eşzamanlı zimmet | Kısmi benzersiz index (`item_id WHERE returned_at IS NULL`) ihlali 409 "Bu adet bu arada zimmetlendi, tekrar deneyin." |
 | Açık zimmet kısıtları | Açık zimmeti olan kullanıcıyı pasifleştirme ve açık zimmeti olan üründe `IsAssignable`'ı kapatma 422 ile reddedilir (`Assignment.UserHasOpenAssignments`, `Product.HasOpenAssignments`). |
 
+**Uygulama sırasında alınan kararlar** (Faz 2.3, 26 Ekim):
+
+| Konu | Karar |
+| --- | --- |
+| Okutma kaydı | Her okutma `count_scans` tablosunda (satır, miktar, okutan, zaman, oturum içi sıra no) tutulur; satırın sayılan miktarı okutmaların toplamıdır. "Son okutmayı geri al" satırın son okutmasını siler; okutması kalmayan beklenmeyen satır da silinir. |
+| Kapsam | Sayımın kapsamı lokasyonun güncel yolundan hesaplanır (ayrı bir `ScopePath` saklanmaz). Kapsam dışı bağlam lokasyonuyla okutma 422. Çakışma kontrolü advisory lock altında yapılır. |
+| Okutma ucu | `POST /counts/{id}/scan` lokasyon etiketine `Location` (bağlam değişir, kayıt yok), miktarsız Quantity ürüne `QuantityRequired` döner; tekil ürün barkodu 422 ("adetin kendi etiketini okutun"). Aynı adet aynı yerde tekrar okutulursa `AlreadyCounted`. |
+| Başka rafta bulunan adet | Kapsam içinde başka rafta okutulan beklenen adet, okutulduğu yerde beklenmeyen satır açar ("Buraya taşı · Dokunma"); beklenen satır "başka rafta bulundu" olur ve kayıp kararına düşmez. |
+| Fark hesabı | Onay anındaki güncel duruma göre: miktar farkı = sayılan − güncel bakiye; okutulmamış beklenen adet sadece hâlâ o lokasyonda `InStock`/`InRepair` ise "Bulunamadı"; beklenmeyen adet için "Buraya taşı" sadece `InStock` iken (tamirdeki adet transfer edilemez, sadece not). |
+| Onay isteği | `{ decisions: [{ lineId, resolution }] }`; karar gereken satırda eksik karar 422 `Count.UndecidedLines`, satıra uymayan karar 422 `Count.InvalidResolution` (`errors["decisions[lineId]"]`). |
+| Kayıp adet | `Out` hareketi, sebep `Lost`, not "Sayımda bulunamadı." |
+| Sayım sırasındaki hareketler | `GET /movements?countId=` kapsamda, sayım başladıktan sonra olan hareketleri (onayın kendi hareketleri hariç) listeler; inceleme cevabı bunların sayısını taşır. |
+| Eşzamanlı okutma | `CountSession` `xmin` ile korunur; her okutma oturumun sıra numarasını artırır, çakışmada 409 "Sayım bu arada değişti, tekrar okutun." |
+| Yetkiler | Okutma, geri alma, incelemeye gönderme, liste ve detay: herkes. Başlatma, inceleme (`/review`), onay ve iptal: `CanApproveCount`. |
+
 ## Mimari
 
 Bağımlılıklar her zaman içe doğru akar: API → Application → Domain. Infrastructure, Application'daki arayüzleri uygular. Domain hiçbir pakete bağımlı değildir.

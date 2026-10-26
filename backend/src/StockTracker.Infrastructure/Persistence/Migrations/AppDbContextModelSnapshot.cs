@@ -484,6 +484,210 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("product_barcodes", (string)null);
                 });
 
+            modelBuilder.Entity("StockTracker.Domain.Counts.CountLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CountSessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("count_session_id");
+
+                    b.Property<decimal?>("CountedQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("counted_quantity");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal>("ExpectedQuantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("expected_quantity");
+
+                    b.Property<Guid?>("ItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<string>("LineType")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("line_type");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("location_id");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_id");
+
+                    b.Property<string>("Resolution")
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)")
+                        .HasColumnName("resolution");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_count_lines");
+
+                    b.HasIndex("ItemId")
+                        .HasDatabaseName("ix_count_lines_item_id");
+
+                    b.HasIndex("LocationId")
+                        .HasDatabaseName("ix_count_lines_location_id");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("ix_count_lines_product_id");
+
+                    b.HasIndex("CountSessionId", "LocationId")
+                        .HasDatabaseName("ix_count_lines_count_session_id_location_id");
+
+                    b.ToTable("count_lines", (string)null);
+                });
+
+            modelBuilder.Entity("StockTracker.Domain.Counts.CountScan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CountLineId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("count_line_id");
+
+                    b.Property<Guid>("CountSessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("count_session_id");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("quantity");
+
+                    b.Property<DateTime>("ScannedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("scanned_at");
+
+                    b.Property<Guid>("ScannedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("scanned_by");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("integer")
+                        .HasColumnName("sequence");
+
+                    b.HasKey("Id")
+                        .HasName("pk_count_scans");
+
+                    b.HasIndex("CountLineId")
+                        .HasDatabaseName("ix_count_scans_count_line_id");
+
+                    b.HasIndex("CountSessionId", "Sequence")
+                        .IsUnique()
+                        .HasDatabaseName("ix_count_scans_count_session_id_sequence");
+
+                    b.ToTable("count_scans", (string)null);
+                });
+
+            modelBuilder.Entity("StockTracker.Domain.Counts.CountSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("ApprovalReferenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approval_reference_id");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("approved_at");
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approved_by");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IncludeChildren")
+                        .HasColumnType("boolean")
+                        .HasColumnName("include_children");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("location_id");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("note");
+
+                    b.Property<int>("ScanSequence")
+                        .HasColumnType("integer")
+                        .HasColumnName("scan_sequence");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<Guid>("StartedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("started_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_count_sessions");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_count_sessions_status");
+
+                    b.HasIndex("LocationId", "StartedAt")
+                        .HasDatabaseName("ix_count_sessions_location_id_started_at");
+
+                    b.ToTable("count_sessions", (string)null);
+                });
+
             modelBuilder.Entity("StockTracker.Domain.Inventory.Item", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1076,6 +1280,63 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_product_barcodes_products_product_id");
                 });
 
+            modelBuilder.Entity("StockTracker.Domain.Counts.CountLine", b =>
+                {
+                    b.HasOne("StockTracker.Domain.Counts.CountSession", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("CountSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_count_lines_count_sessions_count_session_id");
+
+                    b.HasOne("StockTracker.Domain.Inventory.Item", null)
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_count_lines_items_item_id");
+
+                    b.HasOne("StockTracker.Domain.Locations.Location", null)
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_count_lines_locations_location_id");
+
+                    b.HasOne("StockTracker.Domain.Catalog.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_count_lines_products_product_id");
+                });
+
+            modelBuilder.Entity("StockTracker.Domain.Counts.CountScan", b =>
+                {
+                    b.HasOne("StockTracker.Domain.Counts.CountLine", null)
+                        .WithMany()
+                        .HasForeignKey("CountLineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_count_scans_count_lines_count_line_id");
+
+                    b.HasOne("StockTracker.Domain.Counts.CountSession", null)
+                        .WithMany("Scans")
+                        .HasForeignKey("CountSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_count_scans_count_sessions_count_session_id");
+                });
+
+            modelBuilder.Entity("StockTracker.Domain.Counts.CountSession", b =>
+                {
+                    b.HasOne("StockTracker.Domain.Locations.Location", null)
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_count_sessions_locations_location_id");
+                });
+
             modelBuilder.Entity("StockTracker.Domain.Inventory.Item", b =>
                 {
                     b.HasOne("StockTracker.Domain.Locations.Location", null)
@@ -1159,6 +1420,13 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("StockTracker.Domain.Catalog.Product", b =>
                 {
                     b.Navigation("Barcodes");
+                });
+
+            modelBuilder.Entity("StockTracker.Domain.Counts.CountSession", b =>
+                {
+                    b.Navigation("Lines");
+
+                    b.Navigation("Scans");
                 });
 #pragma warning restore 612, 618
         }

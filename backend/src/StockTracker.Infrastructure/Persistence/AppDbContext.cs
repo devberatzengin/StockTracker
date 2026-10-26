@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Domain.Assignments;
 using StockTracker.Domain.Catalog;
+using StockTracker.Domain.Counts;
 using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
 using StockTracker.Domain.Common;
@@ -32,6 +33,8 @@ public class AppDbContext(DbContextOptions options)
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
 
     public DbSet<Assignment> Assignments => Set<Assignment>();
+
+    public DbSet<CountSession> CountSessions => Set<CountSession>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

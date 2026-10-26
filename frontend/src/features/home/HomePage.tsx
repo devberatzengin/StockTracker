@@ -2,6 +2,7 @@ import { Paper, SimpleGrid, Stack, Text, ThemeIcon, Title, UnstyledButton } from
 import {
   IconArrowBackUp,
   IconArrowsMove,
+  IconClipboardCheck,
   IconHistory,
   IconLogin,
   IconPackage,
@@ -62,6 +63,13 @@ const shortcuts: Shortcut[] = [
     description: 'Üzerimdeki adetler ve teslim tarihleri',
     icon: <IconUserCheck size={26} />,
     color: 'indigo',
+  },
+  {
+    to: '/counts',
+    label: 'Sayım',
+    description: 'Rafı say, farkları onayla',
+    icon: <IconClipboardCheck size={26} />,
+    color: 'orange',
   },
   {
     to: '/products',

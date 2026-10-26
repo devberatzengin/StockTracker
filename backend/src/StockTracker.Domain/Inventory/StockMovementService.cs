@@ -133,6 +133,39 @@ public sealed class StockMovementService
     }
 
     /// <summary>
+    /// Count correction: changes the balance by <paramref name="delta"/> with an Adjustment movement
+    /// (target set for an increase, source for a decrease).
+    /// </summary>
+    public StockMovement AdjustQuantity(
+        Product product,
+        Location location,
+        StockBalance balance,
+        decimal delta,
+        MovementContext context)
+    {
+        EnsureUsable(product, TrackingType.Quantity);
+        EnsureBelongs(balance, product, location);
+        if (delta == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(delta), "An adjustment needs a non-zero difference.");
+        }
+
+        var movement = delta > 0
+            ? StockMovement.Create(MovementType.Adjustment, product.Id, null, null, location.Id, delta, null, null, context)
+            : StockMovement.Create(MovementType.Adjustment, product.Id, null, location.Id, null, -delta, null, null, context);
+        if (delta > 0)
+        {
+            balance.Increase(delta);
+        }
+        else
+        {
+            balance.Decrease(-delta);
+        }
+
+        return movement;
+    }
+
+    /// <summary>
     /// Hands an in-stock item of an assignable product to an active user. The item leaves its
     /// location; the Assign movement's source is that last location.
     /// </summary>

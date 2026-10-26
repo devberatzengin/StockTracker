@@ -14,6 +14,7 @@ import {
   IconArrowsMove,
   IconCategory,
   IconChevronDown,
+  IconClipboardCheck,
   IconHistory,
   IconHome,
   IconKey,
@@ -57,6 +58,7 @@ const mainItems: NavItem[] = [
     permission: Permissions.CanMoveStock,
   },
   { label: 'Zimmetlerim', to: '/my-assignments', icon: <IconUserCheck size={18} /> },
+  { label: 'Sayımlar', to: '/counts', icon: <IconClipboardCheck size={18} /> },
   {
     label: 'Kategoriler',
     to: '/categories',
