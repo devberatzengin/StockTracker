@@ -16,6 +16,7 @@ type MovementText = Pick<
   | 'reason'
   | 'fromStatus'
   | 'toStatus'
+  | 'assigneeName'
 >
 
 /** The moved thing, ready for its accusative suffix: "200 adet Vida M4", "ITM-7F3K9Q kodlu Laptop". */
@@ -48,11 +49,19 @@ export function describeMovement(m: MovementText): string {
       return m.toLocationName
         ? `${who}, sayım farkı olarak ${object(m)} ${dative(m.toLocationName)} ekledi.`
         : `${who}, sayım farkı olarak ${object(m)} ${ablative(place(m.fromLocationName))} düştü.`
-    case 'Assign':
-      return `${who}, ${object(m)} zimmetledi.`
-    case 'Return':
-      return `${who}, ${object(m)} iade alıp ${dative(place(m.toLocationName))} koydu.`
+    case 'Assign': {
+      const from = m.fromLocationName ? ` ${ablative(m.fromLocationName)} alıp` : ''
+      const to = m.assigneeName ? ` ${dative(m.assigneeName)}` : ''
+      return `${who}, ${object(m)}${from}${to} zimmetledi.`
+    }
+    case 'Return': {
+      const from = m.assigneeName ? ` ${ablative(m.assigneeName)}` : ''
+      return `${who}, ${object(m)}${from} iade alıp ${dative(place(m.toLocationName))} koydu.`
+    }
     case 'StatusChange':
+      if (m.toStatus === 'InRepair') return `${who}, ${object(m)} tamire gönderdi.`
+      if (m.fromStatus === 'InRepair' && m.toStatus === 'InStock')
+        return `${who}, ${object(m)} tamirden geri aldı.`
       return m.fromStatus && m.toStatus
         ? `${who}, ${object(m)} "${ITEM_STATUS_LABELS[m.fromStatus]}" durumundan "${ITEM_STATUS_LABELS[m.toStatus]}" durumuna aldı.`
         : `${who}, ${object(m)} durumunu değiştirdi.`

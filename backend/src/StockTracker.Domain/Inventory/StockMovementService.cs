@@ -1,3 +1,4 @@
+using StockTracker.Domain.Assignments;
 using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Exceptions;
 using StockTracker.Domain.Locations;
@@ -128,6 +129,110 @@ public sealed class StockMovementService
             MovementType.Transfer, product.Id, null, source.Id, target.Id, quantity, null, null, context);
         Decrease(sourceBalance, product, source, quantity);
         targetBalance.Increase(quantity);
+        return movement;
+    }
+
+    /// <summary>
+    /// Hands an in-stock item of an assignable product to an active user. The item leaves its
+    /// location; the Assign movement's source is that last location.
+    /// </summary>
+    /// <param name="assigneeIsActive">Whether the receiving user exists and is active.</param>
+    /// <param name="today">Current calendar day (Europe/Istanbul) for the due date rule.</param>
+    public (Assignment Assignment, StockMovement Movement) AssignItem(
+        Item item,
+        Product product,
+        Guid assigneeUserId,
+        bool assigneeIsActive,
+        DateOnly? dueDate,
+        DateOnly today,
+        string? note,
+        MovementContext context)
+    {
+        EnsureUsable(product, TrackingType.Serialized);
+        EnsureBelongs(item, product);
+        if (!product.IsAssignable)
+        {
+            throw new DomainException(AssignmentErrors.ProductNotAssignable, "Bu ürün zimmetlenebilir değil.", "itemId");
+        }
+
+        item.EnsureCanAssign();
+        if (!assigneeIsActive)
+        {
+            throw new DomainException(AssignmentErrors.AssigneeInactive, "Pasif kullanıcıya zimmet verilemez.", "assigneeUserId");
+        }
+
+        // Validate the assignment and the ledger entry before changing the item.
+        var assignment = Assignment.Create(item, assigneeUserId, dueDate, today, note, context);
+        var movement = StockMovement.Create(
+            MovementType.Assign, product.Id, item.Id, item.CurrentLocationId, null, 1, null, null, context);
+        item.Assign();
+        return (assignment, movement);
+    }
+
+    /// <summary>
+    /// Takes an assigned item back into <paramref name="target"/>. A faulty return also sends the item
+    /// to repair: a Return movement followed by a StatusChange carrying the return note.
+    /// </summary>
+    public IReadOnlyList<StockMovement> ReturnItem(
+        Assignment assignment,
+        Item item,
+        Product product,
+        Location target,
+        ReturnCondition condition,
+        string? note,
+        MovementContext context)
+    {
+        EnsureBelongs(item, product);
+        if (assignment.ItemId != item.Id)
+        {
+            throw new ArgumentException("Assignment does not belong to the item.", nameof(assignment));
+        }
+
+        var trimmedNote = Assignment.ValidateReturn(assignment, condition, note);
+        EnsureActive(target, "returnLocationId");
+        item.EnsureCanReturn();
+
+        var movements = new List<StockMovement>
+        {
+            StockMovement.Create(MovementType.Return, product.Id, item.Id, null, target.Id, 1, null, trimmedNote, context),
+        };
+        if (condition == ReturnCondition.Faulty)
+        {
+            movements.Add(StockMovement.Create(
+                MovementType.StatusChange, product.Id, item.Id, null, null, 1, null, trimmedNote, context,
+                ItemStatus.InStock, ItemStatus.InRepair));
+        }
+
+        assignment.Return(target, condition, trimmedNote, context);
+        item.Return(target);
+        if (condition == ReturnCondition.Faulty)
+        {
+            item.SendToRepair();
+        }
+
+        return movements;
+    }
+
+    /// <summary>InStock → InRepair; the item keeps its location.</summary>
+    public StockMovement SendToRepair(Item item, Product product, string? note, MovementContext context) =>
+        ChangeStatus(item, product, note, context, ItemState.For(item.Status).SendToRepair(), item.SendToRepair);
+
+    /// <summary>InRepair → InStock; the item keeps its location.</summary>
+    public StockMovement CompleteRepair(Item item, Product product, string? note, MovementContext context) =>
+        ChangeStatus(item, product, note, context, ItemState.For(item.Status).CompleteRepair(), item.CompleteRepair);
+
+    private static StockMovement ChangeStatus(
+        Item item,
+        Product product,
+        string? note,
+        MovementContext context,
+        ItemStatus toStatus,
+        Action apply)
+    {
+        EnsureBelongs(item, product);
+        var movement = StockMovement.Create(
+            MovementType.StatusChange, product.Id, item.Id, null, null, 1, null, note, context, item.Status, toStatus);
+        apply();
         return movement;
     }
 

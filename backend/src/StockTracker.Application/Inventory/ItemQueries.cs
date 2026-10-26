@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using StockTracker.Application.Common;
 using StockTracker.Application.Common.Exceptions;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Application.Common.Models;
@@ -126,7 +127,8 @@ public sealed class GetItemsQueryHandler(IAppDbContext db) : IRequestHandler<Get
     }
 }
 
-public sealed class GetItemQueryHandler(IAppDbContext db) : IRequestHandler<GetItemQuery, ItemDto>
+public sealed class GetItemQueryHandler(IAppDbContext db, IUserAccountService users, IDateTime dateTime)
+    : IRequestHandler<GetItemQuery, ItemDto>
 {
     public async Task<ItemDto> Handle(GetItemQuery request, CancellationToken cancellationToken)
     {
@@ -142,6 +144,19 @@ public sealed class GetItemQueryHandler(IAppDbContext db) : IRequestHandler<GetI
             ?? throw new NotFoundException("Adet", request.Id);
 
         var item = row.Item;
+        var openAssignment = await db.Assignments.AsNoTracking()
+            .Where(a => a.ItemId == item.Id && a.ReturnedAt == null)
+            .SingleOrDefaultAsync(cancellationToken);
+        var assigneeName = openAssignment is null
+            ? null
+            : (await users.GetDisplayNamesAsync([openAssignment.AssigneeUserId], cancellationToken))
+                .GetValueOrDefault(openAssignment.AssigneeUserId, "?");
+
+        // Valid operations come from the item state; assigning also needs an assignable product.
+        var actions = item.AvailableActions
+            .Where(a => a != ItemAction.Assign || row.Product.IsAssignable)
+            .ToList();
+
         var paths = item.CurrentLocationId is { } locationId
             ? await LocationPaths.BuildAsync(db, [locationId], cancellationToken)
             : new Dictionary<Guid, string>();
@@ -157,7 +172,17 @@ public sealed class GetItemQueryHandler(IAppDbContext db) : IRequestHandler<GetI
             item.Status,
             item.CurrentLocationId,
             item.CurrentLocationId is { } l ? paths.GetValueOrDefault(l) : null,
-            item.CreatedAt);
+            item.CreatedAt,
+            actions,
+            openAssignment is null
+                ? null
+                : new ItemOpenAssignmentDto(
+                    openAssignment.Id,
+                    openAssignment.AssigneeUserId,
+                    assigneeName!,
+                    openAssignment.AssignedAt,
+                    openAssignment.DueDate,
+                    openAssignment.IsOverdue(dateTime.Today())));
     }
 }
 

@@ -27,4 +27,14 @@ public sealed class ItemsController(ISender sender) : ControllerBase
         await sender.Send(new UpdateItemCommand(id, request.SerialNumber), cancellationToken);
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/send-to-repair")]
+    [Authorize(Policy = Permissions.CanMoveStock)]
+    public Task<MovementResultDto> SendToRepair(Guid id, ItemStatusChangeRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new SendItemToRepairCommand(id, request.Note), cancellationToken);
+
+    [HttpPost("{id:guid}/return-from-repair")]
+    [Authorize(Policy = Permissions.CanMoveStock)]
+    public Task<MovementResultDto> ReturnFromRepair(Guid id, ItemStatusChangeRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new ReturnItemFromRepairCommand(id, request.Note), cancellationToken);
 }

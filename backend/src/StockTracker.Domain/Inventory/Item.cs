@@ -62,7 +62,14 @@ public class Item : BaseEntity
         SerialNumber = normalized;
     }
 
+    /// <summary>Operations the current status allows (State pattern).</summary>
+    public IReadOnlyList<ItemAction> AvailableActions => State.Actions;
+
     internal void EnsureCanTransfer() => State.EnsureCanTransfer();
+
+    internal void EnsureCanAssign() => _ = State.Assign();
+
+    internal void EnsureCanReturn() => _ = State.Return();
 
     internal void EnsureCanDispose() => _ = State.Dispose();
 

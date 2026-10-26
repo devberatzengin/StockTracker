@@ -31,3 +31,14 @@ export const startOfDayIstanbul = (day: string) =>
 /** End of a calendar day (yyyy-mm-dd) in Istanbul, as an ISO instant for API filters. */
 export const endOfDayIstanbul = (day: string) =>
   new Date(`${day}T23:59:59.999${ISTANBUL_OFFSET}`).toISOString()
+
+const dayFormatter = new Intl.DateTimeFormat('tr-TR', { timeZone: 'UTC', dateStyle: 'medium' })
+
+/** Formats a calendar day (yyyy-mm-dd, e.g. a due date) without shifting it across time zones. */
+export const formatDay = (day: string) => dayFormatter.format(new Date(`${day}T00:00:00Z`))
+
+/** Today's calendar day in Istanbul (yyyy-mm-dd), optionally shifted by whole days. */
+export function todayIstanbul(addDays = 0, now = new Date()) {
+  const istanbul = new Date(now.getTime() + 3 * 60 * 60 * 1000 + addDays * 24 * 60 * 60 * 1000)
+  return istanbul.toISOString().slice(0, 10)
+}

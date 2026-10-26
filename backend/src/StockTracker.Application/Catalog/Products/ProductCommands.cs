@@ -112,6 +112,7 @@ public sealed class UpdateProductCommandHandler(
     ICategoryRepository categories,
     IProductRepository products,
     IProductStockChecker stockChecker,
+    IAssignmentChecker assignmentChecker,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand>
 {
     public async Task Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -122,6 +123,8 @@ public sealed class UpdateProductCommandHandler(
         var trackingTypeChanges = request.TrackingType != product.TrackingType;
         var hasStockHistory = trackingTypeChanges
             && await stockChecker.HasStockOrMovementsAsync(product.Id, cancellationToken);
+        var hasOpenAssignments = product.IsAssignable && !request.IsAssignable
+            && await assignmentChecker.ProductHasOpenAssignmentsAsync(product.Id, cancellationToken);
 
         product.Update(
             request.Name,
@@ -131,7 +134,8 @@ public sealed class UpdateProductCommandHandler(
             request.TrackingType,
             request.IsAssignable,
             request.MinStockLevel,
-            hasStockHistory);
+            hasStockHistory,
+            hasOpenAssignments);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }

@@ -77,6 +77,21 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Tarama girdisi | URL ise host kontrol edilmez, sadece `/s/{kod}` alınır. Elle giriş alanı tarama penceresinde her zaman görünür. |
 | Lokasyon detayı (1.3) | Breadcrumb ve alt lokasyon listesi; içerik tablosu ve "alt lokasyonlar dahil" anahtarı `/contents` ile 1.5'te. |
 
+**Uygulama sırasında alınan kararlar** (Faz 2.1–2.2, 26 Ekim):
+
+| Konu | Karar |
+| --- | --- |
+| Arızalı iade | `Return` hareketi (Assigned → InStock) ve hemen ardından `StatusChange` (InStock → InRepair) yazılır; ikisi aynı `ReferenceId` ile tek transaction'da. İade notu iki hareketin de notudur. `FromStatus`/`ToStatus` sadece `StatusChange`'te dolu kalır. |
+| Aynı işlemdeki hareketlerin sırası | Hareket listesinde aynı `OccurredAt`'taki `StatusChange`, onu doğuran hareketten sonra gelir (v7 id'ler aynı milisaniye içinde sıralı değildir). |
+| Teslim tarihi | `date` kolonu (`DateOnly`); "bugün" Europe/Istanbul günüdür (sabit UTC+3). Gecikme: iade edilmemiş ve `DueDate < bugün`; teslim günü gecikme sayılmaz. |
+| Zimmet alıcısı seçimi | `GET /users/lookup?search=` (`CanMoveStock`): sadece aktif kullanıcılar, ad/departman araması. `/users` uçları Admin'e kalır. |
+| Kullanıcı detayı | Admin için `GET /users/{id}` ve `/users/:id` sayfası (bilgiler + zimmet geçmişi). |
+| Zimmet uçları yetkisi | Zimmet ver/iade al/liste ve durum işlemleri `CanMoveStock`; `GET /assignments/mine` herkes; `GET /assignments/{id}` `CanMoveStock` ya da zimmetin sahibi. |
+| Item'ın geçerli işlemleri | `ItemDto.availableActions` `ItemState`'ten okunur (`Assign` ayrıca ürünün zimmetlenebilir olmasını ister); frontend düğmeleri sadece buna göre gösterir. `ItemDto.openAssignment` açık zimmetin sahibini ve teslim tarihini taşır. |
+| Zimmet hareketlerinde kişi | Assignment, `AssignReferenceId` ve `ReturnReferenceId` tutar; hareket listesi `Assign`/`Return` satırlarına `assigneeName` ekler. |
+| Eşzamanlı zimmet | Kısmi benzersiz index (`item_id WHERE returned_at IS NULL`) ihlali 409 "Bu adet bu arada zimmetlendi, tekrar deneyin." |
+| Açık zimmet kısıtları | Açık zimmeti olan kullanıcıyı pasifleştirme ve açık zimmeti olan üründe `IsAssignable`'ı kapatma 422 ile reddedilir (`Assignment.UserHasOpenAssignments`, `Product.HasOpenAssignments`). |
+
 ## Mimari
 
 Bağımlılıklar her zaman içe doğru akar: API → Application → Domain. Infrastructure, Application'daki arayüzleri uygular. Domain hiçbir pakete bağımlı değildir.

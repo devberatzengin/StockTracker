@@ -4,6 +4,200 @@
  */
 
 export interface paths {
+    "/api/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Page?: number;
+                    PageSize?: number;
+                    Status?: components["schemas"]["AssignmentStatus"];
+                    UserId?: string;
+                    ProductId?: string;
+                    ItemId?: string;
+                    Search?: string;
+                    Sort?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AssignmentDtoPagedResult"];
+                        "application/json": components["schemas"]["AssignmentDtoPagedResult"];
+                        "text/json": components["schemas"]["AssignmentDtoPagedResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["AssignItemCommand"];
+                    "text/json": components["schemas"]["AssignItemCommand"];
+                    "application/*+json": components["schemas"]["AssignItemCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AssignmentResultDto"];
+                        "application/json": components["schemas"]["AssignmentResultDto"];
+                        "text/json": components["schemas"]["AssignmentResultDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assignments/{id}/return": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ReturnAssignmentRequest"];
+                    "text/json": components["schemas"]["ReturnAssignmentRequest"];
+                    "application/*+json": components["schemas"]["ReturnAssignmentRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AssignmentResultDto"];
+                        "application/json": components["schemas"]["AssignmentResultDto"];
+                        "text/json": components["schemas"]["AssignmentResultDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assignments/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AssignmentDto"][];
+                        "application/json": components["schemas"]["AssignmentDto"][];
+                        "text/json": components["schemas"]["AssignmentDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assignments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["AssignmentDto"];
+                        "application/json": components["schemas"]["AssignmentDto"];
+                        "text/json": components["schemas"]["AssignmentDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login": {
         parameters: {
             query?: never;
@@ -447,6 +641,96 @@ export interface paths {
             };
         };
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/{id}/send-to-repair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ItemStatusChangeRequest"];
+                    "text/json": components["schemas"]["ItemStatusChangeRequest"];
+                    "application/*+json": components["schemas"]["ItemStatusChangeRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MovementResultDto"];
+                        "application/json": components["schemas"]["MovementResultDto"];
+                        "text/json": components["schemas"]["MovementResultDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/items/{id}/return-from-repair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ItemStatusChangeRequest"];
+                    "text/json": components["schemas"]["ItemStatusChangeRequest"];
+                    "application/*+json": components["schemas"]["ItemStatusChangeRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MovementResultDto"];
+                        "application/json": components["schemas"]["MovementResultDto"];
+                        "text/json": components["schemas"]["MovementResultDto"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -1270,6 +1554,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Search?: string;
+                    Limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["UserLookupDto"][];
+                        "application/json": components["schemas"]["UserLookupDto"][];
+                        "text/json": components["schemas"]["UserLookupDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users": {
         parameters: {
             query?: never;
@@ -1346,7 +1670,30 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["UserDto"];
+                        "application/json": components["schemas"]["UserDto"];
+                        "text/json": components["schemas"]["UserDto"];
+                    };
+                };
+            };
+        };
         put: {
             parameters: {
                 query?: never;
@@ -1469,6 +1816,70 @@ export interface components {
             value: string;
             format: components["schemas"]["BarcodeFormat"];
         };
+        AssignItemCommand: {
+            /** Format: uuid */
+            itemId: string;
+            /** Format: uuid */
+            assigneeUserId: string;
+            /** Format: date */
+            dueDate?: string | null;
+            note?: string | null;
+        };
+        AssignmentDto: {
+            /** Format: uuid */
+            id: string;
+            status: components["schemas"]["AssignmentStatus"];
+            /** Format: uuid */
+            itemId: string;
+            itemCode: string;
+            serialNumber?: string | null;
+            /** Format: uuid */
+            productId: string;
+            productCode: string;
+            productName: string;
+            /** Format: uuid */
+            assigneeUserId: string;
+            assigneeName: string;
+            /** Format: uuid */
+            assignedByUserId: string;
+            assignedByName: string;
+            /** Format: date-time */
+            assignedAt: string;
+            /** Format: date */
+            dueDate?: string | null;
+            note?: string | null;
+            /** Format: uuid */
+            assignReferenceId: string;
+            /** Format: date-time */
+            returnedAt?: string | null;
+            /** Format: uuid */
+            returnedByUserId?: string | null;
+            returnedByName?: string | null;
+            /** Format: uuid */
+            returnLocationId?: string | null;
+            returnLocationPath?: string | null;
+            returnCondition?: components["schemas"]["ReturnCondition"];
+            returnNote?: string | null;
+            /** Format: uuid */
+            returnReferenceId?: string | null;
+        };
+        AssignmentDtoPagedResult: {
+            items: components["schemas"]["AssignmentDto"][];
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+        };
+        AssignmentResultDto: {
+            /** Format: uuid */
+            assignmentId: string;
+            /** Format: uuid */
+            referenceId: string;
+        };
+        /** @enum {string} */
+        AssignmentStatus: "Open" | "Overdue" | "Returned";
         /** @enum {string} */
         BarcodeFormat: "Ean13" | "Ean8" | "UpcA" | "Code128" | "Other";
         BarcodeInput: {
@@ -1571,6 +1982,8 @@ export interface components {
             role: string;
             permissions: string[];
         };
+        /** @enum {string} */
+        ItemAction: "Transfer" | "Assign" | "Return" | "SendToRepair" | "ReturnFromRepair" | "Dispose";
         ItemDto: {
             /** Format: uuid */
             id: string;
@@ -1587,6 +2000,8 @@ export interface components {
             locationPath?: string | null;
             /** Format: date-time */
             createdAt: string;
+            availableActions: components["schemas"]["ItemAction"][];
+            openAssignment?: components["schemas"]["ItemOpenAssignmentDto"];
         };
         ItemListItemDto: {
             /** Format: uuid */
@@ -1611,8 +2026,23 @@ export interface components {
             /** Format: int32 */
             pageSize: number;
         };
+        ItemOpenAssignmentDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            assigneeUserId: string;
+            assigneeName: string;
+            /** Format: date-time */
+            assignedAt: string;
+            /** Format: date */
+            dueDate?: string | null;
+            isOverdue: boolean;
+        };
         /** @enum {string} */
         ItemStatus: "InStock" | "Assigned" | "InRepair" | "Disposed";
+        ItemStatusChangeRequest: {
+            note?: string | null;
+        };
         ItemStatusCountDto: {
             status: components["schemas"]["ItemStatus"];
             /** Format: int32 */
@@ -1713,6 +2143,7 @@ export interface components {
             userName: string;
             fromStatus?: components["schemas"]["ItemStatus"];
             toStatus?: components["schemas"]["ItemStatus"];
+            assigneeName?: string | null;
         };
         MovementDtoPagedResult: {
             items: components["schemas"]["MovementDto"][];
@@ -1810,6 +2241,14 @@ export interface components {
         ResetPasswordRequest: {
             newPassword: string;
         };
+        ReturnAssignmentRequest: {
+            /** Format: uuid */
+            returnLocationId: string;
+            condition: components["schemas"]["ReturnCondition"];
+            note?: string | null;
+        };
+        /** @enum {string} */
+        ReturnCondition: "Good" | "Faulty";
         ScanResultDto: {
             type: string;
             /** Format: uuid */
@@ -1900,6 +2339,13 @@ export interface components {
             page: number;
             /** Format: int32 */
             pageSize: number;
+        };
+        UserLookupDto: {
+            /** Format: uuid */
+            id: string;
+            fullName: string;
+            department?: string | null;
+            canLogin: boolean;
         };
     };
     responses: never;

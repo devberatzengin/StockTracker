@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using StockTracker.Application.Common.Interfaces;
+using StockTracker.Domain.Assignments;
 using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
@@ -29,6 +30,8 @@ public class AppDbContext(DbContextOptions options)
     public DbSet<StockBalance> StockBalances => Set<StockBalance>();
 
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
+
+    public DbSet<Assignment> Assignments => Set<Assignment>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

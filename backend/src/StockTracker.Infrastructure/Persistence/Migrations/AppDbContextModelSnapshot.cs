@@ -195,6 +195,113 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("user_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("StockTracker.Domain.Assignments.Assignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AssignReferenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assign_reference_id");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("assigned_at");
+
+                    b.Property<Guid>("AssignedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assigned_by_user_id");
+
+                    b.Property<Guid>("AssigneeUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assignee_user_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("item_id");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("note");
+
+                    b.Property<string>("ReturnCondition")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("return_condition");
+
+                    b.Property<Guid?>("ReturnLocationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("return_location_id");
+
+                    b.Property<string>("ReturnNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("return_note");
+
+                    b.Property<Guid?>("ReturnReferenceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("return_reference_id");
+
+                    b.Property<DateTime?>("ReturnedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("returned_at");
+
+                    b.Property<Guid?>("ReturnedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("returned_by_user_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_assignments");
+
+                    b.HasIndex("AssignedByUserId")
+                        .HasDatabaseName("ix_assignments_assigned_by_user_id");
+
+                    b.HasIndex("DueDate")
+                        .HasDatabaseName("ix_assignments_due_date")
+                        .HasFilter("returned_at IS NULL");
+
+                    b.HasIndex("ItemId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_assignments_item_id_open")
+                        .HasFilter("returned_at IS NULL");
+
+                    b.HasIndex("ReturnLocationId")
+                        .HasDatabaseName("ix_assignments_return_location_id");
+
+                    b.HasIndex("ReturnedByUserId")
+                        .HasDatabaseName("ix_assignments_returned_by_user_id");
+
+                    b.HasIndex("AssigneeUserId", "ReturnedAt")
+                        .HasDatabaseName("ix_assignments_assignee_user_id_returned_at");
+
+                    b.HasIndex("ItemId", "AssignedAt")
+                        .HasDatabaseName("ix_assignments_item_id_assigned_at");
+
+                    b.ToTable("assignments", (string)null);
+                });
+
             modelBuilder.Entity("StockTracker.Domain.Catalog.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -911,6 +1018,42 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_user_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("StockTracker.Domain.Assignments.Assignment", b =>
+                {
+                    b.HasOne("StockTracker.Infrastructure.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_assignments_users_assigned_by_user_id");
+
+                    b.HasOne("StockTracker.Infrastructure.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AssigneeUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_assignments_users_assignee_user_id");
+
+                    b.HasOne("StockTracker.Domain.Inventory.Item", null)
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_assignments_items_item_id");
+
+                    b.HasOne("StockTracker.Domain.Locations.Location", null)
+                        .WithMany()
+                        .HasForeignKey("ReturnLocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_assignments_locations_return_location_id");
+
+                    b.HasOne("StockTracker.Infrastructure.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReturnedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_assignments_users_returned_by_user_id");
                 });
 
             modelBuilder.Entity("StockTracker.Domain.Catalog.Product", b =>

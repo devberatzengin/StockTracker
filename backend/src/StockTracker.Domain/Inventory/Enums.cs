@@ -26,3 +26,14 @@ public enum MovementReason
     Lost,
     Other,
 }
+
+/// <summary>Operations an item's current status allows; read from the item state.</summary>
+public enum ItemAction
+{
+    Transfer,
+    Assign,
+    Return,
+    SendToRepair,
+    ReturnFromRepair,
+    Dispose,
+}

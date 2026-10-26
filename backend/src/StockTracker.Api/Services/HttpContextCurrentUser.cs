@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 using StockTracker.Application.Common.Interfaces;
+using StockTracker.Application.Common.Security;
 
 namespace StockTracker.Api.Services;
 
@@ -13,4 +14,7 @@ public sealed class HttpContextCurrentUser(IHttpContextAccessor httpContextAcces
 
     public Guid? UserId =>
         IsAuthenticated && Guid.TryParse(User!.FindFirstValue(JwtRegisteredClaimNames.Sub), out var id) ? id : null;
+
+    public bool HasPermission(string permission) =>
+        IsAuthenticated && Permissions.RolesFor(permission).Any(User!.IsInRole);
 }

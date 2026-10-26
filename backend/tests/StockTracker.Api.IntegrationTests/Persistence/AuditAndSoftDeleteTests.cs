@@ -141,6 +141,8 @@ public class AuditAndSoftDeleteTests(ApiFactory factory) : IAsyncLifetime
         public Guid? UserId => userId;
 
         public bool IsAuthenticated => true;
+
+        public bool HasPermission(string permission) => false;
     }
 
     private sealed class FakeDateTime : IDateTime

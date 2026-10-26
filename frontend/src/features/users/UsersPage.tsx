@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Anchor,
   Badge,
   Button,
   Group,
@@ -23,6 +24,7 @@ import {
   IconUserOff,
 } from '@tabler/icons-react'
 import { useState } from 'react'
+import { Link } from 'react-router'
 import type { UserDto } from '@/api/types'
 import { ResetPasswordModal } from '@/features/users/ResetPasswordModal'
 import { roleLabel } from '@/features/users/roles'
@@ -125,9 +127,9 @@ export function UsersPage() {
               data?.items.map((user) => (
                 <Table.Tr key={user.id}>
                   <Table.Td>
-                    <Text size="sm" fw={500}>
+                    <Anchor component={Link} to={`/users/${user.id}`} size="sm" fw={500}>
                       {user.fullName}
-                    </Text>
+                    </Anchor>
                     {user.email && (
                       <Text size="xs" c="dimmed">
                         {user.email}

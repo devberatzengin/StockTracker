@@ -50,6 +50,8 @@ public static class DependencyInjection
         services.AddScoped<IItemRepository, ItemRepository>();
         services.AddScoped<IStockBalanceRepository, StockBalanceRepository>();
         services.AddScoped<IMovementRepository, MovementRepository>();
+        services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+        services.AddScoped<IAssignmentChecker, AssignmentChecker>();
 
         services.AddScoped<ICodeUniquenessCheck, ProductCodeUniquenessCheck>();
         services.AddScoped<ICodeUniquenessCheck, LocationCodeUniquenessCheck>();

@@ -25,7 +25,8 @@ public sealed record MovementDto(
     Guid UserId,
     string UserName,
     ItemStatus? FromStatus,
-    ItemStatus? ToStatus);
+    ItemStatus? ToStatus,
+    string? AssigneeName);
 
 public sealed record ItemListItemDto(
     Guid Id,
@@ -49,7 +50,18 @@ public sealed record ItemDto(
     ItemStatus Status,
     Guid? CurrentLocationId,
     string? LocationPath,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    IReadOnlyList<ItemAction> AvailableActions,
+    ItemOpenAssignmentDto? OpenAssignment);
+
+/// <summary>The item's current holder, when assigned.</summary>
+public sealed record ItemOpenAssignmentDto(
+    Guid Id,
+    Guid AssigneeUserId,
+    string AssigneeName,
+    DateTime AssignedAt,
+    DateOnly? DueDate,
+    bool IsOverdue);
 
 public sealed record LocationQuantityDto(Guid LocationId, string LocationPath, decimal Quantity);
 

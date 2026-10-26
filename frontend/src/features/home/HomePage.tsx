@@ -1,5 +1,13 @@
 import { Paper, SimpleGrid, Stack, Text, ThemeIcon, Title, UnstyledButton } from '@mantine/core'
-import { IconArrowsMove, IconHistory, IconLogin, IconPackage } from '@tabler/icons-react'
+import {
+  IconArrowBackUp,
+  IconArrowsMove,
+  IconHistory,
+  IconLogin,
+  IconPackage,
+  IconUserCheck,
+  IconUserShare,
+} from '@tabler/icons-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useAuth } from '@/features/auth/authContext'
@@ -31,6 +39,29 @@ const shortcuts: Shortcut[] = [
     icon: <IconLogin size={26} />,
     color: 'green',
     permission: Permissions.CanMoveStock,
+  },
+  {
+    to: '/assignments/new',
+    label: 'Zimmet ver',
+    description: 'Adeti okut, kişiyi seç',
+    icon: <IconUserShare size={26} />,
+    color: 'grape',
+    permission: Permissions.CanMoveStock,
+  },
+  {
+    to: '/assignments/return',
+    label: 'İade al',
+    description: 'Zimmetli adeti rafa geri al',
+    icon: <IconArrowBackUp size={26} />,
+    color: 'teal',
+    permission: Permissions.CanMoveStock,
+  },
+  {
+    to: '/my-assignments',
+    label: 'Zimmetlerim',
+    description: 'Üzerimdeki adetler ve teslim tarihleri',
+    icon: <IconUserCheck size={26} />,
+    color: 'indigo',
   },
   {
     to: '/products',

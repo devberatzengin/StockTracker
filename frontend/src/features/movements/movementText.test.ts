@@ -12,6 +12,7 @@ const base = {
   reason: undefined,
   fromStatus: undefined,
   toStatus: undefined,
+  assigneeName: undefined,
 }
 
 describe('describeMovement', () => {
@@ -56,6 +57,7 @@ describe('describeMovement', () => {
         itemCode: 'ITM-1',
         productName: 'Laptop',
         quantity: 1,
+        fromLocationName: undefined,
       }),
     ).toBe("Berat, ITM-1 kodlu Laptop'u zimmetledi.")
     expect(
@@ -68,6 +70,37 @@ describe('describeMovement', () => {
         fromStatus: 'InStock',
         toStatus: 'InRepair',
       }),
-    ).toBe('Berat, ITM-1 kodlu Laptop\'u "Stokta" durumundan "Tamirde" durumuna aldı.')
+    ).toBe("Berat, ITM-1 kodlu Laptop'u tamire gönderdi.")
+    expect(
+      describeMovement({
+        ...base,
+        type: 'StatusChange',
+        itemCode: 'ITM-1',
+        productName: 'Laptop',
+        quantity: 1,
+        fromStatus: 'InRepair',
+        toStatus: 'InStock',
+      }),
+    ).toBe("Berat, ITM-1 kodlu Laptop'u tamirden geri aldı.")
+  })
+
+  it('names the holder of assignments and returns', () => {
+    const laptop = { ...base, itemCode: 'ITM-1', productName: 'Laptop', quantity: 1 }
+    expect(
+      describeMovement({
+        ...laptop,
+        type: 'Assign',
+        fromLocationName: 'Raf A1',
+        assigneeName: 'Ali Saha',
+      }),
+    ).toBe("Berat, ITM-1 kodlu Laptop'u Raf A1'den alıp Ali Saha'ya zimmetledi.")
+    expect(
+      describeMovement({
+        ...laptop,
+        type: 'Return',
+        toLocationName: 'Raf B2',
+        assigneeName: 'Ali Saha',
+      }),
+    ).toBe("Berat, ITM-1 kodlu Laptop'u Ali Saha'dan iade alıp Raf B2'ye koydu.")
   })
 })

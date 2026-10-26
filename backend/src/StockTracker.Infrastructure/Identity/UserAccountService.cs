@@ -56,6 +56,37 @@ public sealed class UserAccountService(
         return new PagedResult<UserDto>(items, totalCount, criteria.Page, criteria.PageSize);
     }
 
+    public Task<UserDto?> GetAsync(Guid userId, CancellationToken cancellationToken) =>
+        UsersWithRole(includeInactive: true)
+            .Where(x => x.User.Id == userId)
+            .Select(x => new UserDto(
+                x.User.Id,
+                x.User.FullName,
+                x.User.Department,
+                x.User.Email,
+                x.Role,
+                x.User.CanLogin,
+                x.User.IsActive))
+            .SingleOrDefaultAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<UserLookupDto>> LookupAsync(string? search, int limit, CancellationToken cancellationToken)
+    {
+        var query = db.Users.AsNoTracking();
+        if (!string.IsNullOrEmpty(search))
+        {
+            var pattern = $"%{EscapeLike(search)}%";
+            query = query.Where(u =>
+                EF.Functions.ILike(u.FullName, pattern, "\\")
+                || EF.Functions.ILike(u.Department ?? string.Empty, pattern, "\\"));
+        }
+
+        return await query
+            .OrderBy(u => u.FullName)
+            .Take(limit)
+            .Select(u => new UserLookupDto(u.Id, u.FullName, u.Department, u.CanLogin))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
         IReadOnlyCollection<Guid> userIds,
         CancellationToken cancellationToken) =>

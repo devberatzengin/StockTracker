@@ -1,6 +1,7 @@
 import {
   Alert,
   Anchor,
+  Badge,
   Button,
   Group,
   Modal,
@@ -8,16 +9,25 @@ import {
   SimpleGrid,
   Stack,
   Text,
+  Textarea,
   TextInput,
   Title,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
-import { IconPencil } from '@tabler/icons-react'
+import {
+  IconArrowBackUp,
+  IconCircleCheck,
+  IconPencil,
+  IconTool,
+  IconUserShare,
+} from '@tabler/icons-react'
 import { useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router'
 import { isApiError } from '@/api/client'
 import type { ItemDetail } from '@/api/types'
+import { useItemStatusChange, type StatusChangeAction } from '@/features/assignments/assignmentsApi'
+import { AssignmentTable } from '@/features/assignments/AssignmentTable'
 import { NotFoundPage } from '@/components/NotFoundPage'
 import { usePermission } from '@/features/auth/authContext'
 import { Permissions } from '@/features/auth/permissions'
@@ -25,7 +35,7 @@ import { parseLineErrors } from '@/features/movements/lineErrors'
 import { MovementList } from '@/features/movements/MovementList'
 import { useItem, useUpdateItem } from '@/features/movements/movementsApi'
 import { ItemStatusBadge } from '@/features/movements/ProductStockTabs'
-import { formatDateTime } from '@/lib/dates'
+import { formatDateTime, formatDay } from '@/lib/dates'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -50,9 +60,19 @@ export function ItemDetailPage() {
   return <ItemDetail item={item} />
 }
 
+const STATUS_CHANGES: Record<StatusChangeAction, { title: string; done: string }> = {
+  'send-to-repair': { title: 'Tamire gönder', done: 'Adet tamire gönderildi.' },
+  'return-from-repair': { title: 'Tamirden döndü', done: 'Adet tamirden döndü, stokta.' },
+}
+
 function ItemDetail({ item }: { item: ItemDetail }) {
   const canEdit = usePermission(Permissions.CanMoveStock)
   const [editing, edit] = useDisclosure()
+  const [statusChange, setStatusChange] = useState<StatusChangeAction | null>(null)
+  const [assignmentPage, setAssignmentPage] = useState(1)
+  // Only the transitions the item's state allows (from the server's State pattern).
+  const can = (action: ItemDetail['availableActions'][number]) =>
+    canEdit && item.availableActions.includes(action)
 
   return (
     <Stack maw={860}>
@@ -71,6 +91,49 @@ function ItemDetail({ item }: { item: ItemDetail }) {
           · {item.productCode}
         </Text>
       </div>
+
+      {(can('Assign') || can('Return') || can('SendToRepair') || can('ReturnFromRepair')) && (
+        <Group gap="xs">
+          {can('Assign') && (
+            <Button
+              component={Link}
+              to={`/assignments/new?itemId=${item.id}`}
+              leftSection={<IconUserShare size={16} />}
+            >
+              Zimmet ver
+            </Button>
+          )}
+          {can('Return') && (
+            <Button
+              component={Link}
+              to={`/assignments/return?itemId=${item.id}`}
+              leftSection={<IconArrowBackUp size={16} />}
+            >
+              İade al
+            </Button>
+          )}
+          {can('SendToRepair') && (
+            <Button
+              variant="light"
+              color="orange"
+              leftSection={<IconTool size={16} />}
+              onClick={() => setStatusChange('send-to-repair')}
+            >
+              Tamire gönder
+            </Button>
+          )}
+          {can('ReturnFromRepair') && (
+            <Button
+              variant="light"
+              color="green"
+              leftSection={<IconCircleCheck size={16} />}
+              onClick={() => setStatusChange('return-from-repair')}
+            >
+              Tamirden döndü
+            </Button>
+          )}
+        </Group>
+      )}
 
       <Paper withBorder p="md">
         <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }}>
@@ -99,8 +162,40 @@ function ItemDetail({ item }: { item: ItemDetail }) {
             )}
           </Field>
           <Field label="Oluşturulma">{formatDateTime(item.createdAt)}</Field>
+          {item.openAssignment && (
+            <Field label="Zimmetli">
+              <Group gap={6}>
+                <span>{item.openAssignment.assigneeName}</span>
+                {item.openAssignment.isOverdue && (
+                  <Badge size="sm" color="red" variant="light">
+                    Gecikmiş
+                  </Badge>
+                )}
+              </Group>
+              <Text size="xs" c="dimmed">
+                {formatDateTime(item.openAssignment.assignedAt)}
+                {item.openAssignment.dueDate
+                  ? ` · teslim ${formatDay(item.openAssignment.dueDate)}`
+                  : ''}
+              </Text>
+            </Field>
+          )}
         </SimpleGrid>
       </Paper>
+
+      {item.productIsAssignable && canEdit && (
+        <div>
+          <Title order={4} mb="sm">
+            Zimmet geçmişi
+          </Title>
+          <AssignmentTable
+            filters={{ itemId: item.id, sort: '-assignedAt' }}
+            page={assignmentPage}
+            onPageChange={setAssignmentPage}
+            hide="item"
+          />
+        </div>
+      )}
 
       <div>
         <Title order={4} mb="sm">
@@ -111,6 +206,20 @@ function ItemDetail({ item }: { item: ItemDetail }) {
 
       <Modal opened={editing} onClose={edit.close} title="Seri numarasını düzenle">
         <SerialForm item={item} onClose={edit.close} />
+      </Modal>
+
+      <Modal
+        opened={statusChange !== null}
+        onClose={() => setStatusChange(null)}
+        title={statusChange ? STATUS_CHANGES[statusChange].title : undefined}
+      >
+        {statusChange && (
+          <StatusChangeForm
+            item={item}
+            action={statusChange}
+            onClose={() => setStatusChange(null)}
+          />
+        )}
       </Modal>
     </Stack>
   )
@@ -150,6 +259,65 @@ function SerialForm({ item, onClose }: { item: ItemDetail; onClose: () => void }
         </Button>
         <Button onClick={() => void save()} loading={update.isPending}>
           Kaydet
+        </Button>
+      </Group>
+    </Stack>
+  )
+}
+
+function StatusChangeForm({
+  item,
+  action,
+  onClose,
+}: {
+  item: ItemDetail
+  action: StatusChangeAction
+  onClose: () => void
+}) {
+  const change = useItemStatusChange(item.id)
+  const [note, setNote] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const save = async () => {
+    setError(null)
+    try {
+      await change.mutateAsync({ action, note: note.trim() })
+      notifications.show({ color: 'green', message: STATUS_CHANGES[action].done })
+      onClose()
+    } catch (e) {
+      const parsed = parseLineErrors(e)
+      setError(parsed.fields.note ?? parsed.general[0])
+    }
+  }
+
+  return (
+    <Stack>
+      {error && <Alert color="red">{error}</Alert>}
+      <Textarea
+        label="Not"
+        description={
+          action === 'send-to-repair'
+            ? 'Arızayı ya da tamire gönderme sebebini yazın.'
+            : 'Yapılan tamiri kısaca yazın.'
+        }
+        required
+        value={note}
+        onChange={(e) => setNote(e.currentTarget.value)}
+        maxLength={500}
+        autosize
+        minRows={2}
+        data-autofocus
+      />
+      <Group justify="flex-end">
+        <Button variant="default" onClick={onClose}>
+          Vazgeç
+        </Button>
+        <Button
+          onClick={() => void save()}
+          loading={change.isPending}
+          disabled={note.trim() === ''}
+        >
+          {STATUS_CHANGES[action].title}
         </Button>
       </Group>
     </Stack>

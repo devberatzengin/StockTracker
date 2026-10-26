@@ -84,13 +84,16 @@ public sealed class GetMovementsQueryHandler(IAppDbContext db, IUserAccountServi
             query = query.Where(m => m.ReferenceId == referenceId);
         }
 
+        // Movements of one operation share OccurredAt. A status change there (faulty return) follows
+        // the movement that caused it; ids alone do not order them (v7 ids are random within a millisecond).
         query = request.Sort == "occurredAt"
-            ? query.OrderBy(m => m.OccurredAt).ThenBy(m => m.Id)
-            : query.OrderByDescending(m => m.OccurredAt).ThenByDescending(m => m.Id);
+            ? query.OrderBy(m => m.OccurredAt).ThenBy(m => m.Type == MovementType.StatusChange).ThenBy(m => m.Id)
+            : query.OrderByDescending(m => m.OccurredAt).ThenByDescending(m => m.Type == MovementType.StatusChange).ThenByDescending(m => m.Id);
 
         var products = db.Products.IgnoreQueryFilters();
         var items = db.Items;
         var locations = db.Locations.IgnoreQueryFilters();
+        var assignments = db.Assignments;
 
         var page = await query
             .Select(m => new
@@ -100,11 +103,21 @@ public sealed class GetMovementsQueryHandler(IAppDbContext db, IUserAccountServi
                 Item = items.Where(i => i.Id == m.ItemId).Select(i => new { i.Code, i.SerialNumber }).FirstOrDefault(),
                 FromName = locations.Where(l => l.Id == m.FromLocationId).Select(l => l.Name).FirstOrDefault(),
                 ToName = locations.Where(l => l.Id == m.ToLocationId).Select(l => l.Name).FirstOrDefault(),
+                // Assign and Return movements name the assignment's holder.
+                AssigneeId = m.Type == MovementType.Assign
+                    ? assignments.Where(a => a.ItemId == m.ItemId && a.AssignReferenceId == m.ReferenceId)
+                        .Select(a => (Guid?)a.AssigneeUserId).FirstOrDefault()
+                    : m.Type == MovementType.Return
+                        ? assignments.Where(a => a.ItemId == m.ItemId && a.ReturnReferenceId == m.ReferenceId)
+                            .Select(a => (Guid?)a.AssigneeUserId).FirstOrDefault()
+                        : null,
             })
             .ToPagedResultAsync(request, cancellationToken);
 
         var userNames = await users.GetDisplayNamesAsync(
-            [.. page.Items.Select(x => x.Movement.UserId).Distinct()],
+            [.. page.Items.Select(x => x.Movement.UserId)
+                .Concat(page.Items.Where(x => x.AssigneeId is not null).Select(x => x.AssigneeId!.Value))
+                .Distinct()],
             cancellationToken);
 
         var dtos = page.Items.Select(x => new MovementDto(
@@ -129,7 +142,8 @@ public sealed class GetMovementsQueryHandler(IAppDbContext db, IUserAccountServi
                 x.Movement.UserId,
                 userNames.GetValueOrDefault(x.Movement.UserId, "?"),
                 x.Movement.FromStatus,
-                x.Movement.ToStatus))
+                x.Movement.ToStatus,
+                x.AssigneeId is { } assigneeId ? userNames.GetValueOrDefault(assigneeId, "?") : null))
             .ToList();
 
         return new PagedResult<MovementDto>(dtos, page.TotalCount, page.Page, page.PageSize);

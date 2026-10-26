@@ -122,8 +122,15 @@ public class StockMovementTests
     {
         Create(MovementType.StatusChange, null, null, Item, fromStatus: ItemStatus.InStock)
             .Should().Throw<DomainException>().Which.Code.Should().Be(InventoryErrors.InvalidMovement);
-        Create(MovementType.StatusChange, null, null, Item, fromStatus: ItemStatus.InStock, toStatus: ItemStatus.InRepair)
+        Create(MovementType.StatusChange, null, null, Item, note: "fan arızası", fromStatus: ItemStatus.InStock, toStatus: ItemStatus.InRepair)
             .Should().NotThrow();
+    }
+
+    [Fact]
+    public void StatusChange_RequiresNote()
+    {
+        Create(MovementType.StatusChange, null, null, Item, note: "  ", fromStatus: ItemStatus.InStock, toStatus: ItemStatus.InRepair)
+            .Should().Throw<DomainException>().Which.Code.Should().Be(InventoryErrors.NoteRequired);
     }
 
     [Fact]

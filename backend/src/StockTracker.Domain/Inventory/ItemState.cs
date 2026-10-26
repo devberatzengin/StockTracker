@@ -21,6 +21,9 @@ public abstract class ItemState
 
     public static ItemState For(ItemStatus status) => States[status];
 
+    /// <summary>The operations this state allows; each one matches a method that does not throw.</summary>
+    public abstract IReadOnlyList<ItemAction> Actions { get; }
+
     public virtual ItemStatus Assign() => throw Invalid("zimmetlenemez");
 
     public virtual ItemStatus Return() => throw Invalid("iade alınamaz");
@@ -49,6 +52,9 @@ public abstract class ItemState
     {
         public override ItemStatus Status => ItemStatus.InStock;
 
+        public override IReadOnlyList<ItemAction> Actions { get; } =
+            [ItemAction.Transfer, ItemAction.Assign, ItemAction.SendToRepair, ItemAction.Dispose];
+
         public override ItemStatus Assign() => ItemStatus.Assigned;
 
         public override ItemStatus SendToRepair() => ItemStatus.InRepair;
@@ -64,12 +70,16 @@ public abstract class ItemState
     {
         public override ItemStatus Status => ItemStatus.Assigned;
 
+        public override IReadOnlyList<ItemAction> Actions { get; } = [ItemAction.Return];
+
         public override ItemStatus Return() => ItemStatus.InStock;
     }
 
     private sealed class InRepairState : ItemState
     {
         public override ItemStatus Status => ItemStatus.InRepair;
+
+        public override IReadOnlyList<ItemAction> Actions { get; } = [ItemAction.ReturnFromRepair, ItemAction.Dispose];
 
         public override ItemStatus CompleteRepair() => ItemStatus.InStock;
 
@@ -79,5 +89,7 @@ public abstract class ItemState
     private sealed class DisposedState : ItemState
     {
         public override ItemStatus Status => ItemStatus.Disposed;
+
+        public override IReadOnlyList<ItemAction> Actions { get; } = [];
     }
 }

@@ -33,6 +33,12 @@ public interface IUserAccountService
 
     Task<PagedResult<UserDto>> ListAsync(UserListCriteria criteria, CancellationToken cancellationToken);
 
+    /// <summary>Any user, active or not; null when it does not exist.</summary>
+    Task<UserDto?> GetAsync(Guid userId, CancellationToken cancellationToken);
+
+    /// <summary>Active users matching the name or department, for pickers (e.g. assignees).</summary>
+    Task<IReadOnlyList<UserLookupDto>> LookupAsync(string? search, int limit, CancellationToken cancellationToken);
+
     /// <summary>Full names of the given users (including inactive ones), for history lists.</summary>
     Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
         IReadOnlyCollection<Guid> userIds,

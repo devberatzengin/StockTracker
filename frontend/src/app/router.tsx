@@ -29,6 +29,12 @@ export const router = createBrowserRouter([
                       Component: (await import('@/features/users/UsersPage')).UsersPage,
                     }),
                   },
+                  {
+                    path: 'users/:id',
+                    lazy: async () => ({
+                      Component: (await import('@/features/users/UserDetailPage')).UserDetailPage,
+                    }),
+                  },
                 ],
               },
               {
@@ -69,6 +75,13 @@ export const router = createBrowserRouter([
                 }),
               },
               {
+                path: 'my-assignments',
+                lazy: async () => ({
+                  Component: (await import('@/features/assignments/MyAssignmentsPage'))
+                    .MyAssignmentsPage,
+                }),
+              },
+              {
                 path: 'items/:id',
                 lazy: async () => ({
                   Component: (await import('@/features/movements/ItemDetailPage')).ItemDetailPage,
@@ -94,6 +107,25 @@ export const router = createBrowserRouter([
                     lazy: async () => ({
                       Component: (await import('@/features/movements/StockTransferPage'))
                         .StockTransferPage,
+                    }),
+                  },
+                  {
+                    path: 'assignments',
+                    lazy: async () => ({
+                      Component: (await import('@/features/assignments/AssignmentsPage'))
+                        .AssignmentsPage,
+                    }),
+                  },
+                  {
+                    path: 'assignments/new',
+                    lazy: async () => ({
+                      Component: (await import('@/features/assignments/AssignPage')).AssignPage,
+                    }),
+                  },
+                  {
+                    path: 'assignments/return',
+                    lazy: async () => ({
+                      Component: (await import('@/features/assignments/ReturnPage')).ReturnPage,
                     }),
                   },
                   {

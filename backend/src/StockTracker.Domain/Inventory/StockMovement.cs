@@ -72,6 +72,11 @@ public sealed class StockMovement
             throw Invalid("Durum değişikliği bir adet ile önceki ve yeni durumu gerektirir.");
         }
 
+        if (type == MovementType.StatusChange && trimmedNote is null)
+        {
+            throw new DomainException(InventoryErrors.NoteRequired, "Durum değişikliğinde not zorunludur.", "note");
+        }
+
         return new StockMovement
         {
             Type = type,

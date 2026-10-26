@@ -173,4 +173,25 @@ public class ProductTests
 
         product.IsActive.Should().BeFalse();
     }
+
+    [Fact]
+    public void Update_TurningOffAssignableWithOpenAssignments_IsRejected()
+    {
+        var product = Product.Create("PRD-LAPTOP", "Laptop", null, Category, Unit.Piece, TrackingType.Serialized, true, null);
+
+        var act = () => product.Update("Laptop", null, Category, Unit.Piece, TrackingType.Serialized, false, null, true, hasOpenAssignments: true);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be(CatalogErrors.ProductHasOpenAssignments);
+        product.IsAssignable.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Update_KeepingAssignableWithOpenAssignments_IsAllowed()
+    {
+        var product = Product.Create("PRD-LAPTOP", "Laptop", null, Category, Unit.Piece, TrackingType.Serialized, true, null);
+
+        product.Update("Laptop Pro", null, Category, Unit.Piece, TrackingType.Serialized, true, null, true, hasOpenAssignments: true);
+
+        product.Name.Should().Be("Laptop Pro");
+    }
 }

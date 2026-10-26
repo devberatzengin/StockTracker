@@ -18,6 +18,7 @@ public static class CatalogErrors
     public const string ProductMinStockMustBeWhole = "Product.MinStockMustBeWhole";
     public const string ProductTrackingTypeLocked = "Product.TrackingTypeLocked";
     public const string ProductHasStock = "Product.HasStock";
+    public const string ProductHasOpenAssignments = "Product.HasOpenAssignments";
     public const string ProductDuplicateBarcode = "Product.DuplicateBarcode";
     public const string ProductBarcodeNotFound = "Product.BarcodeNotFound";
 

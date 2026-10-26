@@ -20,7 +20,9 @@ import {
   IconLogout,
   IconMapPin,
   IconPackage,
+  IconUserCheck,
   IconUsers,
+  IconUserShare,
 } from '@tabler/icons-react'
 import type { ReactNode } from 'react'
 import { NavLink as RouterNavLink, Outlet, useLocation } from 'react-router'
@@ -48,6 +50,13 @@ const mainItems: NavItem[] = [
     icon: <IconArrowsMove size={18} />,
     permission: Permissions.CanMoveStock,
   },
+  {
+    label: 'Zimmetler',
+    to: '/assignments',
+    icon: <IconUserShare size={18} />,
+    permission: Permissions.CanMoveStock,
+  },
+  { label: 'Zimmetlerim', to: '/my-assignments', icon: <IconUserCheck size={18} /> },
   {
     label: 'Kategoriler',
     to: '/categories',

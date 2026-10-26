@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using StockTracker.Domain.Assignments;
 using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
@@ -24,4 +25,6 @@ public interface IAppDbContext
     DbSet<StockBalance> StockBalances { get; }
 
     DbSet<StockMovement> StockMovements { get; }
+
+    DbSet<Assignment> Assignments { get; }
 }

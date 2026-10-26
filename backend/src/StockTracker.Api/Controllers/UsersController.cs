@@ -17,6 +17,10 @@ public sealed class UsersController(ISender sender) : ControllerBase
     public Task<PagedResult<UserDto>> List([FromQuery] GetUsersQuery query, CancellationToken cancellationToken) =>
         sender.Send(query, cancellationToken);
 
+    [HttpGet("{id:guid}")]
+    public Task<UserDto> Get(Guid id, CancellationToken cancellationToken) =>
+        sender.Send(new GetUserQuery(id), cancellationToken);
+
     [HttpPost]
     [ProducesResponseType<CreatedResponse>(StatusCodes.Status201Created)]
     public async Task<IActionResult> Create(CreateUserCommand command, CancellationToken cancellationToken)

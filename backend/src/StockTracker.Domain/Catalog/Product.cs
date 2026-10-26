@@ -55,6 +55,7 @@ public class Product : BaseEntity, ISoftDeletable
     }
 
     /// <param name="hasStockHistory">Whether the product has stock or movements; locks the tracking type.</param>
+    /// <param name="hasOpenAssignments">Whether an item of the product is assigned; keeps it assignable.</param>
     public void Update(
         string name,
         string? description,
@@ -63,8 +64,16 @@ public class Product : BaseEntity, ISoftDeletable
         TrackingType trackingType,
         bool isAssignable,
         decimal? minStockLevel,
-        bool hasStockHistory)
+        bool hasStockHistory,
+        bool hasOpenAssignments = false)
     {
+        if (IsAssignable && !isAssignable && hasOpenAssignments)
+        {
+            throw new DomainException(
+                CatalogErrors.ProductHasOpenAssignments,
+                "Açık zimmeti olan üründe zimmetlenebilirlik kapatılamaz.");
+        }
+
         if (trackingType != TrackingType && hasStockHistory)
         {
             throw new DomainException(
