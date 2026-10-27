@@ -1,0 +1,25 @@
+name: secret-scan
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: a secret removed in a later commit is still in the repository.
+          fetch-depth: 0
+
+      # The CLI image needs no license (the gitleaks GitHub Action does for organizations).
+      # Known false positives are listed by fingerprint in .gitleaksignore.
+      - name: Scan history for secrets
+        run: >
+          docker run --rm -v "${{ github.workspace }}:/repo" ghcr.io/gitleaks/gitleaks:v8.28.0
+          git /repo --redact --no-banner --exit-code 1

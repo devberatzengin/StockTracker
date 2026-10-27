@@ -6,6 +6,7 @@ using StockTracker.Api.Authentication;
 using StockTracker.Api.ExceptionHandling;
 using StockTracker.Api.OpenApi;
 using StockTracker.Api.Options;
+using StockTracker.Api.Security;
 using StockTracker.Api.Services;
 using StockTracker.Application;
 using StockTracker.Application.Common.Interfaces;
@@ -32,6 +33,7 @@ builder.Services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
 builder.Services.AddApiAuthentication();
 
 builder.Services.AddApiProblemDetails();
+builder.Services.AddLoginRateLimiting(builder.Configuration);
 builder.Services.AddControllers()
     // Enums travel as their names ("Serialized", "Piece"), matching the generated frontend types.
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -65,6 +67,7 @@ if (SeedCommands.IsCommand(args))
     return await SeedCommands.RunAsync(app.Services, args);
 }
 
+app.UseForwardedHeaders();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseSerilogRequestLogging();
@@ -75,6 +78,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

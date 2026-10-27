@@ -24,5 +24,8 @@ public static class TestSettings
         builder.UseSetting("Storage:SigningKey", StorageSigningKey);
         builder.UseSetting("Notifications:DailyCheckEnabled", "false");
         builder.UseSetting("PUBLIC_BASE_URL", PublicBaseUrl);
+
+        // Test hosts share one client address; the login limit itself is tested in LoginRateLimitTests.
+        builder.UseSetting("RateLimiting:LoginPermitPerMinute", "100000");
     }
 }

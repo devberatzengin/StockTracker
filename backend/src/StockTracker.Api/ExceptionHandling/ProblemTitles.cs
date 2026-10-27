@@ -13,6 +13,7 @@ public static class ProblemTitles
         [StatusCodes.Status409Conflict] = "Kayıt başka bir işlem tarafından değiştirildi.",
         [StatusCodes.Status415UnsupportedMediaType] = "Desteklenmeyen içerik türü.",
         [StatusCodes.Status422UnprocessableEntity] = "İşlem kurallara aykırı.",
+        [StatusCodes.Status429TooManyRequests] = "Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.",
         [StatusCodes.Status500InternalServerError] = "Beklenmeyen bir hata oluştu.",
     };
 

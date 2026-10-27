@@ -1,8 +1,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using StockTracker.Api.Authentication;
 using StockTracker.Api.Contracts;
+using StockTracker.Api.Security;
 using StockTracker.Application.Auth;
 using StockTracker.Application.Common.Interfaces;
 
@@ -15,6 +17,7 @@ public sealed class AuthController(ISender sender) : ControllerBase
 {
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting(LoginRateLimiting.PolicyName)]
     public async Task<AccessTokenResponse> Login(LoginCommand command, CancellationToken cancellationToken) =>
         IssueTokens(await sender.Send(command, cancellationToken));
 

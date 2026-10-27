@@ -1,0 +1,3 @@
+# Fake signing keys used only by tests (not secrets).
+359f131e42eee49ae78f05cefb6968c4afd76c64:backend/tests/StockTracker.Api.IntegrationTests/Storage/StorageUnitTests.cs:generic-api-key:61
+73348d69512a90b9a79aec8db6da29b21eb41f6f:backend/tests/StockTracker.Api.IntegrationTests/Infrastructure/TestSettings.cs:generic-api-key:15
