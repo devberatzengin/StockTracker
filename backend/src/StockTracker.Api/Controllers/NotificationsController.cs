@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockTracker.Application.Common.Models;
 using StockTracker.Application.Notifications;
@@ -8,6 +9,7 @@ namespace StockTracker.Api.Controllers;
 /// <summary>The current user's notifications.</summary>
 [ApiController]
 [Route("api/notifications")]
+[Authorize]
 public sealed class NotificationsController(ISender sender) : ControllerBase
 {
     [HttpGet]

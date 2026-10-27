@@ -10,6 +10,7 @@ namespace StockTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/assignments")]
+[Authorize]
 public sealed class AssignmentsController(ISender sender) : ControllerBase
 {
     [HttpPost]

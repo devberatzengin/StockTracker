@@ -10,6 +10,7 @@ namespace StockTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/locations")]
+[Authorize]
 public sealed class LocationsController(ISender sender) : ControllerBase
 {
     [HttpGet("tree")]

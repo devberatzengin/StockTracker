@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockTracker.Application.Scan;
 
@@ -6,6 +7,7 @@ namespace StockTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/scan")]
+[Authorize]
 public sealed class ScanController(ISender sender) : ControllerBase
 {
     /// <summary>

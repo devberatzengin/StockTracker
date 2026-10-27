@@ -11,6 +11,7 @@ namespace StockTracker.Api.Controllers;
 /// <summary>Anyone can count; starting, reviewing, approving and cancelling need CanApproveCount.</summary>
 [ApiController]
 [Route("api/counts")]
+[Authorize]
 public sealed class CountsController(ISender sender) : ControllerBase
 {
     [HttpPost]

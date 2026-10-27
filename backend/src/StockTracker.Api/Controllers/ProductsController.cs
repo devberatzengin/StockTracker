@@ -11,6 +11,7 @@ namespace StockTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/products")]
+[Authorize]
 public sealed class ProductsController(ISender sender) : ControllerBase
 {
     [HttpGet]

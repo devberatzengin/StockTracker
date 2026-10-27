@@ -9,6 +9,7 @@ namespace StockTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/movements")]
+[Authorize]
 public sealed class MovementsController(ISender sender) : ControllerBase
 {
     [HttpGet]

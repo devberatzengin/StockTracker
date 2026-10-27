@@ -10,6 +10,7 @@ namespace StockTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[Authorize]
 public sealed class AuthController(ISender sender) : ControllerBase
 {
     [HttpPost("login")]

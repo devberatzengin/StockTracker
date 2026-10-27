@@ -10,6 +10,7 @@ namespace StockTracker.Api.Controllers;
 
 [ApiController]
 [Route("api/items")]
+[Authorize]
 public sealed class ItemsController(ISender sender) : ControllerBase
 {
     [HttpGet]
