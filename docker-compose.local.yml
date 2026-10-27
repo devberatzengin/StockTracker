@@ -1,0 +1,57 @@
+# Try StockTracker locally without an external database or a .env file:
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml run --rm api seed-demo
+#   open http://localhost:8080
+#
+# Adds a PostgreSQL container and fixed development settings. These keys are public: never use
+# this file for real data. Stop with `... down` (add -v to delete the database).
+
+name: stocktracker-local
+
+x-local-env: &local-env
+  ConnectionStrings__Default: "Host=db;Port=5432;Database=stocktracker;Username=stocktracker;Password=stocktracker"
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: stocktracker
+      POSTGRES_USER: stocktracker
+      POSTGRES_PASSWORD: stocktracker
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stocktracker -d stocktracker"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Runs on every `up` (migrations are idempotent); the API waits for it.
+  migrator:
+    profiles: !reset []
+    env_file: !reset []
+    environment:
+      <<: *local-env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    env_file: !reset []
+    environment:
+      <<: *local-env
+      Jwt__Issuer: stocktracker
+      Jwt__Audience: stocktracker
+      Jwt__SigningKey: local-only-signing-key-not-a-secret-0123456789
+      Storage__Provider: Local
+      Storage__SigningKey: local-only-storage-key-not-a-secret-0123456789
+      PUBLIC_BASE_URL: http://localhost:8080
+      SEED_ADMIN_EMAIL: admin@local.test
+      SEED_ADMIN_PASSWORD: Admin12345
+      DEMO_MODE: "true"
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+
+volumes:
+  db:
