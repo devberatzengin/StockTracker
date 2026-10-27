@@ -1,0 +1,60 @@
+# Production override (PLAN 4.5):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm migrator
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile tunnel up -d
+#
+# Images come from GitHub Container Registry, tagged by the git tag (IMAGE_TAG=1.0.0).
+# Adding --build builds them locally under the same names instead. See docs/deploy.md.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  api:
+    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER}/stocktracker-api:${IMAGE_TAG:-latest}
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    restart: unless-stopped
+    logging: *logging
+
+  migrator:
+    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER}/stocktracker-migrator:${IMAGE_TAG:-latest}
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    logging: *logging
+
+  web:
+    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER}/stocktracker-web:${IMAGE_TAG:-latest}
+    # Only the host (and cloudflared inside the network) can reach nginx: nobody can send
+    # a forged CF-Connecting-IP header past the tunnel.
+    ports: !override
+      - "127.0.0.1:8080:80"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    restart: unless-stopped
+    logging: *logging
+
+  cloudflared:
+    # A named tunnel (token from the Cloudflare dashboard) keeps a fixed host name.
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN}
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    restart: unless-stopped
+    logging: *logging
