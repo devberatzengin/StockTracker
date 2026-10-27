@@ -11,6 +11,7 @@ using StockTracker.Application;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Infrastructure;
 using StockTracker.Infrastructure.Identity;
+using StockTracker.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,13 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+// One-off data commands (seed-demo, reset-demo, seed-load) run instead of the web server.
+if (SeedCommands.IsCommand(args))
+{
+    await app.Services.SeedIdentityAsync();
+    return await SeedCommands.RunAsync(app.Services, args);
+}
+
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseSerilogRequestLogging();
@@ -76,3 +84,4 @@ app.MapHealthChecks("/health").AllowAnonymous();
 await app.Services.SeedIdentityAsync();
 
 await app.RunAsync();
+return 0;

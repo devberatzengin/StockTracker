@@ -1017,6 +1017,9 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                     b.HasIndex("ItemId")
                         .HasDatabaseName("ix_stock_movements_item_id");
 
+                    b.HasIndex("OccurredAt")
+                        .HasDatabaseName("ix_stock_movements_occurred_at");
+
                     b.HasIndex("ReferenceId")
                         .HasDatabaseName("ix_stock_movements_reference_id");
 

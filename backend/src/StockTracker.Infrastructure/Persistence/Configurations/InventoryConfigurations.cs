@@ -75,6 +75,8 @@ public sealed class StockMovementConfiguration : IEntityTypeConfiguration<StockM
         builder.Property(m => m.Note).HasMaxLength(StockMovement.NoteMaxLength);
 
         builder.HasIndex(m => new { m.ProductId, m.OccurredAt });
+        // Unfiltered ledger list and the dashboard's last-30-days window (docs/performance.md).
+        builder.HasIndex(m => m.OccurredAt);
         builder.HasIndex(m => m.ItemId);
         builder.HasIndex(m => m.FromLocationId);
         builder.HasIndex(m => m.ToLocationId);
