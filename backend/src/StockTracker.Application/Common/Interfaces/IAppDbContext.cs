@@ -5,6 +5,7 @@ using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Counts;
 using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
+using StockTracker.Domain.Notifications;
 
 namespace StockTracker.Application.Common.Interfaces;
 
@@ -35,4 +36,6 @@ public interface IAppDbContext
     DbSet<ProductPhoto> ProductPhotos { get; }
 
     DbSet<AuditLog> AuditLogs { get; }
+
+    DbSet<Notification> Notifications { get; }
 }

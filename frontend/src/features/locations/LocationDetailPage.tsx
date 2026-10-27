@@ -15,6 +15,7 @@ import { Link, useParams } from 'react-router'
 import { isApiError } from '@/api/client'
 import { NotFoundPage } from '@/components/NotFoundPage'
 import { AuditHistory } from '@/features/audit/AuditHistory'
+import { PrintLabelsButton } from '@/features/labels/PrintLabelsButton'
 import { usePermission } from '@/features/auth/authContext'
 import { Permissions } from '@/features/auth/permissions'
 import { LOCATION_TYPE_LABELS } from '@/features/locations/labels'
@@ -66,6 +67,15 @@ export function LocationDetailPage() {
           <Title order={2}>{location.name}</Title>
           <Badge variant="light">{LOCATION_TYPE_LABELS[location.type]}</Badge>
           {!location.isActive && <Badge color="gray">Pasif</Badge>}
+          {location.isActive && (
+            <PrintLabelsButton
+              target={{ locationId: location.id }}
+              summary={`${location.name} ve alt lokasyonları`}
+              defaultTemplate="Sheet2x4"
+              size="compact-sm"
+              ml="auto"
+            />
+          )}
         </Group>
         <Text ff="monospace" c="dimmed">
           {location.code}

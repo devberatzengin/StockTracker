@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Application.Common.Behaviors;
 using StockTracker.Application.Common.Codes;
+using StockTracker.Application.Notifications;
 using StockTracker.Application.Scan;
 using StockTracker.Domain.Counts;
 using StockTracker.Domain.Inventory;
@@ -32,6 +33,9 @@ public static class DependencyInjection
         services.AddScoped<ICodeGenerator, CodeGenerator>();
         services.AddSingleton<StockMovementService>();
         services.AddSingleton<CountApprovalService>();
+        services.AddScoped<LowStockMonitor>();
+        services.AddScoped<AssignmentReminderMonitor>();
+        services.AddScoped<DailyNotificationRun>();
 
         // One resolver per code prefix.
         services.AddScoped<IScanCodeResolver, ProductCodeScanResolver>();

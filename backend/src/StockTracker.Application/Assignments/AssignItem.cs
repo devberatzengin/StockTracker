@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using StockTracker.Application.Common;
 using StockTracker.Application.Common.Interfaces;
+using StockTracker.Application.Notifications;
 using StockTracker.Domain.Assignments;
 using StockTracker.Domain.Exceptions;
 using StockTracker.Domain.Inventory;
@@ -32,7 +33,8 @@ public sealed class AssignItemCommandHandler(
     StockMovementService movementService,
     ICurrentUser currentUser,
     IDateTime dateTime,
-    IUnitOfWork unitOfWork) : IRequestHandler<AssignItemCommand, AssignmentResultDto>
+    IUnitOfWork unitOfWork,
+    IPublisher publisher) : IRequestHandler<AssignItemCommand, AssignmentResultDto>
 {
     public async Task<AssignmentResultDto> Handle(AssignItemCommand request, CancellationToken cancellationToken)
     {
@@ -58,6 +60,7 @@ public sealed class AssignItemCommandHandler(
         assignments.Add(assignment);
         movements.AddRange([movement]);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await publisher.Publish(new StockLevelsChanged([product.Id]), cancellationToken);
 
         return new AssignmentResultDto(assignment.Id, context.ReferenceId);
     }

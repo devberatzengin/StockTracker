@@ -6,7 +6,10 @@ using StockTracker.Application.Common.Codes;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Application.Files;
 using StockTracker.Infrastructure.Codes;
+using StockTracker.Application.Labels;
 using StockTracker.Infrastructure.Identity;
+using StockTracker.Infrastructure.Labels;
+using StockTracker.Infrastructure.Notifications;
 using StockTracker.Infrastructure.Inventory;
 using StockTracker.Infrastructure.Persistence;
 using StockTracker.Infrastructure.Persistence.Interceptors;
@@ -31,6 +34,8 @@ public static class DependencyInjection
 
         services.AddSingleton<IDateTime, SystemDateTime>();
         AddStorage(services, configuration);
+        services.AddSingleton<ILabelRenderer, QuestPdfLabelRenderer>();
+        services.AddSingleton<IPublicUrls, PublicUrls>();
 
         services.AddScoped<AuditableEntityInterceptor>();
         services.AddScoped<AuditInterceptor>();
@@ -59,6 +64,10 @@ public static class DependencyInjection
         services.AddScoped<IAssignmentRepository, AssignmentRepository>();
         services.AddScoped<IAssignmentChecker, AssignmentChecker>();
         services.AddScoped<ICountRepository, CountRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+
+        services.AddOptions<NotificationOptions>().Bind(configuration.GetSection(NotificationOptions.SectionName));
+        services.AddHostedService<DailyNotificationJob>();
 
         services.AddScoped<ICodeUniquenessCheck, ProductCodeUniquenessCheck>();
         services.AddScoped<ICodeUniquenessCheck, LocationCodeUniquenessCheck>();

@@ -123,6 +123,23 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | İmzalı URL | `/api/files/{key}?exp=&sig=` göreli döner, anonim; HMAC-SHA256 (`"{key}:{exp}"`), süresi geçmiş ya da hatalı imza 403, `Cache-Control: private, max-age=<kalan süre>`. |
 | Galeri | Ürün detayının "Genel" sekmesinde (yeni ürün kaydedildikten sonra). Sürükle-bırak + telefon için ok düğmeleri; `accept="image/*" capture="environment"`. Thumbnail ürün listesinde, ürün seçicide ve tara-taşı listesinde. |
 
+**Uygulama sırasında alınan kararlar** (Faz 3.3–3.4, 27 Ekim):
+
+| Konu | Karar |
+| --- | --- |
+| Etiket kütüphaneleri | QRCoder 1.8.1 (MIT), QuestPDF 2026.9.1 (Community lisansı; `Settings.License = Community`). Lato fontu ve Linux native kütüphaneleri paketle gelir. |
+| `PUBLIC_BASE_URL` | Boşsa `POST /labels` 422 `Labels.BaseUrlMissing`; API açılışını engellemez. |
+| Başlangıç pozisyonu | API'de 1'den başlayan hücre numarası (`startPosition`); önceki `startPosition − 1` hücre boş kalır. Termal ruloda her zaman 1. |
+| Etiket hedefleri | Tam olarak biri: `productIds`, `itemIds`, `referenceId` (o girişte oluşan adetler, seri no sırasıyla), `locationId` (lokasyon + aktif alt lokasyonlar, ağaç sırasıyla). Her şablon her hedefle çalışır; arayüz kaynağa göre 3x8 ya da 2x4 önerir. Aynı id iki kez gelirse bir kez basılır. |
+| Kâğıt geometrisi | 3x8 ve 2x4: yan 0, üst 0,5 mm; 5x13: yan 10, üst 12 mm; termal 50x30: her etiket ayrı sayfa. QR PNG, 10 px/modül, M seviyesi, 4 modül sessiz alan. |
+| Etiket yetkisi | `POST /labels` `CanMoveStock`; en fazla 500 etiket (genişletme sonrası sayılır, 422 `Labels.TooMany`). PDF yeni sekmede açılır; "%100 ölçek" notu modalda. |
+| Kritik stok tetikleri | `In`, `Out`, `Adjustment`'a ek olarak `Assign`, `Return`, `StatusChange` (tekil ürünlerde toplam = `InStock` adet). `Transfer` tetiklemez. Kontrol kayıttan sonra MediatR notification ile çalışır; hata isteği bozmaz, loglanır. |
+| Bildirim alıcıları | Her alıcıya ayrı satır. Kritik stok: aktif ve giriş yapabilen Admin + Depo Sorumluları. Teslim yaklaşıyor: zimmet alan (giriş yapabiliyorsa). Gecikmiş: zimmet alan (giriş yapabiliyorsa) + Depo Sorumluları. |
+| Tekrar önleme | `(user_id, dedup_key) WHERE resolved_at IS NULL` kısmi benzersiz index; yarışta 409, günlük kontrol telafi eder. |
+| Kapanış | Kritik stok toplam ≥ minimum olunca (ya da ürün pasif / minimum kaldırılmışsa bir sonraki kontrolde). Zimmet bildirimleri iadede (`AssignmentReturned` olayı); günlük kontrol iade edilmiş zimmetlerin açık bildirimlerini de kapatır. |
+| Günlük kontrol | `BackgroundService`: açılıştan 1 dk sonra bir kez, sonra her gün 08:00 (UTC+3) `PeriodicTimer(1 gün)`. `Notifications__DailyCheckEnabled=false` ile kapatılır (testler). |
+| Okunmamış sayısı | Zil sadece okunmamış ve kapanmamış bildirimleri sayar; kapanmışlar listede "Çözüldü" rozetiyle kalır. 60 sn'de bir sorgulama. |
+
 ## Mimari
 
 Bağımlılıklar her zaman içe doğru akar: API → Application → Domain. Infrastructure, Application'daki arayüzleri uygular. Domain hiçbir pakete bağımlı değildir.

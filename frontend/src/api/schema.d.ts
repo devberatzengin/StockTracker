@@ -1163,6 +1163,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/labels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["PrintLabelsCommand"];
+                    "text/json": components["schemas"]["PrintLabelsCommand"];
+                    "application/*+json": components["schemas"]["PrintLabelsCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/pdf": string;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/locations/tree": {
         parameters: {
             query?: never;
@@ -1596,6 +1637,152 @@ export interface paths {
                         "application/json": components["schemas"]["MovementResultDto"];
                         "text/json": components["schemas"]["MovementResultDto"];
                     };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Page?: number;
+                    PageSize?: number;
+                    UnreadOnly?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["NotificationDtoPagedResult"];
+                        "application/json": components["schemas"]["NotificationDtoPagedResult"];
+                        "text/json": components["schemas"]["NotificationDtoPagedResult"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["UnreadCountDto"];
+                        "application/json": components["schemas"]["UnreadCountDto"];
+                        "text/json": components["schemas"]["UnreadCountDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
                 };
             };
         };
@@ -2837,6 +3024,8 @@ export interface components {
             /** Format: int32 */
             count: number;
         };
+        /** @enum {string} */
+        LabelTemplate: "Sheet3x8" | "Sheet2x4" | "Sheet5x13" | "Thermal50x30";
         LocationChildDto: {
             /** Format: uuid */
             id: string;
@@ -2954,6 +3143,43 @@ export interface components {
         };
         /** @enum {string} */
         MovementType: "In" | "Out" | "Transfer" | "Adjustment" | "Assign" | "Return" | "StatusChange";
+        NotificationDto: {
+            /** Format: uuid */
+            id: string;
+            type: components["schemas"]["NotificationType"];
+            title: string;
+            message: string;
+            entityType: string;
+            /** Format: uuid */
+            entityId: string;
+            isRead: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            resolvedAt?: string | null;
+        };
+        NotificationDtoPagedResult: {
+            items: components["schemas"]["NotificationDto"][];
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+        };
+        /** @enum {string} */
+        NotificationType: "LowStock" | "AssignmentDueSoon" | "AssignmentOverdue";
+        PrintLabelsCommand: {
+            template: components["schemas"]["LabelTemplate"];
+            /** Format: int32 */
+            startPosition: number;
+            productIds?: string[] | null;
+            itemIds?: string[] | null;
+            /** Format: uuid */
+            referenceId?: string | null;
+            /** Format: uuid */
+            locationId?: string | null;
+        };
         ProblemDetails: {
             type?: string | null;
             title?: string | null;
@@ -3107,6 +3333,10 @@ export interface components {
         TrackingType: "Serialized" | "Quantity";
         /** @enum {string} */
         Unit: "Piece" | "Kg" | "Meter" | "Liter" | "Package" | "Box";
+        UnreadCountDto: {
+            /** Format: int32 */
+            count: number;
+        };
         UpdateItemRequest: {
             serialNumber?: string | null;
         };

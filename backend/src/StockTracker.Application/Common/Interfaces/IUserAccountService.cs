@@ -39,6 +39,11 @@ public interface IUserAccountService
     /// <summary>Active users matching the name or department, for pickers (e.g. assignees).</summary>
     Task<IReadOnlyList<UserLookupDto>> LookupAsync(string? search, int limit, CancellationToken cancellationToken);
 
+    /// <summary>Active users who can log in and have one of the roles (notification recipients).</summary>
+    Task<IReadOnlyList<Guid>> GetActiveLoginUsersInRolesAsync(
+        IReadOnlyCollection<string> roles,
+        CancellationToken cancellationToken);
+
     /// <summary>Full names of the given users (including inactive ones), for history lists.</summary>
     Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
         IReadOnlyCollection<Guid> userIds,

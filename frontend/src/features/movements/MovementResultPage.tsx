@@ -1,6 +1,7 @@
 import { Alert, Anchor, Button, Group, Paper, Stack, Table, Text, Title } from '@mantine/core'
 import { IconCircleCheck } from '@tabler/icons-react'
 import { Link, useParams } from 'react-router'
+import { PrintLabelsButton } from '@/features/labels/PrintLabelsButton'
 import { MOVEMENT_TYPE_LABELS } from '@/features/movements/labels'
 import { MovementTypeBadge } from '@/features/movements/MovementList'
 import { describeMovement } from '@/features/movements/movementText'
@@ -77,6 +78,15 @@ export function MovementResultPage() {
       </Paper>
 
       <Group>
+        {createdItems.length > 0 && (
+          <PrintLabelsButton
+            target={{ referenceId }}
+            summary={`${createdItems.length} adet`}
+            variant="filled"
+          >
+            Etiketleri yazdır
+          </PrintLabelsButton>
+        )}
         <Button component={Link} to="/movements" variant="light">
           Tüm hareketler
         </Button>

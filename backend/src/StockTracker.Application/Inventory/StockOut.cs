@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using StockTracker.Application.Common.Interfaces;
+using StockTracker.Application.Notifications;
 using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
 using static StockTracker.Application.Inventory.MovementCommandHelpers;
@@ -39,7 +40,8 @@ public sealed class StockOutCommandHandler(
     StockMovementService movementService,
     ICurrentUser currentUser,
     IDateTime dateTime,
-    IUnitOfWork unitOfWork) : IRequestHandler<StockOutCommand, MovementResultDto>
+    IUnitOfWork unitOfWork,
+    IPublisher publisher) : IRequestHandler<StockOutCommand, MovementResultDto>
 {
     public async Task<MovementResultDto> Handle(StockOutCommand request, CancellationToken cancellationToken)
     {
@@ -72,6 +74,7 @@ public sealed class StockOutCommandHandler(
 
         movements.AddRange(ledger);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await publisher.Publish(new StockLevelsChanged([.. ledger.Select(m => m.ProductId).Distinct()]), cancellationToken);
 
         return new MovementResultDto(context.ReferenceId, ledger.Count, []);
     }

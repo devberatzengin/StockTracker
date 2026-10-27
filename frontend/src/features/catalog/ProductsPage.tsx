@@ -1,6 +1,7 @@
 import {
   Badge,
   Button,
+  Checkbox,
   Group,
   Pagination,
   Select,
@@ -22,6 +23,7 @@ import { useCategoryOptions, useProducts } from '@/features/catalog/catalogApi'
 import { TRACKING_TYPE_LABELS, TRACKING_TYPE_OPTIONS, UNIT_LABELS } from '@/features/catalog/labels'
 import { ProductFormModal } from '@/features/catalog/ProductFormModal'
 import { ProductThumb } from '@/features/catalog/ProductThumb'
+import { PrintLabelsButton } from '@/features/labels/PrintLabelsButton'
 
 const PAGE_SIZE = 25
 
@@ -35,6 +37,16 @@ export function ProductsPage() {
   const [includeInactive, setIncludeInactive] = useState(false)
   const [debouncedSearch] = useDebouncedValue(search.trim(), 300)
   const [formOpened, form] = useDisclosure()
+  const canPrint = usePermission(Permissions.CanMoveStock)
+  // Selected for label printing; kept across pages and filters.
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const toggle = (id: string, on: boolean) =>
+    setSelected((current) => {
+      const next = new Set(current)
+      if (on) next.add(id)
+      else next.delete(id)
+      return next
+    })
 
   // "Create product with this barcode" after scanning an unknown EAN lands here with the barcode.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -116,12 +128,41 @@ export function ProductsPage() {
           onChange={(event) => filter(setIncludeInactive)(event.currentTarget.checked)}
           mb={8}
         />
+        {canPrint && selected.size > 0 && (
+          <Group gap="xs" ml="auto">
+            <PrintLabelsButton
+              target={{ productIds: [...selected] }}
+              summary={`${selected.size} ürün`}
+            >
+              {`Etiket yazdır (${selected.size})`}
+            </PrintLabelsButton>
+            <Button variant="subtle" color="gray" onClick={() => setSelected(new Set())}>
+              Seçimi temizle
+            </Button>
+          </Group>
+        )}
       </Group>
 
       <Table.ScrollContainer minWidth={820}>
         <Table striped highlightOnHover withTableBorder>
           <Table.Thead>
             <Table.Tr>
+              {canPrint && (
+                <Table.Th w={36}>
+                  <Checkbox
+                    aria-label="Sayfadakilerin tümünü seç"
+                    checked={!!data?.items.length && data.items.every((p) => selected.has(p.id))}
+                    indeterminate={
+                      !!data?.items.some((p) => selected.has(p.id)) &&
+                      !data.items.every((p) => selected.has(p.id))
+                    }
+                    onChange={(e) => {
+                      const on = e.currentTarget.checked
+                      data?.items.forEach((p) => toggle(p.id, on))
+                    }}
+                  />
+                </Table.Th>
+              )}
               <Table.Th w={52} />
               <Table.Th>Kod</Table.Th>
               <Table.Th>Ad</Table.Th>
@@ -135,7 +176,7 @@ export function ProductsPage() {
           <Table.Tbody>
             {isPending || data?.items.length === 0 ? (
               <Table.Tr>
-                <Table.Td colSpan={8}>
+                <Table.Td colSpan={canPrint ? 9 : 8}>
                   <Text c="dimmed" size="sm">
                     {isPending ? 'Yükleniyor…' : 'Ürün bulunamadı.'}
                   </Text>
@@ -148,6 +189,15 @@ export function ProductsPage() {
                   onClick={() => navigate(`/products/${product.id}`)}
                   style={{ cursor: 'pointer' }}
                 >
+                  {canPrint && (
+                    <Table.Td onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        aria-label={`${product.name} seç`}
+                        checked={selected.has(product.id)}
+                        onChange={(e) => toggle(product.id, e.currentTarget.checked)}
+                      />
+                    </Table.Td>
+                  )}
                   <Table.Td>
                     <ProductThumb url={product.thumbnailUrl} />
                   </Table.Td>

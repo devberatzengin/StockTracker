@@ -10,6 +10,7 @@ using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Common;
 using StockTracker.Domain.Counts;
 using StockTracker.Domain.Inventory;
+using StockTracker.Domain.Notifications;
 using StockTracker.Infrastructure.Identity;
 
 namespace StockTracker.Infrastructure.Persistence.Interceptors;
@@ -32,6 +33,7 @@ public sealed class AuditInterceptor(ICurrentUser currentUser, IDateTime dateTim
         typeof(RefreshToken),
         typeof(CountLine),
         typeof(CountScan),
+        typeof(Notification),
         typeof(IdentityRole<Guid>),
         typeof(IdentityUserClaim<Guid>),
         typeof(IdentityUserLogin<Guid>),

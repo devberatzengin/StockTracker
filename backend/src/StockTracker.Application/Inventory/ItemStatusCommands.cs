@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using StockTracker.Application.Common.Exceptions;
 using StockTracker.Application.Common.Interfaces;
+using StockTracker.Application.Notifications;
 using StockTracker.Domain.Inventory;
 
 namespace StockTracker.Application.Inventory;
@@ -39,7 +40,8 @@ public sealed class ItemStatusCommandHandlers(
     StockMovementService movementService,
     ICurrentUser currentUser,
     IDateTime dateTime,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    IPublisher publisher)
     : IRequestHandler<SendItemToRepairCommand, MovementResultDto>,
       IRequestHandler<ReturnItemFromRepairCommand, MovementResultDto>
 {
@@ -64,6 +66,7 @@ public sealed class ItemStatusCommandHandlers(
 
         movements.AddRange([change(item, product, context)]);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await publisher.Publish(new StockLevelsChanged([product.Id]), cancellationToken);
 
         return new MovementResultDto(context.ReferenceId, 1, []);
     }

@@ -26,6 +26,8 @@ public sealed class UnitOfWork(AppDbContext dbContext) : IUnitOfWork
         [StockBalanceConfiguration.ProductLocationIndex] = () => new ConcurrencyException(StockChangedMessage),
         [ItemConfiguration.SerialNumberIndex] = () =>
             new DomainException(InventoryErrors.SerialNumberTaken, "Bu seri numarası bu üründe zaten kayıtlı.", "serialNumbers"),
+        // Two checks opening the same notification at once (instant check vs. daily run).
+        [NotificationConfiguration.OpenDedupIndex] = () => new ConcurrencyException(),
         // Two requests assigning the same item at once.
         [AssignmentConfiguration.OpenItemIndex] = () =>
             new ConcurrencyException("Bu adet bu arada zimmetlendi, tekrar deneyin."),

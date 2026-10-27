@@ -4,13 +4,14 @@ using StockTracker.Application.Common.Exceptions;
 using StockTracker.Application.Common.Interfaces;
 using StockTracker.Application.Inventory;
 using StockTracker.Application.Locations;
+using StockTracker.Application.Notifications;
 using StockTracker.Application.Scan;
 using StockTracker.Domain.Catalog;
-using Unit = StockTracker.Domain.Catalog.Unit;
 using StockTracker.Domain.Counts;
 using StockTracker.Domain.Exceptions;
 using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
+using Unit = StockTracker.Domain.Catalog.Unit;
 
 namespace StockTracker.Application.Counts;
 
@@ -273,7 +274,8 @@ public sealed class ApproveCountCommandHandler(
     CountApprovalService approval,
     ICurrentUser currentUser,
     IDateTime dateTime,
-    IUnitOfWork unitOfWork) : IRequestHandler<ApproveCountCommand, CountApprovalResultDto>
+    IUnitOfWork unitOfWork,
+    IPublisher publisher) : IRequestHandler<ApproveCountCommand, CountApprovalResultDto>
 {
     public async Task<CountApprovalResultDto> Handle(ApproveCountCommand request, CancellationToken cancellationToken)
     {
@@ -292,6 +294,7 @@ public sealed class ApproveCountCommandHandler(
 
         movements.AddRange(ledger);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await publisher.Publish(new StockLevelsChanged([.. ledger.Select(m => m.ProductId).Distinct()]), cancellationToken);
 
         return new CountApprovalResultDto(context.ReferenceId, ledger.Count);
     }

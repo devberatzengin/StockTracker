@@ -45,5 +45,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: false,
+    // Long form tests (many typed fields) can pass 5 s on a busy machine or CI runner.
+    testTimeout: 10_000,
   },
 })

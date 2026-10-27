@@ -31,6 +31,7 @@ import { NavLink as RouterNavLink, Outlet, useLocation } from 'react-router'
 import { ChangePasswordModal } from '@/features/auth/ChangePasswordModal'
 import { useAuth } from '@/features/auth/authContext'
 import { Permissions, type Permission } from '@/features/auth/permissions'
+import { NotificationBell } from '@/features/notifications/NotificationBell'
 import { ScanButton } from '@/features/scan/ScanButton'
 import { roleLabel } from '@/features/users/roles'
 
@@ -126,6 +127,7 @@ export function AppLayout() {
           {user && (
             <Group gap="sm" wrap="nowrap">
               <ScanButton />
+              <NotificationBell />
               <Menu position="bottom-end" width={220}>
                 <Menu.Target>
                   <UnstyledButton aria-label="Profil menüsü">

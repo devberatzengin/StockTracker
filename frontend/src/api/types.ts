@@ -74,3 +74,8 @@ export type AuditLogPage = Schemas['AuditLogDtoPagedResult']
 export type AuditAction = Schemas['AuditAction']
 export type AuditChange = Schemas['AuditChangeDto']
 export type ProductPhoto = Schemas['ProductPhotoDto']
+
+export type LabelTemplate = Schemas['LabelTemplate']
+export type NotificationType = Schemas['NotificationType']
+export type AppNotification = Schemas['NotificationDto']
+export type NotificationPage = Schemas['NotificationDtoPagedResult']

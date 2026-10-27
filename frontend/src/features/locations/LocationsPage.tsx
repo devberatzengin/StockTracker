@@ -34,6 +34,7 @@ import { LOCATION_TYPE_LABELS } from '@/features/locations/labels'
 import { LocationTypeIcon } from '@/features/locations/LocationTypeIcon'
 import { LocationFormModal, type LocationFormTarget } from '@/features/locations/LocationFormModal'
 import { useDeactivateLocation, useLocationTree } from '@/features/locations/locationsApi'
+import { PrintLabelsButton } from '@/features/labels/PrintLabelsButton'
 import { MoveLocationModal } from '@/features/locations/MoveLocationModal'
 import {
   filterTree,
@@ -196,6 +197,15 @@ export function LocationsPage() {
                   >
                     Detay
                   </Button>
+                  {selected.node.isActive && (
+                    <PrintLabelsButton
+                      target={{ locationId: selected.node.id }}
+                      summary={`${selected.node.name} ve alt lokasyonları`}
+                      defaultTemplate="Sheet2x4"
+                    >
+                      Etiket yazdır (alt ağaç)
+                    </PrintLabelsButton>
+                  )}
                   {canManage && (
                     <>
                       <Button

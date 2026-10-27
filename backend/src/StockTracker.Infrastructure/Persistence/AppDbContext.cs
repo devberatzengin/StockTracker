@@ -9,6 +9,7 @@ using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Counts;
 using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
+using StockTracker.Domain.Notifications;
 using StockTracker.Domain.Common;
 using StockTracker.Infrastructure.Identity;
 
@@ -40,6 +41,8 @@ public class AppDbContext(DbContextOptions options)
     public DbSet<ProductPhoto> ProductPhotos => Set<ProductPhoto>();
 
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

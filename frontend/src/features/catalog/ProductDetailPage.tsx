@@ -30,6 +30,7 @@ import {
   UNIT_LABELS,
 } from '@/features/catalog/labels'
 import { ProductGallery } from '@/features/catalog/ProductGallery'
+import { PrintLabelsButton } from '@/features/labels/PrintLabelsButton'
 import { ProductFormModal } from '@/features/catalog/ProductFormModal'
 import { MovementList } from '@/features/movements/MovementList'
 import { ProductItemsTab, ProductStockTab } from '@/features/movements/ProductStockTabs'
@@ -109,23 +110,26 @@ function ProductDetail({ product }: { product: ProductDto }) {
             {product.code}
           </Text>
         </div>
-        {canManage && (
-          <Group>
-            <Button variant="light" leftSection={<IconPencil size={16} />} onClick={form.open}>
-              Düzenle
-            </Button>
-            {product.isActive && (
-              <Button
-                variant="light"
-                color="red"
-                leftSection={<IconArchive size={16} />}
-                onClick={confirmDeactivate}
-              >
-                Pasifleştir
+        <Group>
+          <PrintLabelsButton target={{ productIds: [product.id] }} summary={product.name} />
+          {canManage && (
+            <Group>
+              <Button variant="light" leftSection={<IconPencil size={16} />} onClick={form.open}>
+                Düzenle
               </Button>
-            )}
-          </Group>
-        )}
+              {product.isActive && (
+                <Button
+                  variant="light"
+                  color="red"
+                  leftSection={<IconArchive size={16} />}
+                  onClick={confirmDeactivate}
+                >
+                  Pasifleştir
+                </Button>
+              )}
+            </Group>
+          )}
+        </Group>
       </Group>
 
       {!product.isActive && (

@@ -87,6 +87,14 @@ public sealed class UserAccountService(
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Guid>> GetActiveLoginUsersInRolesAsync(
+        IReadOnlyCollection<string> roles,
+        CancellationToken cancellationToken) =>
+        await UsersWithRole(includeInactive: false)
+            .Where(x => x.User.CanLogin && roles.Contains(x.Role))
+            .Select(x => x.User.Id)
+            .ToListAsync(cancellationToken);
+
     public async Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
         IReadOnlyCollection<Guid> userIds,
         CancellationToken cancellationToken) =>

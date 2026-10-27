@@ -90,8 +90,9 @@ async function request<T>(
   path: string,
   body?: unknown,
   retried = false,
+  asBlob = false,
 ): Promise<T> {
-  const headers = new Headers({ Accept: 'application/json, text/plain' })
+  const headers = new Headers({ Accept: asBlob ? '*/*' : 'application/json, text/plain' })
   // FormData (file uploads) sets its own multipart content type with the boundary.
   const isForm = body instanceof FormData
   if (body !== undefined && !isForm) {
@@ -115,7 +116,7 @@ async function request<T>(
 
   if (response.status === 401 && !isAuthEndpoint(path)) {
     if (!retried && (await refreshSession())) {
-      return request<T>(method, path, body, true)
+      return request<T>(method, path, body, true, asBlob)
     }
     sessionHandlers.onExpired()
   }
@@ -124,7 +125,7 @@ async function request<T>(
     throw new ApiError(response.status, await readProblem(response))
   }
 
-  return (await readBody(response)) as T
+  return (asBlob ? await response.blob() : await readBody(response)) as T
 }
 
 async function readBody(response: Response): Promise<unknown> {
@@ -160,6 +161,8 @@ export const apiClient = {
   put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
   patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
   delete: <T = void>(path: string) => request<T>('DELETE', path),
+  /** POST whose answer is a file (e.g. a label PDF). */
+  postForBlob: (path: string, body?: unknown) => request<Blob>('POST', path, body, false, true),
 }
 
 export function isApiError(error: unknown, status?: number): error is ApiError {

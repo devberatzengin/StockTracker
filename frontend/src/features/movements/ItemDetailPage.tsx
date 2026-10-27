@@ -29,6 +29,7 @@ import type { ItemDetail } from '@/api/types'
 import { useItemStatusChange, type StatusChangeAction } from '@/features/assignments/assignmentsApi'
 import { AssignmentTable } from '@/features/assignments/AssignmentTable'
 import { AuditHistory } from '@/features/audit/AuditHistory'
+import { PrintLabelsButton } from '@/features/labels/PrintLabelsButton'
 import { NotFoundPage } from '@/components/NotFoundPage'
 import { usePermission } from '@/features/auth/authContext'
 import { Permissions } from '@/features/auth/permissions'
@@ -84,6 +85,12 @@ function ItemDetail({ item }: { item: ItemDetail }) {
             {item.code}
           </Title>
           <ItemStatusBadge status={item.status} />
+          <PrintLabelsButton
+            target={{ itemIds: [item.id] }}
+            summary={item.code}
+            size="compact-sm"
+            ml="auto"
+          />
         </Group>
         <Anchor component={Link} to={`/products/${item.productId}`}>
           {item.productName}
