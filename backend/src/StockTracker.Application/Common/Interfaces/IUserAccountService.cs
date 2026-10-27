@@ -5,6 +5,8 @@ namespace StockTracker.Application.Common.Interfaces;
 
 public sealed record UserProfile(Guid Id, string FullName, string? Email, string? Department, string Role);
 
+public sealed record UserSummary(string FullName, string? Department);
+
 public sealed record UserListCriteria(int Page, int PageSize, string? Search, string? Sort);
 
 public sealed record NewUserData(
@@ -45,6 +47,11 @@ public interface IUserAccountService
         CancellationToken cancellationToken);
 
     /// <summary>Full names of the given users (including inactive ones), for history lists.</summary>
+    /// <summary>Name and department of the given users (including inactive ones), for reports.</summary>
+    Task<IReadOnlyDictionary<Guid, UserSummary>> GetSummariesAsync(
+        IReadOnlyCollection<Guid> userIds,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
         IReadOnlyCollection<Guid> userIds,
         CancellationToken cancellationToken);

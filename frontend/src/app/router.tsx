@@ -51,6 +51,23 @@ export const router = createBrowserRouter([
                 }),
               },
               {
+                element: <RequirePermission permission={Permissions.CanViewReports} />,
+                children: [
+                  {
+                    path: 'dashboard',
+                    lazy: async () => ({
+                      Component: (await import('@/features/dashboard/DashboardPage')).DashboardPage,
+                    }),
+                  },
+                  {
+                    path: 'reports',
+                    lazy: async () => ({
+                      Component: (await import('@/features/reports/ReportsPage')).ReportsPage,
+                    }),
+                  },
+                ],
+              },
+              {
                 element: <RequirePermission permission={Permissions.CanViewAudit} />,
                 children: [
                   {

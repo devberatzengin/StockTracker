@@ -75,3 +75,12 @@ public sealed class AdminRulesCollection : ICollectionFixture<ApiFactory>
 {
     public const string Name = "AdminRules";
 }
+
+/// <summary>
+/// Separate database for dashboard and report tests, which check exact totals.
+/// </summary>
+[CollectionDefinition(Name)]
+public sealed class DashboardCollection : ICollectionFixture<ApiFactory>
+{
+    public const string Name = "Dashboard";
+}

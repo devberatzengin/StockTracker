@@ -13,11 +13,13 @@ import { useDisclosure } from '@mantine/hooks'
 import {
   IconArrowsMove,
   IconCategory,
+  IconChartBar,
   IconChevronDown,
   IconClipboardCheck,
   IconHistory,
   IconHome,
   IconKey,
+  IconFileSpreadsheet,
   IconListDetails,
   IconLogout,
   IconMapPin,
@@ -44,6 +46,12 @@ interface NavItem {
 
 const mainItems: NavItem[] = [
   { label: 'Ana sayfa', to: '/', icon: <IconHome size={18} /> },
+  {
+    label: 'Panel',
+    to: '/dashboard',
+    icon: <IconChartBar size={18} />,
+    permission: Permissions.CanViewReports,
+  },
   { label: 'Ürünler', to: '/products', icon: <IconPackage size={18} /> },
   { label: 'Lokasyonlar', to: '/locations', icon: <IconMapPin size={18} /> },
   { label: 'Hareketler', to: '/movements', icon: <IconHistory size={18} /> },
@@ -72,6 +80,12 @@ const mainItems: NavItem[] = [
     to: '/users',
     icon: <IconUsers size={18} />,
     permission: Permissions.CanManageUsers,
+  },
+  {
+    label: 'Raporlar',
+    to: '/reports',
+    icon: <IconFileSpreadsheet size={18} />,
+    permission: Permissions.CanViewReports,
   },
   {
     label: 'Değişiklik kaydı',

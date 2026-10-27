@@ -95,6 +95,15 @@ public sealed class UserAccountService(
             .Select(x => x.User.Id)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyDictionary<Guid, UserSummary>> GetSummariesAsync(
+        IReadOnlyCollection<Guid> userIds,
+        CancellationToken cancellationToken) =>
+        userIds.Count == 0
+            ? new Dictionary<Guid, UserSummary>()
+            : await db.Users.IgnoreQueryFilters().AsNoTracking()
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => new UserSummary(u.FullName, u.Department), cancellationToken);
+
     public async Task<IReadOnlyDictionary<Guid, string>> GetDisplayNamesAsync(
         IReadOnlyCollection<Guid> userIds,
         CancellationToken cancellationToken) =>

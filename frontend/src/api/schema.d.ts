@@ -925,6 +925,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DashboardDto"];
+                        "application/json": components["schemas"]["DashboardDto"];
+                        "text/json": components["schemas"]["DashboardDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/files/{key}": {
         parameters: {
             query?: never;
@@ -2277,6 +2314,110 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reports/stock.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/movements.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/assignments.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    status?: components["schemas"]["AssignmentStatus"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/scan/{input}": {
         parameters: {
             query?: never;
@@ -2958,6 +3099,46 @@ export interface components {
             role: string;
             permissions: string[];
         };
+        DailyMovementsDto: {
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            in: number;
+            /** Format: int32 */
+            out: number;
+            /** Format: int32 */
+            transfer: number;
+            /** Format: int32 */
+            adjustment: number;
+            /** Format: int32 */
+            assign: number;
+            /** Format: int32 */
+            return: number;
+            /** Format: int32 */
+            statusChange: number;
+        };
+        DashboardCardsDto: {
+            /** Format: int32 */
+            activeProducts: number;
+            /** Format: int32 */
+            totalItems: number;
+            /** Format: int32 */
+            lowStockProducts: number;
+            /** Format: int32 */
+            openAssignments: number;
+            /** Format: int32 */
+            overdueAssignments: number;
+            /** Format: int32 */
+            itemsInRepair: number;
+        };
+        DashboardDto: {
+            cards: components["schemas"]["DashboardCardsDto"];
+            dailyMovements: components["schemas"]["DailyMovementsDto"][];
+            topProducts: components["schemas"]["TopProductDto"][];
+            itemStatuses: components["schemas"]["ItemStatusCountsDto"];
+            lowStock: components["schemas"]["LowStockProductDto"][];
+            overdueAssignments: components["schemas"]["OverdueAssignmentDto"][];
+        };
         /** @enum {string} */
         ItemAction: "Transfer" | "Assign" | "Return" | "SendToRepair" | "ReturnFromRepair" | "Dispose";
         ItemDto: {
@@ -3024,6 +3205,14 @@ export interface components {
             /** Format: int32 */
             count: number;
         };
+        ItemStatusCountsDto: {
+            /** Format: int32 */
+            inStock: number;
+            /** Format: int32 */
+            assigned: number;
+            /** Format: int32 */
+            inRepair: number;
+        };
         /** @enum {string} */
         LabelTemplate: "Sheet3x8" | "Sheet2x4" | "Sheet5x13" | "Thermal50x30";
         LocationChildDto: {
@@ -3084,6 +3273,19 @@ export interface components {
         LoginCommand: {
             email: string;
             password: string;
+        };
+        LowStockProductDto: {
+            /** Format: uuid */
+            productId: string;
+            code: string;
+            name: string;
+            unit: components["schemas"]["Unit"];
+            /** Format: double */
+            total: number;
+            /** Format: double */
+            minStockLevel: number;
+            /** Format: double */
+            shortage: number;
         };
         MoveLocationRequest: {
             /** Format: uuid */
@@ -3169,6 +3371,19 @@ export interface components {
         };
         /** @enum {string} */
         NotificationType: "LowStock" | "AssignmentDueSoon" | "AssignmentOverdue";
+        OverdueAssignmentDto: {
+            /** Format: uuid */
+            assignmentId: string;
+            /** Format: uuid */
+            itemId: string;
+            itemCode: string;
+            productName: string;
+            assigneeName: string;
+            /** Format: date */
+            dueDate: string;
+            /** Format: int32 */
+            daysOverdue: number;
+        };
         PrintLabelsCommand: {
             template: components["schemas"]["LabelTemplate"];
             /** Format: int32 */
@@ -3328,6 +3543,14 @@ export interface components {
             /** Format: uuid */
             toLocationId: string;
             lines: components["schemas"]["StockLine"][];
+        };
+        TopProductDto: {
+            /** Format: uuid */
+            productId: string;
+            code: string;
+            name: string;
+            /** Format: int32 */
+            movementCount: number;
         };
         /** @enum {string} */
         TrackingType: "Serialized" | "Quantity";

@@ -140,6 +140,18 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Günlük kontrol | `BackgroundService`: açılıştan 1 dk sonra bir kez, sonra her gün 08:00 (UTC+3) `PeriodicTimer(1 gün)`. `Notifications__DailyCheckEnabled=false` ile kapatılır (testler). |
 | Okunmamış sayısı | Zil sadece okunmamış ve kapanmamış bildirimleri sayar; kapanmışlar listede "Çözüldü" rozetiyle kalır. 60 sn'de bir sorgulama. |
 
+**Uygulama sırasında alınan kararlar** (Faz 3.5, 27 Ekim):
+
+| Konu | Karar |
+| --- | --- |
+| Kritik stok tanımı | Bildirimlerle aynı ortak sorgu (`StockTotals`): Quantity'de bakiye toplamı, Serialized'da `InStock` adet; aktif ve minimumu olan ürün, toplam < minimum. |
+| Günlük hareket grafiği | İstanbul gününe göre bugün dahil 30 gün; hareketsiz günler 0. Gruplama 30 günlük (zaman, tip) çiftleri yüklenerek bellekte yapılır (sabit UTC+3). Tüm tipler döner, grafik sadece olanları çizer. |
+| Dashboard listeleri | En çok hareket gören 10 ürün hareket sayısına göre; durum dağılımı `InStock`/`Assigned`/`InRepair`; kritik stok eksik miktara göre ilk 20; gecikmiş zimmetlerde teslim tarihi en eski 10 (gecikme günüyle). "Toplam adet" hurdaya ayrılanları saymaz. |
+| Excel | ClosedXML 0.105.1 (MIT; bağımlılığı SixLabors.Fonts 1.0.0, lisans anahtarı istemez). Kolon genişlikleri sabit (font ölçümü yok); başlık kalın + dondurulmuş, otomatik filtre; tarihler İstanbul saatiyle gerçek Excel tarihi. |
+| Rapor içerikleri | Stok durumu: aktif ürünler + "Lokasyon dağılımı" sayfası (Quantity bakiyeleri, Serialized'da lokasyondaki `InStock`/`InRepair` adet). Hareket dökümü: `from`/`to` İstanbul günü (iki gün dahil), kaynak/hedef tam lokasyon yolu. Zimmet listesi: isteğe bağlı `status`. |
+| Satır sınırı | Satırlar önce sayılır; 50.000'i aşan rapor üretilmeden 422 `Reports.TooManyRows` (hareket dökümünde "Tarih aralığını daraltın"). |
+| Yetki ve ekranlar | `GET /dashboard` ve `GET /reports/*.xlsx` `CanViewReports`. Menüde "Panel" (`/dashboard`) ve "Raporlar" (`/reports`). |
+
 ## Mimari
 
 Bağımlılıklar her zaman içe doğru akar: API → Application → Domain. Infrastructure, Application'daki arayüzleri uygular. Domain hiçbir pakete bağımlı değildir.

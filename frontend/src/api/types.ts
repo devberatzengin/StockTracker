@@ -79,3 +79,6 @@ export type LabelTemplate = Schemas['LabelTemplate']
 export type NotificationType = Schemas['NotificationType']
 export type AppNotification = Schemas['NotificationDto']
 export type NotificationPage = Schemas['NotificationDtoPagedResult']
+
+export type Dashboard = Schemas['DashboardDto']
+export type DailyMovements = Schemas['DailyMovementsDto']

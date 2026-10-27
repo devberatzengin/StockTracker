@@ -161,6 +161,8 @@ export const apiClient = {
   put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
   patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
   delete: <T = void>(path: string) => request<T>('DELETE', path),
+  /** GET whose answer is a file (e.g. an Excel report). */
+  getForBlob: (path: string) => request<Blob>('GET', path, undefined, false, true),
   /** POST whose answer is a file (e.g. a label PDF). */
   postForBlob: (path: string, body?: unknown) => request<Blob>('POST', path, body, false, true),
 }

@@ -23,6 +23,7 @@
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
     <PackageReference Include="AWSSDK.S3" />
     <PackageReference Include="QRCoder" />
+    <PackageReference Include="ClosedXML" />
     <PackageReference Include="QuestPDF" />
   </ItemGroup>
 

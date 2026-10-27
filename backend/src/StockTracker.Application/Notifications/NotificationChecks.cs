@@ -2,8 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using StockTracker.Application.Catalog;
 using StockTracker.Application.Common;
 using StockTracker.Application.Common.Interfaces;
-using StockTracker.Domain.Catalog;
-using StockTracker.Domain.Inventory;
+using StockTracker.Application.Inventory;
 using StockTracker.Domain.Notifications;
 using StockTracker.Domain.Users;
 
@@ -31,30 +30,15 @@ public sealed class LowStockMonitor(
             query = query.Where(p => productIds.Contains(p.Id));
         }
 
-        var balances = db.StockBalances;
-        var items = db.Items;
-        var products = await query
-            .Select(p => new
-            {
-                p.Id,
-                p.Code,
-                p.Name,
-                p.Unit,
-                p.IsActive,
-                p.MinStockLevel,
-                Total = p.TrackingType == TrackingType.Quantity
-                    ? balances.Where(b => b.ProductId == p.Id).Sum(b => (decimal?)b.Quantity) ?? 0
-                    : items.Count(i => i.ProductId == p.Id && i.Status == ItemStatus.InStock),
-            })
-            .ToListAsync(cancellationToken);
+        var products = await StockTotals.Query(db, query).ToListAsync(cancellationToken);
 
-        var low = products.Where(p => p.IsActive && p.MinStockLevel is { } min && p.Total < min).ToList();
-        var keys = products.Select(p => Notification.LowStockKey(p.Id)).ToList();
+        var low = products.Where(StockTotals.IsLow).ToList();
+        var keys = products.Select(p => Notification.LowStockKey(p.ProductId)).ToList();
         var open = await notifications.GetOpenAsync(keys, cancellationToken);
         var now = dateTime.UtcNow;
 
         // Resolve where the cause went away (refilled, minimum removed, product deactivated).
-        var lowKeys = low.Select(p => Notification.LowStockKey(p.Id)).ToHashSet();
+        var lowKeys = low.Select(p => Notification.LowStockKey(p.ProductId)).ToHashSet();
         foreach (var notification in open.Where(n => !lowKeys.Contains(n.DedupKey)))
         {
             notification.Resolve(now);
@@ -65,7 +49,7 @@ public sealed class LowStockMonitor(
             var recipients = await users.GetActiveLoginUsersInRolesAsync(Recipients, cancellationToken);
             foreach (var product in low)
             {
-                var key = Notification.LowStockKey(product.Id);
+                var key = Notification.LowStockKey(product.ProductId);
                 var unit = CatalogLabels.Unit(product.Unit);
                 foreach (var userId in recipients.Where(u => !open.Any(n => n.DedupKey == key && n.UserId == u)))
                 {
@@ -75,7 +59,7 @@ public sealed class LowStockMonitor(
                         $"Kritik stok: {product.Name}",
                         $"{product.Name} ({product.Code}) stoğu {product.Total:0.###} {unit}; minimum {product.MinStockLevel:0.###} {unit}.",
                         "Product",
-                        product.Id,
+                        product.ProductId,
                         key,
                         now));
                 }

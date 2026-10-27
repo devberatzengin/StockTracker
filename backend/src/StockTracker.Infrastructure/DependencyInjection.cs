@@ -7,6 +7,7 @@ using StockTracker.Application.Common.Interfaces;
 using StockTracker.Application.Files;
 using StockTracker.Infrastructure.Codes;
 using StockTracker.Application.Labels;
+using StockTracker.Application.Reports;
 using StockTracker.Infrastructure.Identity;
 using StockTracker.Infrastructure.Labels;
 using StockTracker.Infrastructure.Notifications;
@@ -14,6 +15,7 @@ using StockTracker.Infrastructure.Inventory;
 using StockTracker.Infrastructure.Persistence;
 using StockTracker.Infrastructure.Persistence.Interceptors;
 using StockTracker.Infrastructure.Persistence.Repositories;
+using StockTracker.Infrastructure.Reports;
 using StockTracker.Infrastructure.Services;
 using StockTracker.Infrastructure.Storage;
 
@@ -36,6 +38,7 @@ public static class DependencyInjection
         AddStorage(services, configuration);
         services.AddSingleton<ILabelRenderer, QuestPdfLabelRenderer>();
         services.AddSingleton<IPublicUrls, PublicUrls>();
+        services.AddSingleton<IReportWriter, ClosedXmlReportWriter>();
 
         services.AddScoped<AuditableEntityInterceptor>();
         services.AddScoped<AuditInterceptor>();
