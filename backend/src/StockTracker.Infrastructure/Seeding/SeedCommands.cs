@@ -28,8 +28,8 @@ public static class SeedCommands
         {
             switch (args[0])
             {
-                case SeedLoad when !demoMode:
-                case ResetDemo when !demoMode:
+                // seed-demo too: it creates an admin whose password is published in the README.
+                case SeedLoad or SeedDemo or ResetDemo when !demoMode:
                     logger.LogError("{Command} only runs with DEMO_MODE=true.", args[0]);
                     return 2;
                 case SeedLoad:

@@ -18,10 +18,13 @@ public class SeedCommandTests(ApiFactory factory)
     public void IsCommand_RecognizesOnlySeedCommands(string arg, bool expected) =>
         SeedCommands.IsCommand([arg]).Should().Be(expected);
 
-    [Fact]
-    public async Task SeedLoad_WithoutDemoMode_IsRefused()
+    [Theory]
+    [InlineData(SeedCommands.SeedLoad)]
+    [InlineData(SeedCommands.SeedDemo)]
+    [InlineData(SeedCommands.ResetDemo)]
+    public async Task Command_WithoutDemoMode_IsRefused(string command)
     {
-        var exitCode = await SeedCommands.RunAsync(factory.Services, [SeedCommands.SeedLoad]);
+        var exitCode = await SeedCommands.RunAsync(factory.Services, [command]);
 
         exitCode.Should().Be(2);
     }

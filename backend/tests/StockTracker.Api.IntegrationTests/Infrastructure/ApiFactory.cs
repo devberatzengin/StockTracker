@@ -84,3 +84,10 @@ public sealed class DashboardCollection : ICollectionFixture<ApiFactory>
 {
     public const string Name = "Dashboard";
 }
+
+/// <summary>Separate, initially empty database for the demo seed (it refuses a database with data).</summary>
+[CollectionDefinition(Name)]
+public sealed class DemoSeedCollection : ICollectionFixture<ApiFactory>
+{
+    public const string Name = "DemoSeed";
+}
