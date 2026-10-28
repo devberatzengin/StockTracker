@@ -27,7 +27,7 @@ Pin the repository on the profile.
 - Built a QR/barcode stock tracker with phone scanning, device assignments, counts and label
   printing on .NET 10 Clean Architecture with CQRS; stock changes go through an append-only
   movement ledger enforced by a database trigger and optimistic concurrency.
-- Covered all 71 endpoints with access-policy tests and 500+ backend tests against real
+- Covered all 72 endpoints with access-policy tests and 500+ backend tests against real
   PostgreSQL (Testcontainers); list endpoints stay under 10 ms p95 on 50,000 movements.
 - Shipped with Docker Compose, GHCR images per release tag, nginx security headers, login rate
   limiting and secret scanning in CI.

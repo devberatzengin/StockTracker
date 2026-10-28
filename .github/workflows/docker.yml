@@ -34,6 +34,9 @@ jobs:
           - name: web
             context: frontend
             file: frontend/Dockerfile
+          - name: backup
+            context: docker/backup
+            file: docker/backup/Dockerfile
     name: build (${{ matrix.name }})
     steps:
       - uses: actions/checkout@v5

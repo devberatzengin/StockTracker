@@ -48,6 +48,24 @@ services:
     restart: unless-stopped
     logging: *logging
 
+  # Nightly pg_dump of the external database into the backups volume (docs/deploy.md, Backups).
+  backup:
+    image: ghcr.io/${GHCR_OWNER:?set GHCR_OWNER}/stocktracker-backup:${IMAGE_TAG:-latest}
+    build:
+      context: ./docker/backup
+    env_file:
+      - path: .env
+        required: true
+    volumes:
+      - backups:/backups
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    restart: unless-stopped
+    logging: *logging
+
   cloudflared:
     # A named tunnel (token from the Cloudflare dashboard) keeps a fixed host name.
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN}
@@ -58,3 +76,6 @@ services:
           memory: 128M
     restart: unless-stopped
     logging: *logging
+
+volumes:
+  backups:

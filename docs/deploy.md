@@ -1,8 +1,8 @@
 # Deploy
 
-StockTracker runs as four containers: `api` (ASP.NET Core), `web` (nginx with the built SPA,
-proxies `/api`), `migrator` (EF Core migration bundle, run on demand) and `cloudflared` (HTTPS
-tunnel). PostgreSQL is **not** a container: it is an external server reached through
+StockTracker runs as five containers: `api` (ASP.NET Core), `web` (nginx with the built SPA,
+proxies `/api`), `migrator` (EF Core migration bundle, run on demand), `cloudflared` (HTTPS
+tunnel) and, in production, `backup` (nightly `pg_dump`). PostgreSQL is **not** a container: it is an external server reached through
 `ConnectionStrings__Default`.
 
 `docker-compose.prod.yml` is an override on top of `docker-compose.yml`:
@@ -10,12 +10,13 @@ tunnel). PostgreSQL is **not** a container: it is an external server reached thr
 | Setting | Production value |
 |---|---|
 | `ASPNETCORE_ENVIRONMENT` | `Production` (no Swagger, no exception details in errors) |
-| Images | `ghcr.io/<GHCR_OWNER>/stocktracker-{api,web,migrator}:<IMAGE_TAG>` |
+| Images | `ghcr.io/<GHCR_OWNER>/stocktracker-{api,web,migrator,backup}:<IMAGE_TAG>` |
 | Restart | `unless-stopped` |
-| Resource limits | api 1 CPU / 512 MB, web 0.5 CPU / 128 MB, cloudflared 0.5 CPU / 128 MB, migrator 1 CPU / 512 MB |
+| Resource limits | api 1 CPU / 512 MB, web 0.5 CPU / 128 MB, cloudflared 0.5 CPU / 128 MB, migrator 1 CPU / 512 MB, backup 0.5 CPU / 256 MB |
 | Logs | `json-file`, 3 × 10 MB per container |
 | Web port | `127.0.0.1:8080` only; the public way in is the tunnel |
 | Tunnel | named Cloudflare tunnel (`CLOUDFLARE_TUNNEL_TOKEN`), fixed host name |
+| Backups | nightly dump into the `backups` volume, 7 daily + 4 weekly (see Backups) |
 
 ## Images
 
@@ -26,8 +27,8 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-This produces `stocktracker-api:1.0.0`, `:latest` and `:sha-<commit>` (same for `web` and
-`migrator`) under the repository owner's GitHub Container Registry. Packages are private by
+This produces `stocktracker-api:1.0.0`, `:latest` and `:sha-<commit>` (same for `web`,
+`migrator` and `backup`) under the repository owner's GitHub Container Registry. Packages are private by
 default: make them public in GitHub, or run `docker login ghcr.io` on the server.
 
 ## Settings that change for a deployment
@@ -93,6 +94,53 @@ SMOKE_EMAIL=admin@example.com SMOKE_PASSWORD=... python3 scripts/smoke.py https:
 
 ## Backups
 
-- Database: the provider's backups, or `pg_dump` on a schedule. The ledger (`stock_movements`)
-  is the source of truth; balances can be checked against it.
-- Photos: the R2 bucket, or the `uploads` Docker volume with Local storage.
+The `backup` service of `docker-compose.prod.yml` dumps the database every night and keeps the
+files in the `backups` Docker volume (`stocktracker_backups`):
+
+- `pg_dump` in custom format, at `BACKUP_TIME_UTC` (default `00:00` UTC = 03:00 Istanbul) and once
+  at container start.
+- `daily/`: the last 7 dumps (`BACKUP_KEEP_DAILY`); `weekly/`: Sunday's dump, the last 4
+  (`BACKUP_KEEP_WEEKLY`).
+- It reads `ConnectionStrings__Default` from `.env`; nothing else to configure. Its health check
+  turns unhealthy when the newest dump is older than 26 hours.
+- `pg_dump` must be at least the server's major version. For PostgreSQL 18, build the image with
+  `--build-arg POSTGRES_VERSION=18`.
+
+Take a backup now:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm backup backup-now
+```
+
+### Check that a backup restores
+
+Do this after the first deployment and then regularly (for example monthly). The script restores
+the newest dump into a throwaway PostgreSQL container, prints row counts and fails if any stock
+balance differs from its ledger movements:
+
+```bash
+scripts/backup/restore-test.sh --volume stocktracker_backups
+scripts/backup/restore-test.sh path/to/stocktracker-2026-10-28-000000.dump
+```
+
+### Restore into the real database
+
+1. Stop the API and web: `docker compose -f docker-compose.yml -f docker-compose.prod.yml stop api web`.
+2. Restore into an **empty** database (create a new one, or drop and recreate the old one):
+   `pg_restore --no-owner --no-privileges -d "<connection URI>" stocktracker-….dump`
+   (run it from the `backup` image if you have no local `pg_restore`).
+3. Point `ConnectionStrings__Default` at it if it is a new database, then start the services again.
+
+### Off-site copies
+
+The volume lives on the same server as the app. Copy the dumps elsewhere, for example to an R2
+bucket with `rclone` from a cron job on the host:
+
+```bash
+docker run --rm -v stocktracker_backups:/backups:ro -v ~/.config/rclone:/config/rclone \
+  rclone/rclone sync /backups r2:stocktracker-backups
+```
+
+Photos are not in the dumps: with R2 storage they are already off-site; with Local storage back up
+the `uploads` volume the same way. The ledger (`stock_movements`) is the source of truth; the daily
+reconciliation reports any balance or item that does not match it.

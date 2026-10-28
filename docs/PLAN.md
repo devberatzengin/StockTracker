@@ -161,6 +161,7 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Defter mutabakatı | Günlük job her bakiyeyi miktar hareketlerinin toplamıyla, her adedin durum ve lokasyonunu son hareketleriyle karşılaştırır (`LedgerReconciliation`). Fark varsa aktif Admin'lere tek "Defter tutarsızlığı" bildirimi (`LedgerMismatch`, dedup), ayrıntılar loga; veri düzelince bildirim kapanır. Otomatik düzeltme yapılmaz. |
 | Günlük job kilidi | Job, oturum seviyesinde `pg_try_advisory_lock` alabilen tek API kopyasında çalışır; kilit alınamazsa o çalışma atlanır. |
 | Rate limit | Kayan pencere (1 dk, 6 segment), aşımda 429 + `Retry-After`. Genel tavan: giriş yapmış kullanıcı başına 300/dk, anonim IP başına 100/dk. Politikalar: login IP başına 10/dk, refresh IP başına 30/dk, ağır uçlar (Excel raporları, etiket PDF'i, fotoğraf yükleme) kullanıcı başına 10/dk. Hepsi `RateLimiting__*PermitPerMinute` ile değişir; sayaçlar bellekte (tek API kopyası varsayımı). Hangi ucun hangi politikayı kullandığı testle sabit. |
+| Yedekleme | Production'da `backup` konteyneri (`postgres:17-alpine` tabanlı, `docker/backup`) her gün 00:00 UTC'de (03:00 İstanbul) ve açılışta `pg_dump -Fc` alır; bağlantıyı `ConnectionStrings__Default`'tan okur. `backups` volume'unda son 7 günlük ve 4 haftalık (pazar) yedek. `scripts/backup/restore-test.sh` en son yedeği geçici bir Postgres'e geri yükler, bakiye–defter tutarlılığını kontrol eder. Sunucu dışı kopya (rclone → R2) dokümanda, otomatik değil. |
 
 ## Mimari
 

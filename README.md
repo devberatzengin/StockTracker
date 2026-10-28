@@ -26,8 +26,8 @@ append-only movement ledger.
 ![nginx](https://img.shields.io/badge/nginx-009639?logo=nginx&logoColor=white)
 ![Cloudflare](https://img.shields.io/badge/Cloudflare_Tunnel-F38020?logo=cloudflare&logoColor=white)
 
-![Tests](https://img.shields.io/badge/tests-515_backend_%7C_111_frontend-brightgreen)
-![Endpoints](https://img.shields.io/badge/endpoints-71_policy--tested-brightgreen)
+![Tests](https://img.shields.io/badge/tests-544_backend_%7C_116_frontend-brightgreen)
+![Endpoints](https://img.shields.io/badge/endpoints-72_policy--tested-brightgreen)
 ![p95](https://img.shields.io/badge/list_p95-%3C10_ms_on_50k_movements-brightgreen)
 
 [Features](#-features) ·
@@ -50,7 +50,7 @@ append-only movement ledger.
 | 🏷️ **Two kinds of products** | Serialized devices tracked one by one (serial number, status, location, owner) and quantity stock tracked per shelf. [ADR 001](docs/adr/001-mixed-product-model.md) |
 | 📱 **Scanning** | Phone or webcam camera (QR, EAN/UPC) or typed codes. A label's QR opens the item page even from the phone's own camera app. [ADR 006](docs/adr/006-qr-content-url.md) |
 | 🗂️ **Location tree** | Building › room › cabinet › shelf › box, any depth, with contents per subtree. [ADR 004](docs/adr/004-materialized-path.md) |
-| 🔁 **Movements** | Stock in, out, transfer, multi-line receipts; full history per product, item, location and user. |
+| 🔁 **Movements** | Stock in, out, transfer, multi-line receipts; wrong entries are reversed with an opposite movement, never edited. Full history per product, item, location and user. |
 | 🤝 **Assignments** | Lend devices to people (with or without a login), due dates, overdue tracking; faulty returns go to repair. |
 | 🧮 **Counts** | Scan a location, review the differences, approve; differences become adjustment movements. |
 | 🖨️ **Labels** | PDF sheets (A4 3×8, 2×4, 5×13) and thermal rolls, for products, items, a whole receipt or a location subtree. |
@@ -135,15 +135,19 @@ time. [ADR 002](docs/adr/002-movement-ledger.md)
 | **Storage** | Local disk with signed URLs, or Cloudflare R2 (AWS S3 SDK) |
 | **Frontend** | React 19, TypeScript, Vite, Mantine + Mantine Charts, TanStack Query, React Router, React Hook Form + Zod, `@zxing/browser` |
 | **Testing** | xUnit, FluentAssertions, Testcontainers (real PostgreSQL), Vitest, React Testing Library |
-| **Ops** | Docker Compose, nginx (security headers), Cloudflare Tunnel, GitHub Actions, GHCR images, gitleaks |
+| **Ops** | Docker Compose, nginx (security headers), Cloudflare Tunnel, GitHub Actions, GHCR images, gitleaks, nightly `pg_dump` backups with a restore test |
 
 ## ✅ Quality
 
-- **515 backend tests** (domain, application, API integration against real PostgreSQL) and
-  **111 frontend tests**.
-- A reflection test pins the access policy of all **71 endpoints**; no endpoint can ship without one.
+- **544 backend tests** (domain, application, API integration against real PostgreSQL) and
+  **116 frontend tests**.
+- A reflection test pins the access policy of all **72 endpoints**; no endpoint can ship without one.
 - Load data of 1,000 products and 50,000 movements: every list endpoint and the dashboard stay
   well under the 300 ms target. [docs/performance.md](docs/performance.md)
+- Stock commands are idempotent (`Idempotency-Key`): a double click or a network retry never books twice.
+- A daily job reconciles every balance and item with the ledger and alerts the admins on any difference.
+- Rate limits per user and per IP, stricter for login, token refresh and heavy endpoints.
+- Nightly database backups with a scripted restore test.
 - CI on every push: build + tests, Docker image builds, secret scan of the full history.
 
 ## 📚 Documentation
@@ -247,7 +251,8 @@ while it runs and changes on every start.
 backend/    ASP.NET Core solution: Domain, Application, Infrastructure, Api + tests
 frontend/   React app (features/*), nginx config
 docs/       Plan, ADRs, API, deploy and performance notes
-scripts/    Smoke test, performance measurement, API doc generator
+docker/     Backup image (nightly pg_dump)
+scripts/    Smoke test, restore test, performance measurement, API doc generator
 ```
 
 ---
