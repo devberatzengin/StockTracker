@@ -6,6 +6,7 @@ import { groupByReference } from '@/features/movements/grouping'
 import { MOVEMENT_TYPE_COLORS, MOVEMENT_TYPE_LABELS } from '@/features/movements/labels'
 import { describeMovement } from '@/features/movements/movementText'
 import { useMovements, type MovementFilters } from '@/features/movements/movementsApi'
+import { MovementReversal } from '@/features/movements/ReverseMovement'
 import { formatDateTime } from '@/lib/dates'
 
 interface Props {
@@ -61,6 +62,7 @@ export function MovementList({ filters, variant = 'list', emptyText = 'Hareket y
                   <Text size="xs" c="dimmed">
                     {formatDateTime(m.occurredAt)}
                   </Text>
+                  <MovementReversal movement={m} />
                 </Group>
               }
             >
@@ -83,6 +85,7 @@ export function MovementList({ filters, variant = 'list', emptyText = 'Hareket y
               <Text size="xs" c="dimmed">
                 {formatDateTime(m.occurredAt)}
               </Text>
+              <MovementReversal movement={m} />
             </Group>
             <Text size="sm">{describeMovement(m)}</Text>
             {m.note && (
@@ -114,9 +117,10 @@ export function MovementList({ filters, variant = 'list', emptyText = 'Hareket y
               </Group>
               <Stack gap={2}>
                 {group.movements.map((m) => (
-                  <Text key={m.id} size="sm">
-                    {describeMovement(m)}
-                  </Text>
+                  <Group key={m.id} gap="xs" wrap="nowrap">
+                    <Text size="sm">{describeMovement(m)}</Text>
+                    <MovementReversal movement={m} />
+                  </Group>
                 ))}
               </Stack>
               {first.note && (

@@ -254,6 +254,161 @@ public sealed class StockMovementService
     public StockMovement CompleteRepair(Item item, Product product, string? note, MovementContext context) =>
         ChangeStatus(item, product, note, context, ItemState.For(item.Status).CompleteRepair(), item.CompleteRepair);
 
+    /// <summary>
+    /// Cancels out a wrong movement with a new one in the opposite direction; the original stays in the
+    /// ledger. Quantity In/Out/Transfer and item In/Transfer can be reversed, once, with a note. Items must
+    /// still be in stock where the original movement left them.
+    /// </summary>
+    /// <param name="from">The original movement's source location (null when it had none).</param>
+    /// <param name="to">The original movement's target location (null when it had none).</param>
+    /// <param name="fromBalance">Balance of (product, <paramref name="from"/>) for quantity movements.</param>
+    /// <param name="toBalance">Balance of (product, <paramref name="to"/>) for quantity movements.</param>
+    public StockMovement Reverse(
+        StockMovement original,
+        bool alreadyReversed,
+        Product product,
+        Item? item,
+        Location? from,
+        Location? to,
+        StockBalance? fromBalance,
+        StockBalance? toBalance,
+        string? note,
+        MovementContext context)
+    {
+        if (original.ReversesMovementId is not null)
+        {
+            throw new DomainException(InventoryErrors.NotReversible, "Ters kaydın kendisi ters çevrilemez.");
+        }
+
+        if (!original.IsReversibleType)
+        {
+            throw new DomainException(
+                InventoryErrors.NotReversible,
+                "Bu hareket ters çevrilemez; zimmet, iade, durum değişikliği ve sayım düzeltmelerinin kendi işlemleri var.");
+        }
+
+        if (alreadyReversed)
+        {
+            throw new DomainException(InventoryErrors.AlreadyReversed, "Bu hareket zaten ters çevrildi.");
+        }
+
+        if (string.IsNullOrWhiteSpace(note))
+        {
+            throw new DomainException(InventoryErrors.NoteRequired, "Ters kayıt için not zorunludur.", "note");
+        }
+
+        if (product.Id != original.ProductId)
+        {
+            throw new ArgumentException("Product does not belong to the movement.", nameof(product));
+        }
+
+        var movement = original.ItemId is null
+            ? ReverseQuantity(original, product, from, to, fromBalance, toBalance, note, context)
+            : ReverseItem(original, product, item ?? throw new ArgumentNullException(nameof(item)), from, to, note, context);
+        movement.MarkAsReversalOf(original);
+        return movement;
+    }
+
+    private static StockMovement ReverseQuantity(
+        StockMovement original,
+        Product product,
+        Location? from,
+        Location? to,
+        StockBalance? fromBalance,
+        StockBalance? toBalance,
+        string note,
+        MovementContext context)
+    {
+        EnsureUsable(product, TrackingType.Quantity);
+        var quantity = original.Quantity;
+        switch (original.Type)
+        {
+            case MovementType.In:
+            {
+                var target = Required(to, original.ToLocationId);
+                EnsureActive(target, "movementId");
+                var movement = StockMovement.Create(
+                    MovementType.Out, product.Id, null, target.Id, null, quantity, MovementReason.Other, note, context);
+                Decrease(toBalance, product, target, quantity);
+                return movement;
+            }
+
+            case MovementType.Out:
+            {
+                var source = Required(from, original.FromLocationId);
+                EnsureActive(source, "movementId");
+                var balance = fromBalance ?? throw new ArgumentNullException(nameof(fromBalance));
+                EnsureBelongs(balance, product, source);
+                var movement = StockMovement.Create(
+                    MovementType.In, product.Id, null, null, source.Id, quantity, null, note, context);
+                balance.Increase(quantity);
+                return movement;
+            }
+
+            default:
+            {
+                var source = Required(from, original.FromLocationId);
+                var target = Required(to, original.ToLocationId);
+                EnsureActive(source, "movementId");
+                EnsureActive(target, "movementId");
+                var back = fromBalance ?? throw new ArgumentNullException(nameof(fromBalance));
+                EnsureBelongs(back, product, source);
+                var movement = StockMovement.Create(
+                    MovementType.Transfer, product.Id, null, target.Id, source.Id, quantity, null, note, context);
+                Decrease(toBalance, product, target, quantity);
+                back.Increase(quantity);
+                return movement;
+            }
+        }
+    }
+
+    private static StockMovement ReverseItem(
+        StockMovement original,
+        Product product,
+        Item item,
+        Location? from,
+        Location? to,
+        string note,
+        MovementContext context)
+    {
+        EnsureUsable(product, TrackingType.Serialized);
+        EnsureBelongs(item, product);
+        if (item.Id != original.ItemId)
+        {
+            throw new ArgumentException("Item does not belong to the movement.", nameof(item));
+        }
+
+        // The item must still be where this movement put it; anything later would be undone silently.
+        if (item.Status != ItemStatus.InStock || item.CurrentLocationId != original.ToLocationId)
+        {
+            throw new DomainException(
+                InventoryErrors.ItemChangedSinceMovement,
+                "Adet bu hareketten sonra taşınmış ya da durumu değişmiş; ters kayıt yapılamaz.");
+        }
+
+        var target = Required(to, original.ToLocationId);
+        if (original.Type == MovementType.In)
+        {
+            // A wrongly received item leaves stock for good.
+            var movement = StockMovement.Create(
+                MovementType.Out, product.Id, item.Id, target.Id, null, 1, MovementReason.Other, note, context);
+            item.Dispose();
+            return movement;
+        }
+
+        var source = Required(from, original.FromLocationId);
+        EnsureActive(source, "movementId");
+        var back = StockMovement.Create(
+            MovementType.Transfer, product.Id, item.Id, target.Id, source.Id, 1, null, note, context);
+        item.MoveTo(source);
+        return back;
+    }
+
+    private static Location Required(Location? location, Guid? expectedId) =>
+        location is not null && location.Id == expectedId
+            ? location
+            : throw new ArgumentException("Location does not match the movement.", nameof(location));
+
     private static StockMovement ChangeStatus(
         Item item,
         Product product,

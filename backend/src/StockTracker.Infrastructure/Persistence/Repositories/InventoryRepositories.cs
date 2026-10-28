@@ -55,5 +55,11 @@ public sealed class StockBalanceRepository(AppDbContext db) : IStockBalanceRepos
 
 public sealed class MovementRepository(AppDbContext db) : IMovementRepository
 {
+    public Task<StockMovement?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
+        db.StockMovements.AsNoTracking().SingleOrDefaultAsync(m => m.Id == id, cancellationToken);
+
+    public Task<bool> IsReversedAsync(Guid id, CancellationToken cancellationToken) =>
+        db.StockMovements.AnyAsync(m => m.ReversesMovementId == id, cancellationToken);
+
     public void AddRange(IEnumerable<StockMovement> movements) => db.StockMovements.AddRange(movements);
 }

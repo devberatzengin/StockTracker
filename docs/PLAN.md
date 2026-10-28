@@ -152,6 +152,12 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Satır sınırı | Satırlar önce sayılır; 50.000'i aşan rapor üretilmeden 422 `Reports.TooManyRows` (hareket dökümünde "Tarih aralığını daraltın"). |
 | Yetki ve ekranlar | `GET /dashboard` ve `GET /reports/*.xlsx` `CanViewReports`. Menüde "Panel" (`/dashboard`) ve "Raporlar" (`/reports`). |
 
+**Uygulama sırasında alınan kararlar** (güvenilirlik, 28 Ekim):
+
+| Konu | Karar |
+| --- | --- |
+| Ters kayıt | `POST /movements/{id}/reverse` (`CanMoveStock`, not zorunlu). Orijinal hareket değişmez; tersi yönde yeni hareket `reverses_movement_id` ile orijinali gösterir (yeni hareket tipi yok). Miktar `In` → aynı raftan `Out` (sebep `Other`), `Out` → aynı rafa `In`, `Transfer` → geri transfer; tekil `In` → adet hurdaya (`Out`), tekil `Transfer` → geri transfer. Tekil adet hâlâ `InStock` ve hareketin bıraktığı yerde olmalı (`Movement.ItemChangedSinceMovement`). Bir hareket bir kez ters çevrilir (kısmi unique index, `Movement.AlreadyReversed`); ters kayıt ve zimmet/iade/durum/sayım hareketleri ters çevrilemez (`Movement.NotReversible`). Süre sınırı yok. |
+
 ## Mimari
 
 Bağımlılıklar her zaman içe doğru akar: API → Application → Domain. Infrastructure, Application'daki arayüzleri uygular. Domain hiçbir pakete bağımlı değildir.

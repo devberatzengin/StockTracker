@@ -78,6 +78,7 @@ public class EndpointAccessTests(ApiFactory factory)
         { "POST", "api/movements/in", Permissions.CanMoveStock },
         { "POST", "api/movements/out", Permissions.CanMoveStock },
         { "POST", "api/movements/transfer", Permissions.CanMoveStock },
+        { "POST", "api/movements/{id:guid}/reverse", Permissions.CanMoveStock },
         { "GET", "api/notifications", AnyUser },
         { "GET", "api/notifications/unread-count", AnyUser },
         { "POST", "api/notifications/{id:guid}/read", AnyUser },

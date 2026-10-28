@@ -989,6 +989,10 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("reference_id");
 
+                    b.Property<Guid?>("ReversesMovementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reverses_movement_id");
+
                     b.Property<Guid?>("ToLocationId")
                         .HasColumnType("uuid")
                         .HasColumnName("to_location_id");
@@ -1022,6 +1026,11 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ReferenceId")
                         .HasDatabaseName("ix_stock_movements_reference_id");
+
+                    b.HasIndex("ReversesMovementId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_stock_movements_reverses_movement_id")
+                        .HasFilter("reverses_movement_id IS NOT NULL");
 
                     b.HasIndex("ToLocationId")
                         .HasDatabaseName("ix_stock_movements_to_location_id");
@@ -1600,6 +1609,12 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_stock_movements_products_product_id");
+
+                    b.HasOne("StockTracker.Domain.Inventory.StockMovement", null)
+                        .WithMany()
+                        .HasForeignKey("ReversesMovementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_stock_movements_stock_movements_reverses_movement_id");
 
                     b.HasOne("StockTracker.Domain.Locations.Location", null)
                         .WithMany()

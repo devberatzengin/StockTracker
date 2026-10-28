@@ -31,6 +31,9 @@ public sealed class UnitOfWork(AppDbContext dbContext) : IUnitOfWork
         // Two requests assigning the same item at once.
         [AssignmentConfiguration.OpenItemIndex] = () =>
             new ConcurrencyException("Bu adet bu arada zimmetlendi, tekrar deneyin."),
+        // Two requests reversing the same movement at once.
+        [StockMovementConfiguration.ReversalIndex] = () =>
+            new DomainException(InventoryErrors.AlreadyReversed, "Bu hareket zaten ters çevrildi."),
         [LocationConfiguration.SiblingNameIndex] = () =>
             new DomainException(LocationErrors.NameTaken, "Aynı üst lokasyon altında bu adla bir lokasyon zaten var."),
     };

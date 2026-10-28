@@ -63,6 +63,8 @@ public sealed class StockBalanceConfiguration : IEntityTypeConfiguration<StockBa
 
 public sealed class StockMovementConfiguration : IEntityTypeConfiguration<StockMovement>
 {
+    public const string ReversalIndex = "ix_stock_movements_reverses_movement_id";
+
     public void Configure(EntityTypeBuilder<StockMovement> builder)
     {
         builder.ToTable("stock_movements", t => t.HasCheckConstraint("ck_stock_movements_quantity", "quantity > 0"));
@@ -81,10 +83,16 @@ public sealed class StockMovementConfiguration : IEntityTypeConfiguration<StockM
         builder.HasIndex(m => m.FromLocationId);
         builder.HasIndex(m => m.ToLocationId);
         builder.HasIndex(m => m.ReferenceId);
+        // A movement is reversed at most once; also backs "reversed by" lookups.
+        builder.HasIndex(m => m.ReversesMovementId)
+            .HasDatabaseName(ReversalIndex)
+            .IsUnique()
+            .HasFilter("reverses_movement_id IS NOT NULL");
 
         builder.HasOne<Product>().WithMany().HasForeignKey(m => m.ProductId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Item>().WithMany().HasForeignKey(m => m.ItemId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Location>().WithMany().HasForeignKey(m => m.FromLocationId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Location>().WithMany().HasForeignKey(m => m.ToLocationId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<StockMovement>().WithMany().HasForeignKey(m => m.ReversesMovementId).OnDelete(DeleteBehavior.Restrict);
     }
 }

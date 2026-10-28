@@ -26,7 +26,9 @@ public sealed record MovementDto(
     string UserName,
     ItemStatus? FromStatus,
     ItemStatus? ToStatus,
-    string? AssigneeName);
+    string? AssigneeName,
+    Guid? ReversesMovementId,
+    Guid? ReversedByMovementId);
 
 public sealed record ItemListItemDto(
     Guid Id,

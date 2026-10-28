@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using StockTracker.Api.Contracts;
 using StockTracker.Application.Common.Models;
 using StockTracker.Application.Common.Security;
 using StockTracker.Application.Inventory;
@@ -25,6 +26,12 @@ public sealed class MovementsController(ISender sender) : ControllerBase
     [Authorize(Policy = Permissions.CanMoveStock)]
     public Task<MovementResultDto> Out(StockOutCommand command, CancellationToken cancellationToken) =>
         sender.Send(command, cancellationToken);
+
+    /// <summary>Cancels out a wrong movement with an opposite one (the original stays).</summary>
+    [HttpPost("{id:guid}/reverse")]
+    [Authorize(Policy = Permissions.CanMoveStock)]
+    public Task<MovementResultDto> Reverse(Guid id, ReverseMovementRequest request, CancellationToken cancellationToken) =>
+        sender.Send(new ReverseMovementCommand(id, request.Note), cancellationToken);
 
     [HttpPost("transfer")]
     [Authorize(Policy = Permissions.CanMoveStock)]

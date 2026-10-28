@@ -66,6 +66,16 @@ export function useStockTransfer() {
   })
 }
 
+export function useReverseMovement() {
+  const invalidate = useInvalidateStock()
+  return useMutation({
+    mutationFn: ({ id, note }: { id: string; note: string }) =>
+      apiClient.post<MovementResult>(`/movements/${id}/reverse`, { note }),
+    onSuccess: invalidate,
+    meta: formMutationMeta,
+  })
+}
+
 export interface MovementFilters {
   page?: number
   pageSize?: number

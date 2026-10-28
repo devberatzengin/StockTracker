@@ -21,4 +21,8 @@ public static class InventoryErrors
     public const string ReasonRequired = "Movement.ReasonRequired";
     public const string NoteRequired = "Movement.NoteRequired";
     public const string NoteTooLong = "Movement.NoteTooLong";
+    public const string MovementNotFound = "Movement.NotFound";
+    public const string NotReversible = "Movement.NotReversible";
+    public const string AlreadyReversed = "Movement.AlreadyReversed";
+    public const string ItemChangedSinceMovement = "Movement.ItemChangedSinceMovement";
 }

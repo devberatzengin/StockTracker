@@ -104,6 +104,7 @@ public sealed class GetMovementsQueryHandler(IAppDbContext db, IUserAccountServi
         var items = db.Items;
         var locations = db.Locations.IgnoreQueryFilters();
         var assignments = db.Assignments;
+        var ledger = db.StockMovements;
 
         var page = await query
             .Select(m => new
@@ -121,6 +122,7 @@ public sealed class GetMovementsQueryHandler(IAppDbContext db, IUserAccountServi
                         ? assignments.Where(a => a.ItemId == m.ItemId && a.ReturnReferenceId == m.ReferenceId)
                             .Select(a => (Guid?)a.AssigneeUserId).FirstOrDefault()
                         : null,
+                ReversedBy = ledger.Where(r => r.ReversesMovementId == m.Id).Select(r => (Guid?)r.Id).FirstOrDefault(),
             })
             .ToPagedResultAsync(request, cancellationToken);
 
@@ -153,7 +155,9 @@ public sealed class GetMovementsQueryHandler(IAppDbContext db, IUserAccountServi
                 userNames.GetValueOrDefault(x.Movement.UserId, "?"),
                 x.Movement.FromStatus,
                 x.Movement.ToStatus,
-                x.AssigneeId is { } assigneeId ? userNames.GetValueOrDefault(assigneeId, "?") : null))
+                x.AssigneeId is { } assigneeId ? userNames.GetValueOrDefault(assigneeId, "?") : null,
+                x.Movement.ReversesMovementId,
+                x.ReversedBy))
             .ToList();
 
         return new PagedResult<MovementDto>(dtos, page.TotalCount, page.Page, page.PageSize);

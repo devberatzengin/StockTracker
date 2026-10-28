@@ -1640,6 +1640,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/movements/{id}/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["ReverseMovementRequest"];
+                    "text/json": components["schemas"]["ReverseMovementRequest"];
+                    "application/*+json": components["schemas"]["ReverseMovementRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MovementResultDto"];
+                        "application/json": components["schemas"]["MovementResultDto"];
+                        "text/json": components["schemas"]["MovementResultDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/movements/transfer": {
         parameters: {
             query?: never;
@@ -3324,6 +3369,10 @@ export interface components {
             fromStatus?: components["schemas"]["ItemStatus"];
             toStatus?: components["schemas"]["ItemStatus"];
             assigneeName?: string | null;
+            /** Format: uuid */
+            reversesMovementId?: string | null;
+            /** Format: uuid */
+            reversedByMovementId?: string | null;
         };
         MovementDtoPagedResult: {
             items: components["schemas"]["MovementDto"][];
@@ -3495,6 +3544,9 @@ export interface components {
         };
         /** @enum {string} */
         ReturnCondition: "Good" | "Faulty";
+        ReverseMovementRequest: {
+            note?: string | null;
+        };
         ScanResultDto: {
             type: string;
             /** Format: uuid */

@@ -31,5 +31,10 @@ public interface IStockBalanceRepository
 /// <summary>The stock ledger is append-only: movements can only be added.</summary>
 public interface IMovementRepository
 {
+    /// <summary>Loads a movement to reverse it; the movement itself is never changed.</summary>
+    Task<StockMovement?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+
+    Task<bool> IsReversedAsync(Guid id, CancellationToken cancellationToken);
+
     void AddRange(IEnumerable<StockMovement> movements);
 }

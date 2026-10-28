@@ -47,6 +47,13 @@ public sealed class StockMovement
     /// <summary>Item status after a status change (phase 2).</summary>
     public ItemStatus? ToStatus { get; private init; }
 
+    /// <summary>The movement this one cancels out (reversal entry); null for ordinary movements.</summary>
+    public Guid? ReversesMovementId { get; private set; }
+
+    /// <summary>Movement types that can be reversed (with their quantity or item rules in the service).</summary>
+    public bool IsReversibleType => Type is MovementType.In or MovementType.Transfer
+        || (Type == MovementType.Out && ItemId is null);
+
     /// <summary>Creates a movement after checking the field rules of its type.</summary>
     public static StockMovement Create(
         MovementType type,
@@ -93,6 +100,17 @@ public sealed class StockMovement
             FromStatus = fromStatus,
             ToStatus = toStatus,
         };
+    }
+
+    /// <summary>Marks a new, unsaved movement as the reversal of <paramref name="original"/>.</summary>
+    internal void MarkAsReversalOf(StockMovement original)
+    {
+        if (ReversesMovementId is not null)
+        {
+            throw new InvalidOperationException("The movement is already a reversal.");
+        }
+
+        ReversesMovementId = original.Id;
     }
 
     private static void ValidateLocations(MovementType type, Guid? from, Guid? to)
