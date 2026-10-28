@@ -5,6 +5,7 @@ public enum NotificationType
     LowStock,
     AssignmentDueSoon,
     AssignmentOverdue,
+    LedgerMismatch,
 }
 
 /// <summary>
@@ -79,6 +80,8 @@ public sealed class Notification
     public static string DueSoonKey(Guid assignmentId) => $"AssignmentDueSoon:{assignmentId}";
 
     public static string OverdueKey(Guid assignmentId) => $"AssignmentOverdue:{assignmentId}";
+
+    public const string LedgerMismatchKey = "LedgerMismatch";
 
     private static string Truncate(string value, int max) => value.Length <= max ? value : value[..(max - 1)] + "…";
 }

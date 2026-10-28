@@ -13,4 +13,5 @@ export const NOTIFICATION_COLORS: Record<AppNotification['type'], string> = {
   LowStock: 'orange',
   AssignmentDueSoon: 'blue',
   AssignmentOverdue: 'red',
+  LedgerMismatch: 'grape',
 }

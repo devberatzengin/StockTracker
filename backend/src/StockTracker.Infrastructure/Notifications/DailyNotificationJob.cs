@@ -1,8 +1,10 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StockTracker.Application.Notifications;
+using StockTracker.Infrastructure.Persistence;
 
 namespace StockTracker.Infrastructure.Notifications;
 
@@ -21,8 +23,9 @@ public sealed class NotificationOptions
 }
 
 /// <summary>
-/// Every day at 08:00 Istanbul time (UTC+3, no DST) checks all products and open assignments.
-/// Deduplication makes extra runs harmless.
+/// Every day at 08:00 Istanbul time (UTC+3, no DST) checks all products and open assignments, reconciles
+/// the ledger and drops old idempotency keys. With several API instances only one runs it (advisory lock);
+/// deduplication makes extra runs harmless anyway.
 /// </summary>
 public sealed class DailyNotificationJob(
     IServiceScopeFactory scopes,
@@ -59,6 +62,42 @@ public sealed class DailyNotificationJob(
         }
     }
 
+    /// <summary>Arbitrary constant naming the daily job's PostgreSQL advisory lock.</summary>
+    public const long LockKey = 7_301_202_610;
+
+    /// <summary>
+    /// Runs <paramref name="run"/> only if this connection gets the session-level advisory lock; the
+    /// connection stays open for the whole run, so the lock is held until it ends.
+    /// </summary>
+    public static async Task<bool> TryRunExclusiveAsync(AppDbContext db, Func<Task> run, CancellationToken cancellationToken)
+    {
+        await db.Database.OpenConnectionAsync(cancellationToken);
+        try
+        {
+            var acquired = await db.Database
+                .SqlQuery<bool>($"SELECT pg_try_advisory_lock({LockKey}) AS \"Value\"")
+                .SingleAsync(cancellationToken);
+            if (!acquired)
+            {
+                return false;
+            }
+
+            try
+            {
+                await run();
+                return true;
+            }
+            finally
+            {
+                await db.Database.ExecuteSqlAsync($"SELECT pg_advisory_unlock({LockKey})", CancellationToken.None);
+            }
+        }
+        finally
+        {
+            await db.Database.CloseConnectionAsync();
+        }
+    }
+
     /// <summary>Time from <paramref name="nowUtc"/> to the next <paramref name="localTime"/> in Istanbul.</summary>
     public static TimeSpan UntilNext(DateTimeOffset nowUtc, TimeSpan localTime)
     {
@@ -77,8 +116,16 @@ public sealed class DailyNotificationJob(
         try
         {
             await using var scope = scopes.CreateAsyncScope();
-            await scope.ServiceProvider.GetRequiredService<DailyNotificationRun>().RunAsync(cancellationToken);
-            logger.LogInformation("Daily notification check finished");
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var run = scope.ServiceProvider.GetRequiredService<DailyNotificationRun>();
+            if (await TryRunExclusiveAsync(db, () => run.RunAsync(cancellationToken), cancellationToken))
+            {
+                logger.LogInformation("Daily notification check finished");
+            }
+            else
+            {
+                logger.LogInformation("Daily notification check skipped: another instance is running it");
+            }
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {

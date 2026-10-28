@@ -91,3 +91,10 @@ public sealed class DemoSeedCollection : ICollectionFixture<ApiFactory>
 {
     public const string Name = "DemoSeed";
 }
+
+/// <summary>Separate database for ledger reconciliation tests, which corrupt data on purpose.</summary>
+[CollectionDefinition(Name)]
+public sealed class LedgerCollection : ICollectionFixture<ApiFactory>
+{
+    public const string Name = "Ledger";
+}

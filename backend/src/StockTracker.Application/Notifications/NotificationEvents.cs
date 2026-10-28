@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using StockTracker.Application.Common.Interfaces;
+using StockTracker.Application.Inventory;
 
 namespace StockTracker.Application.Notifications;
 
@@ -52,6 +53,7 @@ public sealed class NotificationEventHandlers(
 public sealed class DailyNotificationRun(
     LowStockMonitor lowStock,
     AssignmentReminderMonitor reminders,
+    LedgerReconciliation ledger,
     IIdempotencyStore idempotency,
     IDateTime dateTime)
 {
@@ -62,6 +64,7 @@ public sealed class DailyNotificationRun(
     {
         await lowStock.CheckAsync(null, cancellationToken);
         await reminders.CheckAsync(cancellationToken);
+        await ledger.CheckAsync(cancellationToken);
         await idempotency.DeleteOlderThanAsync(dateTime.UtcNow - IdempotencyRetention, cancellationToken);
     }
 }

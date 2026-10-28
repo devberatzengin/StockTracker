@@ -3419,7 +3419,7 @@ export interface components {
             pageSize: number;
         };
         /** @enum {string} */
-        NotificationType: "LowStock" | "AssignmentDueSoon" | "AssignmentOverdue";
+        NotificationType: "LowStock" | "AssignmentDueSoon" | "AssignmentOverdue" | "LedgerMismatch";
         OverdueAssignmentDto: {
             /** Format: uuid */
             assignmentId: string;

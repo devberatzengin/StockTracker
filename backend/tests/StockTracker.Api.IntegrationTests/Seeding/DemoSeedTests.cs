@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Api.IntegrationTests.Infrastructure;
+using StockTracker.Application.Inventory;
 using StockTracker.Domain.Counts;
 using StockTracker.Domain.Inventory;
 using StockTracker.Infrastructure.Persistence;
@@ -56,5 +57,10 @@ public class DemoSeedTests(ApiFactory factory)
         (await db.Items.CountAsync(i => i.Status == ItemStatus.InRepair)).Should().Be(2);
         (await db.Notifications.Where(n => n.ResolvedAt == null && n.EntityType == "Product").Select(n => n.EntityId).Distinct().CountAsync())
             .Should().Be(2);
+
+        // Every balance and item of the scenario matches its movements.
+        var report = await scope.ServiceProvider.GetRequiredService<LedgerReconciliation>().CheckAsync(CancellationToken.None);
+        report.Problems.Should().BeEmpty();
+        report.ItemsChecked.Should().Be(150);
     }
 }

@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using StockTracker.Application.Common.Behaviors;
 using StockTracker.Application.Common.Codes;
+using StockTracker.Application.Inventory;
 using StockTracker.Application.Notifications;
 using StockTracker.Application.Scan;
 using StockTracker.Domain.Counts;
@@ -36,6 +37,7 @@ public static class DependencyInjection
         services.AddSingleton<CountApprovalService>();
         services.AddScoped<LowStockMonitor>();
         services.AddScoped<AssignmentReminderMonitor>();
+        services.AddScoped<LedgerReconciliation>();
         services.AddScoped<DailyNotificationRun>();
 
         // One resolver per code prefix.
