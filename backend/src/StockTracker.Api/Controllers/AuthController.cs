@@ -17,12 +17,13 @@ public sealed class AuthController(ISender sender) : ControllerBase
 {
     [HttpPost("login")]
     [AllowAnonymous]
-    [EnableRateLimiting(LoginRateLimiting.PolicyName)]
+    [EnableRateLimiting(ApiRateLimiting.LoginPolicy)]
     public async Task<AccessTokenResponse> Login(LoginCommand command, CancellationToken cancellationToken) =>
         IssueTokens(await sender.Send(command, cancellationToken));
 
     [HttpPost("refresh")]
     [AllowAnonymous]
+    [EnableRateLimiting(ApiRateLimiting.RefreshPolicy)]
     public async Task<AccessTokenResponse> Refresh(CancellationToken cancellationToken) =>
         IssueTokens(await sender.Send(new RefreshTokenCommand(RefreshTokenCookie.Read(Request)), cancellationToken));
 

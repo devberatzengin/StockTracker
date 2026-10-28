@@ -25,7 +25,10 @@ public static class TestSettings
         builder.UseSetting("Notifications:DailyCheckEnabled", "false");
         builder.UseSetting("PUBLIC_BASE_URL", PublicBaseUrl);
 
-        // Test hosts share one client address; the login limit itself is tested in LoginRateLimitTests.
-        builder.UseSetting("RateLimiting:LoginPermitPerMinute", "100000");
+        // Test hosts share one client address; the limits themselves are tested in RateLimitingTests.
+        foreach (var limit in new[] { "Login", "Refresh", "Heavy", "User", "Anonymous" })
+        {
+            builder.UseSetting($"RateLimiting:{limit}PermitPerMinute", "100000");
+        }
     }
 }

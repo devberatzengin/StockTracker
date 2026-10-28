@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using StockTracker.Api.Security;
 using StockTracker.Application.Assignments;
 using StockTracker.Application.Common.Security;
 using StockTracker.Application.Reports;
@@ -11,6 +13,7 @@ namespace StockTracker.Api.Controllers;
 [ApiController]
 [Route("api/reports")]
 [Authorize(Policy = Permissions.CanViewReports)]
+[EnableRateLimiting(ApiRateLimiting.HeavyPolicy)]
 public sealed class ReportsController(ISender sender) : ControllerBase
 {
     [HttpGet("stock.xlsx")]

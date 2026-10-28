@@ -46,7 +46,7 @@ Everything goes into `.env` on the server (copy `.env.example`). Never commit it
 | `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | First admin; change the password after the first login. |
 | `GHCR_OWNER`, `IMAGE_TAG` | Image owner and version, e.g. `IMAGE_TAG=1.0.0`. |
 | `CLOUDFLARE_TUNNEL_TOKEN` | Token of a named tunnel whose public host name points at `http://web:80`. |
-| `RateLimiting__LoginPermitPerMinute` | Optional; default 10 login attempts per minute per client IP. |
+| `RateLimiting__*PermitPerMinute` | Optional limits per minute: `Login` 10 and `Refresh` 30 per client IP, `Heavy` 10 per user (reports, labels, photo uploads), `User` 300 per signed-in user, `Anonymous` 100 per IP. Counters are in memory, so with several API instances each counts on its own. |
 | `DEMO_MODE` | `false` (or unset) on real data. |
 
 CORS needs no setting: the SPA and the API share one origin (nginx proxies `/api`). Only a

@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using StockTracker.Api.Security;
 using StockTracker.Application.Catalog.Products;
 using StockTracker.Application.Common.Security;
 
@@ -18,6 +20,7 @@ public sealed class ProductPhotosController(ISender sender) : ControllerBase
 
     /// <summary>Multipart upload with a single "file" field (JPEG, PNG or WebP, at most 5 MB).</summary>
     [HttpPost]
+    [EnableRateLimiting(ApiRateLimiting.HeavyPolicy)]
     [RequestSizeLimit(RequestLimit)]
     [RequestFormLimits(MultipartBodyLengthLimit = RequestLimit)]
     [Consumes("multipart/form-data")]

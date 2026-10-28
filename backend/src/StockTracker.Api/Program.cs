@@ -34,7 +34,7 @@ builder.Services.AddScoped<IIdempotencyContext, HttpIdempotencyContext>();
 builder.Services.AddApiAuthentication();
 
 builder.Services.AddApiProblemDetails();
-builder.Services.AddLoginRateLimiting(builder.Configuration);
+builder.Services.AddApiRateLimiting(builder.Configuration);
 builder.Services.AddControllers()
     // Enums travel as their names ("Serialized", "Piece"), matching the generated frontend types.
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -79,8 +79,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseRateLimiter();
 app.UseAuthentication();
+// After authentication: the global limit is per user for signed-in requests.
+app.UseRateLimiter();
 app.UseAuthorization();
 
 app.MapControllers();
