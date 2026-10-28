@@ -8,6 +8,7 @@ using StockTracker.Application.Files;
 using StockTracker.Infrastructure.Codes;
 using StockTracker.Application.Labels;
 using StockTracker.Application.Reports;
+using StockTracker.Infrastructure.Idempotency;
 using StockTracker.Infrastructure.Identity;
 using StockTracker.Infrastructure.Labels;
 using StockTracker.Infrastructure.Notifications;
@@ -67,6 +68,7 @@ public static class DependencyInjection
         services.AddScoped<IItemRepository, ItemRepository>();
         services.AddScoped<IStockBalanceRepository, StockBalanceRepository>();
         services.AddScoped<IMovementRepository, MovementRepository>();
+        services.AddScoped<IIdempotencyStore, IdempotencyStore>();
         services.AddScoped<IAssignmentRepository, AssignmentRepository>();
         services.AddScoped<IAssignmentChecker, AssignmentChecker>();
         services.AddScoped<ICountRepository, CountRepository>();

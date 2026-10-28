@@ -10,7 +10,7 @@ using StockTracker.Domain.Inventory;
 namespace StockTracker.Application.Assignments;
 
 public sealed record ReturnAssignmentCommand(Guid Id, Guid ReturnLocationId, ReturnCondition Condition, string? Note)
-    : IRequest<AssignmentResultDto>;
+    : IRequest<AssignmentResultDto>, IIdempotentCommand;
 
 public sealed class ReturnAssignmentCommandValidator : AbstractValidator<ReturnAssignmentCommand>
 {

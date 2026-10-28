@@ -29,7 +29,7 @@ public sealed record SubmitCountCommand(Guid Id) : IRequest;
 
 public sealed record CancelCountCommand(Guid Id) : IRequest;
 
-public sealed record ApproveCountCommand(Guid Id, IReadOnlyList<CountDecision> Decisions) : IRequest<CountApprovalResultDto>;
+public sealed record ApproveCountCommand(Guid Id, IReadOnlyList<CountDecision> Decisions) : IRequest<CountApprovalResultDto>, IIdempotentCommand;
 
 public sealed class StartCountCommandValidator : AbstractValidator<StartCountCommand>
 {

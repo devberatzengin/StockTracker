@@ -8,7 +8,7 @@ using StockTracker.Domain.Inventory;
 namespace StockTracker.Application.Inventory;
 
 /// <summary>Cancels out a wrong movement with an opposite one; the original stays in the ledger.</summary>
-public sealed record ReverseMovementCommand(Guid MovementId, string? Note) : IRequest<MovementResultDto>;
+public sealed record ReverseMovementCommand(Guid MovementId, string? Note) : IRequest<MovementResultDto>, IIdempotentCommand;
 
 public sealed class ReverseMovementCommandValidator : AbstractValidator<ReverseMovementCommand>
 {

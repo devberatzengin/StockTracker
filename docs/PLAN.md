@@ -157,6 +157,7 @@ Proje beş fazda ilerler (Faz 0–4). Her faz, çalışan ve demo edilebilir bir
 | Konu | Karar |
 | --- | --- |
 | Ters kayıt | `POST /movements/{id}/reverse` (`CanMoveStock`, not zorunlu). Orijinal hareket değişmez; tersi yönde yeni hareket `reverses_movement_id` ile orijinali gösterir (yeni hareket tipi yok). Miktar `In` → aynı raftan `Out` (sebep `Other`), `Out` → aynı rafa `In`, `Transfer` → geri transfer; tekil `In` → adet hurdaya (`Out`), tekil `Transfer` → geri transfer. Tekil adet hâlâ `InStock` ve hareketin bıraktığı yerde olmalı (`Movement.ItemChangedSinceMovement`). Bir hareket bir kez ters çevrilir (kısmi unique index, `Movement.AlreadyReversed`); ters kayıt ve zimmet/iade/durum/sayım hareketleri ters çevrilemez (`Movement.NotReversible`). Süre sınırı yok. |
+| Idempotency | Stok değiştiren komutlar (`IIdempotentCommand`: giriş, çıkış, transfer, ters kayıt, zimmet ver/iade, tamire gönder/dön, sayım onayı) `Idempotency-Key` başlığı kabul eder. Anahtar `idempotency_requests` tablosuna komutun **kendi transaction'ında** yazılır (MediatR behavior); hata alan komut anahtarı tüketmez. Aynı anahtar + aynı gövde ilk cevabı döner, farklı gövde 422 `Idempotency.KeyReused`; eşzamanlı kopya ilk cevabı 3 sn bekler, yoksa 409. Frontend gönderim başına bir anahtar üretir, başarıdan sonra yeniler. Kayıtlar 7 gün sonra günlük job ile silinir. |
 
 ## Mimari
 

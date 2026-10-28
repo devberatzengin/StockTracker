@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using StockTracker.Application.Common.Interfaces;
 
 namespace StockTracker.Application.Notifications;
 
@@ -48,11 +49,19 @@ public sealed class NotificationEventHandlers(
 }
 
 /// <summary>The daily 08:00 run: every product and every open assignment.</summary>
-public sealed class DailyNotificationRun(LowStockMonitor lowStock, AssignmentReminderMonitor reminders)
+public sealed class DailyNotificationRun(
+    LowStockMonitor lowStock,
+    AssignmentReminderMonitor reminders,
+    IIdempotencyStore idempotency,
+    IDateTime dateTime)
 {
+    /// <summary>Idempotency keys only protect against retries; a week is plenty.</summary>
+    public static readonly TimeSpan IdempotencyRetention = TimeSpan.FromDays(7);
+
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         await lowStock.CheckAsync(null, cancellationToken);
         await reminders.CheckAsync(cancellationToken);
+        await idempotency.DeleteOlderThanAsync(dateTime.UtcNow - IdempotencyRetention, cancellationToken);
     }
 }

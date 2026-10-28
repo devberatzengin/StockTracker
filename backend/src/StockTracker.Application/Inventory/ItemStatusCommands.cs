@@ -8,10 +8,10 @@ using StockTracker.Domain.Inventory;
 namespace StockTracker.Application.Inventory;
 
 /// <summary>InStock → InRepair with a StatusChange movement; the note is required.</summary>
-public sealed record SendItemToRepairCommand(Guid Id, string? Note) : IRequest<MovementResultDto>;
+public sealed record SendItemToRepairCommand(Guid Id, string? Note) : IRequest<MovementResultDto>, IIdempotentCommand;
 
 /// <summary>InRepair → InStock with a StatusChange movement; the note is required.</summary>
-public sealed record ReturnItemFromRepairCommand(Guid Id, string? Note) : IRequest<MovementResultDto>;
+public sealed record ReturnItemFromRepairCommand(Guid Id, string? Note) : IRequest<MovementResultDto>, IIdempotentCommand;
 
 internal static class ItemStatusNoteRules
 {

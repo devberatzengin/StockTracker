@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/api/client'
+import { useIdempotencyKey } from '@/lib/idempotency'
 import type {
   Assignment,
   AssignmentPage,
@@ -66,20 +67,25 @@ export const fetchItem = (id: string) => apiClient.get<ItemDetail>(`/items/${id}
 
 export function useAssignItem() {
   const invalidate = useInvalidateAssignments()
+  const key = useIdempotencyKey()
   return useMutation({
     mutationFn: (body: {
       itemId: string
       assigneeUserId: string
       dueDate: string | null
       note: string | null
-    }) => apiClient.post<AssignmentResult>('/assignments', body),
-    onSuccess: invalidate,
+    }) => apiClient.postOnce<AssignmentResult>('/assignments', body, key.get()),
+    onSuccess: () => {
+      key.renew()
+      return invalidate()
+    },
     meta: formMutationMeta,
   })
 }
 
 export function useReturnAssignment() {
   const invalidate = useInvalidateAssignments()
+  const key = useIdempotencyKey()
   return useMutation({
     mutationFn: ({
       id,
@@ -89,8 +95,11 @@ export function useReturnAssignment() {
       returnLocationId: string
       condition: ReturnCondition
       note: string | null
-    }) => apiClient.post<AssignmentResult>(`/assignments/${id}/return`, body),
-    onSuccess: invalidate,
+    }) => apiClient.postOnce<AssignmentResult>(`/assignments/${id}/return`, body, key.get()),
+    onSuccess: () => {
+      key.renew()
+      return invalidate()
+    },
     meta: formMutationMeta,
   })
 }
@@ -99,10 +108,14 @@ export type StatusChangeAction = 'send-to-repair' | 'return-from-repair'
 
 export function useItemStatusChange(itemId: string) {
   const invalidate = useInvalidateAssignments()
+  const key = useIdempotencyKey()
   return useMutation({
     mutationFn: ({ action, note }: { action: StatusChangeAction; note: string }) =>
-      apiClient.post<MovementResult>(`/items/${itemId}/${action}`, { note }),
-    onSuccess: invalidate,
+      apiClient.postOnce<MovementResult>(`/items/${itemId}/${action}`, { note }, key.get()),
+    onSuccess: () => {
+      key.renew()
+      return invalidate()
+    },
     meta: formMutationMeta,
   })
 }

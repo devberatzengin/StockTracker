@@ -20,6 +20,14 @@ public sealed class InventoryApi(HttpClient client, string token)
     public Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, object? body = null) =>
         client.SendAsync(Authorized(method, url, token, body));
 
+    /// <summary>Sends with an <c>Idempotency-Key</c> header.</summary>
+    public Task<HttpResponseMessage> SendOnceAsync(HttpMethod method, string url, string key, object? body = null)
+    {
+        var request = Authorized(method, url, token, body);
+        request.Headers.Add("Idempotency-Key", key);
+        return client.SendAsync(request);
+    }
+
     public async Task<JsonElement> JsonAsync(HttpMethod method, string url, object? body = null, HttpStatusCode expected = HttpStatusCode.OK)
     {
         var response = await SendAsync(method, url, body);

@@ -1205,6 +1205,47 @@ namespace StockTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("notifications", (string)null);
                 });
 
+            modelBuilder.Entity("StockTracker.Infrastructure.Idempotency.IdempotencyRecord", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Key")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("key");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("RequestHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("request_hash");
+
+                    b.Property<string>("RequestType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("request_type");
+
+                    b.Property<string>("ResponseJson")
+                        .HasMaxLength(100000)
+                        .HasColumnType("character varying(100000)")
+                        .HasColumnName("response_json");
+
+                    b.HasKey("UserId", "Key")
+                        .HasName("pk_idempotency_requests");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_idempotency_requests_created_at");
+
+                    b.ToTable("idempotency_requests", (string)null);
+                });
+
             modelBuilder.Entity("StockTracker.Infrastructure.Identity.AppUser", b =>
                 {
                     b.Property<Guid>("Id")

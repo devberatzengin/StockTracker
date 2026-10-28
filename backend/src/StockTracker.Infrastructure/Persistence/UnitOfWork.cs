@@ -34,6 +34,8 @@ public sealed class UnitOfWork(AppDbContext dbContext) : IUnitOfWork
         // Two requests reversing the same movement at once.
         [StockMovementConfiguration.ReversalIndex] = () =>
             new DomainException(InventoryErrors.AlreadyReversed, "Bu hareket zaten ters çevrildi."),
+        // The same idempotency key saved by a concurrent request; the behavior replays its response.
+        [IdempotencyRecordConfiguration.PrimaryKey] = () => new IdempotencyConflictException(),
         [LocationConfiguration.SiblingNameIndex] = () =>
             new DomainException(LocationErrors.NameTaken, "Aynı üst lokasyon altında bu adla bir lokasyon zaten var."),
     };

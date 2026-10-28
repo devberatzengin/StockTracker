@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/api/client'
+import { useIdempotencyKey } from '@/lib/idempotency'
 import type {
   ItemDetail,
   ItemPage,
@@ -38,40 +39,56 @@ function useInvalidateStock() {
 
 export function useStockIn() {
   const invalidate = useInvalidateStock()
+  const key = useIdempotencyKey()
   return useMutation({
     mutationFn: (body: { toLocationId: string; lines: StockInLine[] }) =>
-      apiClient.post<MovementResult>('/movements/in', body),
-    onSuccess: invalidate,
+      apiClient.postOnce<MovementResult>('/movements/in', body, key.get()),
+    onSuccess: () => {
+      key.renew()
+      return invalidate()
+    },
     meta: formMutationMeta,
   })
 }
 
 export function useStockOut() {
   const invalidate = useInvalidateStock()
+  const key = useIdempotencyKey()
   return useMutation({
     mutationFn: (body: { reason: MovementReason; note: string | null; lines: StockLine[] }) =>
-      apiClient.post<MovementResult>('/movements/out', body),
-    onSuccess: invalidate,
+      apiClient.postOnce<MovementResult>('/movements/out', body, key.get()),
+    onSuccess: () => {
+      key.renew()
+      return invalidate()
+    },
     meta: formMutationMeta,
   })
 }
 
 export function useStockTransfer() {
   const invalidate = useInvalidateStock()
+  const key = useIdempotencyKey()
   return useMutation({
     mutationFn: (body: { toLocationId: string; lines: StockLine[] }) =>
-      apiClient.post<MovementResult>('/movements/transfer', body),
-    onSuccess: invalidate,
+      apiClient.postOnce<MovementResult>('/movements/transfer', body, key.get()),
+    onSuccess: () => {
+      key.renew()
+      return invalidate()
+    },
     meta: formMutationMeta,
   })
 }
 
 export function useReverseMovement() {
   const invalidate = useInvalidateStock()
+  const key = useIdempotencyKey()
   return useMutation({
     mutationFn: ({ id, note }: { id: string; note: string }) =>
-      apiClient.post<MovementResult>(`/movements/${id}/reverse`, { note }),
-    onSuccess: invalidate,
+      apiClient.postOnce<MovementResult>(`/movements/${id}/reverse`, { note }, key.get()),
+    onSuccess: () => {
+      key.renew()
+      return invalidate()
+    },
     meta: formMutationMeta,
   })
 }

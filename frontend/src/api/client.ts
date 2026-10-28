@@ -91,12 +91,16 @@ async function request<T>(
   body?: unknown,
   retried = false,
   asBlob = false,
+  extraHeaders: Record<string, string> = {},
 ): Promise<T> {
   const headers = new Headers({ Accept: asBlob ? '*/*' : 'application/json, text/plain' })
   // FormData (file uploads) sets its own multipart content type with the boundary.
   const isForm = body instanceof FormData
   if (body !== undefined && !isForm) {
     headers.set('Content-Type', 'application/json')
+  }
+  for (const [name, value] of Object.entries(extraHeaders)) {
+    headers.set(name, value)
   }
   const token = tokenStore.get()
   if (token) {
@@ -116,7 +120,7 @@ async function request<T>(
 
   if (response.status === 401 && !isAuthEndpoint(path)) {
     if (!retried && (await refreshSession())) {
-      return request<T>(method, path, body, true, asBlob)
+      return request<T>(method, path, body, true, asBlob, extraHeaders)
     }
     sessionHandlers.onExpired()
   }
@@ -158,6 +162,9 @@ function isJson(response: Response) {
 export const apiClient = {
   get: <T>(path: string) => request<T>('GET', path),
   post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
+  /** POST that the server runs at most once per key (stock changes; see useIdempotencyKey). */
+  postOnce: <T>(path: string, body: unknown, idempotencyKey: string) =>
+    request<T>('POST', path, body, false, false, { 'Idempotency-Key': idempotencyKey }),
   put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
   patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
   delete: <T = void>(path: string) => request<T>('DELETE', path),

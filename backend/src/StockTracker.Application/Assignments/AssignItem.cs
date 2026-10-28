@@ -10,7 +10,7 @@ using StockTracker.Domain.Inventory;
 namespace StockTracker.Application.Assignments;
 
 public sealed record AssignItemCommand(Guid ItemId, Guid AssigneeUserId, DateOnly? DueDate, string? Note)
-    : IRequest<AssignmentResultDto>;
+    : IRequest<AssignmentResultDto>, IIdempotentCommand;
 
 public sealed class AssignItemCommandValidator : AbstractValidator<AssignItemCommand>
 {

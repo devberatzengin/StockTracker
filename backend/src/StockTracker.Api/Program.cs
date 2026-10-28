@@ -30,6 +30,7 @@ builder.Services
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
+builder.Services.AddScoped<IIdempotencyContext, HttpIdempotencyContext>();
 builder.Services.AddApiAuthentication();
 
 builder.Services.AddApiProblemDetails();

@@ -7,7 +7,7 @@ using static StockTracker.Application.Inventory.MovementCommandHelpers;
 
 namespace StockTracker.Application.Inventory;
 
-public sealed record StockTransferCommand(Guid ToLocationId, IReadOnlyList<StockLine> Lines) : IRequest<MovementResultDto>;
+public sealed record StockTransferCommand(Guid ToLocationId, IReadOnlyList<StockLine> Lines) : IRequest<MovementResultDto>, IIdempotentCommand;
 
 public sealed class StockTransferCommandValidator : AbstractValidator<StockTransferCommand>
 {

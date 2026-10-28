@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/api/client'
+import { useIdempotencyKey } from '@/lib/idempotency'
 import type {
   CountApprovalResult,
   CountDecision,
@@ -92,15 +93,18 @@ export function useCountAction(id: string) {
 
 export function useApproveCount(id: string) {
   const queryClient = useQueryClient()
+  const key = useIdempotencyKey()
   return useMutation({
     mutationFn: (decisions: CountDecision[]) =>
-      apiClient.post<CountApprovalResult>(`/counts/${id}/approve`, { decisions }),
-    onSuccess: () =>
-      Promise.all(
+      apiClient.postOnce<CountApprovalResult>(`/counts/${id}/approve`, { decisions }, key.get()),
+    onSuccess: () => {
+      key.renew()
+      return Promise.all(
         [['counts'], ['movements'], ['items'], ['products'], ['locations']].map((queryKey) =>
           queryClient.invalidateQueries({ queryKey }),
         ),
-      ),
+      )
+    },
     meta: formMutationMeta,
   })
 }

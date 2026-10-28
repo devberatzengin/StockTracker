@@ -17,7 +17,7 @@ namespace StockTracker.Application.Inventory;
 /// </summary>
 public sealed record StockInLine(Guid ProductId, decimal Quantity, IReadOnlyList<string>? SerialNumbers);
 
-public sealed record StockInCommand(Guid ToLocationId, IReadOnlyList<StockInLine> Lines) : IRequest<MovementResultDto>;
+public sealed record StockInCommand(Guid ToLocationId, IReadOnlyList<StockInLine> Lines) : IRequest<MovementResultDto>, IIdempotentCommand;
 
 public sealed class StockInCommandValidator : AbstractValidator<StockInCommand>
 {

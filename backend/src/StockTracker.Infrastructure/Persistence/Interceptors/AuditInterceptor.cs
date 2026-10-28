@@ -10,6 +10,7 @@ using StockTracker.Domain.Catalog;
 using StockTracker.Domain.Common;
 using StockTracker.Domain.Counts;
 using StockTracker.Domain.Inventory;
+using StockTracker.Infrastructure.Idempotency;
 using StockTracker.Domain.Notifications;
 using StockTracker.Infrastructure.Identity;
 
@@ -31,6 +32,7 @@ public sealed class AuditInterceptor(ICurrentUser currentUser, IDateTime dateTim
         typeof(StockMovement),
         typeof(StockBalance),
         typeof(RefreshToken),
+        typeof(IdempotencyRecord),
         typeof(CountLine),
         typeof(CountScan),
         typeof(Notification),

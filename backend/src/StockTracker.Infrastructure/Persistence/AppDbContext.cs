@@ -11,6 +11,7 @@ using StockTracker.Domain.Inventory;
 using StockTracker.Domain.Locations;
 using StockTracker.Domain.Notifications;
 using StockTracker.Domain.Common;
+using StockTracker.Infrastructure.Idempotency;
 using StockTracker.Infrastructure.Identity;
 
 namespace StockTracker.Infrastructure.Persistence;
@@ -19,6 +20,8 @@ public class AppDbContext(DbContextOptions options)
     : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>(options), IAppDbContext
 {
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
     public DbSet<Category> Categories => Set<Category>();
 

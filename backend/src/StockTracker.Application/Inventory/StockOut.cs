@@ -10,7 +10,7 @@ namespace StockTracker.Application.Inventory;
 
 /// <summary>Reason and note apply to every line of the operation.</summary>
 public sealed record StockOutCommand(MovementReason Reason, string? Note, IReadOnlyList<StockLine> Lines)
-    : IRequest<MovementResultDto>;
+    : IRequest<MovementResultDto>, IIdempotentCommand;
 
 public sealed class StockOutCommandValidator : AbstractValidator<StockOutCommand>
 {
